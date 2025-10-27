@@ -243,6 +243,9 @@ metadata:
   version: "1.0"
   test_sequence: 1
   run_ui: false
+  last_tested: "2024-12-28T10:30:00Z"
+  test_status: "completed"
+  backend_pass_rate: "100%"
 
 test_plan:
   current_focus: []
