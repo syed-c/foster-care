@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle2, AlertCircle, Save } from 'lucide-react';
 
-export default function ProfileEditPage() {
-  const { data: session, status } = useSession();
+function ProfileContent() {
+  const session = useSession();
+  const { data, status } = session || { data: null, status: 'loading' };
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -319,5 +320,24 @@ export default function ProfileEditPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+function ProfileFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5E9E2] to-white">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-[#773344] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-gray-600">Loading profile...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function ProfileEditPage() {
+  return (
+    <Suspense fallback={<ProfileFallback />}>
+      <ProfileContent />
+    </Suspense>
   );
 }

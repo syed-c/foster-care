@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,8 +21,9 @@ import {
   Star
 } from 'lucide-react';
 
-export default function LocationsPage() {
-  const { data: session, status } = useSession();
+function LocationsContent() {
+  const session = useSession();
+  const { data, status } = session || { data: null, status: 'loading' };
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [agency, setAgency] = useState(null);
@@ -51,18 +52,18 @@ export default function LocationsPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch agency
-      const agencyRes = await fetch(`/api/agencies?userId=${session.user.id}`);
-      if (agencyRes.ok) {
-        const agencyData = await agencyRes.json();
+      // Fetch agency data
+      const agencyResponse = await fetch(`/api/agencies?userId=${data?.user?.id}`);
+      if (agencyResponse.ok) {
+        const agencyData = await agencyResponse.json();
         if (agencyData.agencies && agencyData.agencies.length > 0) {
           setAgency(agencyData.agencies[0]);
           
-          // Fetch locations
-          const locRes = await fetch(`/api/locations?agencyId=${agencyData.agencies[0].id}`);
-          if (locRes.ok) {
-            const locData = await locRes.json();
-            setLocations(locData.locations || []);
+          // Fetch locations for this agency
+          const locationsResponse = await fetch(`/api/agencies/${agencyData.agencies[0].id}/locations`);
+          if (locationsResponse.ok) {
+            const locationsData = await locationsResponse.json();
+            setLocations(locationsData.locations || []);
           }
         }
       }
@@ -190,35 +191,52 @@ export default function LocationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5E9E2] via-white to-[#F5E9E2]/30">
-      {/* Modern Hero Header */}
-      <section className="relative overflow-hidden pt-32 pb-12">
-        {/* Animated Background */}
-        <div className="absolute inset-0 gradient-mesh opacity-40" />
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-10 right-20 w-64 h-64 bg-[#773344]/10 rounded-full blur-3xl float-animation" />
-          <div className="absolute bottom-10 left-20 w-72 h-72 bg-[#E3B5A4]/10 rounded-full blur-3xl float-animation" style={{ animationDelay: '2s' }} />
-        </div>
-
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#773344] to-[#E3B5A4] flex items-center justify-center">
-              <MapPin className="w-6 h-6 text-white" />
-            </div>
-            <Badge className="bg-gradient-to-r from-[#773344] to-[#E3B5A4] text-white border-0">
-              Location Management
-            </Badge>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold gradient-text">Manage Locations</h1>
+            <p className="text-gray-600 mt-1">Add and manage your agency locations</p>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-[#2C2C2C] mb-2 font-poppins">
-            Manage Locations
-          </h1>
-          <p className="text-gray-600">
-            Add and manage multiple locations for {agency.name}
-          </p>
+          
+          {!isAdding && !editingId && (
+            <Button 
+              onClick={() => {
+                setIsAdding(true);
+                setFormData({
+                  name: '',
+                  address: '',
+                  city: '',
+                  region: '',
+                  postcode: '',
+                  phone: '',
+                  email: '',
+                  is_primary: false,
+                });
+              }}
+              className="btn-futuristic rounded-xl h-12"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Location
+            </Button>
+          )}
         </div>
-      </section>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        {message.text && (
+          <Alert 
+            variant={message.type === 'success' ? 'default' : 'destructive'} 
+            className={`glass rounded-2xl ${message.type === 'success' ? 'bg-green-50/50 border-green-200' : ''}`}
+          >
+            {message.type === 'success' ? (
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+            ) : (
+              <AlertCircle className="h-4 w-4" />
+            )}
+            <AlertDescription className="ml-2">
+              {message.text}
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Messages */}
         {message.text && (
@@ -470,5 +488,43 @@ export default function LocationsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Loading fallback component
+function LocationsFallback() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold gradient-text">Manage Locations</h1>
+            <p className="text-gray-600 mt-1">Loading...</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 gap-6">
+          {[1, 2].map((i) => (
+            <Card key={i} className="glass-strong rounded-3xl animate-pulse">
+              <CardHeader className="pb-2">
+                <div className="h-7 bg-gray-200 rounded-lg w-1/3"></div>
+                <div className="h-4 bg-gray-200 rounded-lg w-1/4 mt-2"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-20 bg-gray-200 rounded-lg"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function LocationsPage() {
+  return (
+    <Suspense fallback={<LocationsFallback />}>
+      <LocationsContent />
+    </Suspense>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -76,8 +76,9 @@ const PLANS = {
   },
 };
 
-export default function SubscriptionPage() {
-  const { data: session, status } = useSession();
+function SubscriptionContent() {
+  const session = useSession();
+  const { data, status } = session || { data: null, status: 'loading' };
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -371,5 +372,24 @@ export default function SubscriptionPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+function SubscriptionFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5E9E2] to-white">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-[#773344] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-gray-600">Loading subscription details...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function SubscriptionPage() {
+  return (
+    <Suspense fallback={<SubscriptionFallback />}>
+      <SubscriptionContent />
+    </Suspense>
   );
 }

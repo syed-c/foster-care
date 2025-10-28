@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,8 +24,9 @@ import {
   Globe
 } from 'lucide-react';
 
-export default function DashboardPage() {
-  const { data: session, status } = useSession();
+function DashboardContent() {
+  const session = useSession();
+  const { data, status } = session || { data: null, status: 'loading' };
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [agency, setAgency] = useState(null);
@@ -40,15 +41,15 @@ export default function DashboardPage() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin?callbackUrl=/dashboard');
-    } else if (status === 'authenticated' && session?.user) {
+    } else if (status === 'authenticated' && data?.user) {
       fetchDashboardData();
     }
-  }, [status, session, router]);
+  }, [status, data, router]);
 
   const fetchDashboardData = async () => {
     try {
       // Fetch agency data
-      const agencyResponse = await fetch(`/api/agencies?userId=${session.user.id}`);
+      const agencyResponse = await fetch(`/api/agencies?userId=${data?.user?.id}`);
       if (agencyResponse.ok) {
         const agencyData = await agencyResponse.json();
         if (agencyData.agencies && agencyData.agencies.length > 0) {
@@ -82,12 +83,12 @@ export default function DashboardPage() {
     );
   }
 
-  if (!session) {
+  if (!data) {
     return null;
   }
 
   // User doesn't have an agency yet
-  if (!agency && session.user.role === 'agency') {
+  if (!agency && data.user.role === 'agency') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#F5E9E2] to-white py-12 px-4">
         <div className="container mx-auto max-w-4xl">
@@ -111,11 +112,11 @@ export default function DashboardPage() {
   }
 
   // Regular user dashboard (not an agency)
-  if (session.user.role !== 'agency') {
+  if (data.user.role !== 'agency') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#F5E9E2] to-white py-12 px-4">
         <div className="container mx-auto max-w-4xl">
-          <h1 className="text-3xl font-bold text-[#2C2C2C] mb-6">Welcome, {session.user.name}!</h1>
+          <h1 className="text-3xl font-bold text-[#2C2C2C] mb-6">Welcome, {data.user.name}!</h1>
           
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
@@ -419,6 +420,25 @@ export default function DashboardPage() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+function DashboardFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5E9E2] to-white">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-[#773344] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-gray-600">Loading dashboard...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardFallback />}>
+      <DashboardContent />
+    </Suspense>
   );
 }
 
