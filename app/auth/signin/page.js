@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert } from '@/components/ui/alert';
 import { Heart, Mail, Lock, AlertCircle } from 'lucide-react';
 
-export default function SignInPage() {
+function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
@@ -176,5 +176,41 @@ export default function SignInPage() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+// Loading fallback component
+function SignInFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5E9E2] to-white py-12 px-4">
+      <Card className="glass-strong rounded-3xl w-full max-w-md relative z-10">
+        <CardHeader className="space-y-4 text-center">
+          <div className="mx-auto w-16 h-16 rounded-xl bg-gradient-to-br from-[#773344] to-[#E3B5A4] flex items-center justify-center glass">
+            <Heart className="w-8 h-8 text-white" fill="white" />
+          </div>
+          <div>
+            <CardTitle className="text-2xl font-bold gradient-text">Welcome Back</CardTitle>
+            <CardDescription>
+              Loading...
+            </CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="animate-pulse space-y-4">
+            <div className="h-10 bg-gray-200 rounded-2xl"></div>
+            <div className="h-10 bg-gray-200 rounded-2xl"></div>
+            <div className="h-10 bg-gray-200 rounded-2xl"></div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<SignInFallback />}>
+      <SignInContent />
+    </Suspense>
   );
 }
