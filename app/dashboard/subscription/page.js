@@ -133,14 +133,22 @@ export default function SubscriptionPage() {
 
       const data = await response.json();
 
-      if (data.success && data.url) {
+      if (!response.ok) {
+        if (response.status === 503) {
+          alert('Subscription features are currently unavailable. Please try again later.');
+          return;
+        }
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+      
+      if (data.url) {
         window.location.href = data.url;
       } else {
         alert('Failed to create checkout session');
       }
     } catch (error) {
       console.error('Upgrade error:', error);
-      alert('An error occurred');
+      alert(error.message || 'Payment processing is temporarily unavailable');
     } finally {
       setLoading(false);
     }
