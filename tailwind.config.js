@@ -18,6 +18,9 @@ module.exports = {
     	},
     	extend: {
     		colors: {
+    			burgundy: '#773344',
+    			beige: '#E3B5A4',
+    			cream: '#F5E9E2',
     			border: 'hsl(var(--border))',
     			input: 'hsl(var(--input))',
     			ring: 'hsl(var(--ring))',

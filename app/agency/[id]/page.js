@@ -81,9 +81,9 @@ export default function AgencyDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5E9E2] to-white">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#7CE2A7] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-16 h-16 border-4 border-[#773344] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading agency details...</p>
         </div>
       </div>
@@ -92,12 +92,12 @@ export default function AgencyDetailPage() {
 
   if (!agency) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="p-12 text-center max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5E9E2] to-white">
+        <Card className="glass-strong rounded-3xl p-12 text-center max-w-md">
           <CardContent>
             <h2 className="text-2xl font-bold mb-4">Agency Not Found</h2>
             <p className="text-gray-600 mb-6">The agency you're looking for doesn't exist.</p>
-            <Button asChild>
+            <Button asChild className="btn-futuristic rounded-xl">
               <Link href="/agencies">
                 <ArrowLeft className="mr-2 w-4 h-4" />
                 Back to Directory
@@ -110,9 +110,9 @@ export default function AgencyDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAF9F6] to-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5E9E2] to-white">
       {/* Header with Cover Image */}
-      <div className="relative h-64 bg-gradient-to-r from-[#7CE2A7]/30 to-[#7DC3EB]/30">
+      <div className="relative h-64 bg-gradient-to-r from-[#773344]/30 to-[#E3B5A4]/30">
         {agency.coverImage && (
           <Image src={agency.coverImage} alt={agency.name} fill className="object-cover opacity-50" />
         )}
@@ -122,7 +122,7 @@ export default function AgencyDetailPage() {
       <div className="container mx-auto px-4 -mt-32 relative z-10">
         {/* Back Button */}
         <div className="mb-6">
-          <Button variant="ghost" asChild>
+          <Button variant="ghost" asChild className="glass rounded-xl">
             <Link href="/agencies">
               <ArrowLeft className="mr-2 w-4 h-4" />
               Back to Directory
@@ -134,40 +134,44 @@ export default function AgencyDetailPage() {
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Agency Header */}
-            <Card className="mb-6">
+            <Card className="glass-strong rounded-3xl mb-6">
               <CardHeader>
                 <div className="flex items-start gap-6">
-                  <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-[#7CE2A7]/20 to-[#7DC3EB]/20 flex items-center justify-center flex-shrink-0">
+                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#773344]/20 to-[#E3B5A4]/20 flex items-center justify-center flex-shrink-0">
                     {agency.logo ? (
                       <Image src={agency.logo} alt={agency.name} width={80} height={80} className="rounded" />
                     ) : (
-                      <Heart className="w-12 h-12 text-[#7CE2A7]" />
+                      <Heart className="w-12 h-12 text-[#773344]" />
                     )}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <h1 className="text-3xl font-bold text-[#2C2C2C] font-poppins">{agency.name}</h1>
+                        <h1 className="text-3xl font-bold text-[#2C2C2C] font-poppins gradient-text">{agency.name}</h1>
                         <div className="flex items-center gap-2 mt-2">
                           <MapPin className="w-4 h-4 text-gray-500" />
                           <span className="text-gray-600">
-                            {agency.location?.address || `${agency.location?.city}, ${agency.location?.region}`}
+                            {agency.address || `${agency.city}, ${agency.region}`}
                           </span>
                         </div>
                       </div>
                       {agency.featured && (
-                        <Badge className="bg-[#F9CBA2] ml-4">Featured</Badge>
+                        <Badge className="bg-gradient-to-r from-[#773344] to-[#E3B5A4] text-white border-0">
+                          Featured
+                        </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-4 mt-4">
+                    <div className="flex flex-wrap items-center gap-4 mt-4">
                       <div className="flex items-center gap-1">
                         {renderStars(agency.rating || 0)}
                         <span className="ml-2 text-sm font-medium">{agency.rating?.toFixed(1) || '0.0'}</span>
-                        <span className="text-sm text-gray-500">({agency.reviewCount || 0} reviews)</span>
+                        <span className="text-sm text-gray-500">({agency.review_count || 0} reviews)</span>
                       </div>
-                      <Badge variant="outline">{agency.type}</Badge>
+                      <Badge variant="outline" className="glass border-2">{agency.type}</Badge>
                       {agency.recruiting && (
-                        <Badge className="bg-green-100 text-green-700">Recruiting</Badge>
+                        <Badge className="bg-green-100 text-green-700 glass">
+                          Recruiting
+                        </Badge>
                       )}
                     </div>
                   </div>
@@ -176,7 +180,7 @@ export default function AgencyDetailPage() {
             </Card>
 
             {/* About */}
-            <Card className="mb-6">
+            <Card className="glass-strong rounded-3xl mb-6">
               <CardHeader>
                 <CardTitle>About Us</CardTitle>
               </CardHeader>
@@ -193,14 +197,14 @@ export default function AgencyDetailPage() {
 
             {/* Services */}
             {agency.services && agency.services.length > 0 && (
-              <Card className="mb-6">
+              <Card className="glass-strong rounded-3xl mb-6">
                 <CardHeader>
                   <CardTitle>Services Offered</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {agency.services.map((service, index) => (
-                      <Badge key={index} variant="secondary" className="text-sm py-2 px-4">
+                      <Badge key={index} variant="secondary" className="text-sm py-2 px-4 glass">
                         {service}
                       </Badge>
                     ))}
@@ -210,7 +214,7 @@ export default function AgencyDetailPage() {
             )}
 
             {/* Reviews */}
-            <Card>
+            <Card className="glass-strong rounded-3xl">
               <CardHeader>
                 <CardTitle>Reviews ({agency.reviews?.length || 0})</CardTitle>
               </CardHeader>
@@ -218,7 +222,7 @@ export default function AgencyDetailPage() {
                 {agency.reviews && agency.reviews.length > 0 ? (
                   <div className="space-y-4">
                     {agency.reviews.map((review) => (
-                      <div key={review.id} className="border-b pb-4 last:border-0">
+                      <div key={review.id} className="border-b border-gray-200 pb-4 last:border-0">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-medium">{review.userName}</span>
                           <div className="flex items-center gap-1">
@@ -242,31 +246,31 @@ export default function AgencyDetailPage() {
           {/* Sidebar */}
           <div>
             {/* Contact Card */}
-            <Card className="mb-6 sticky top-20">
+            <Card className="glass-strong rounded-3xl mb-6 sticky top-20">
               <CardHeader>
                 <CardTitle>Contact Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {agency.contactEmail && (
+                {agency.contact_email && (
                   <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-[#7CE2A7]" />
-                    <a href={`mailto:${agency.contactEmail}`} className="text-sm hover:text-[#7CE2A7] transition-colors">
-                      {agency.contactEmail}
+                    <Mail className="w-5 h-5 text-[#773344]" />
+                    <a href={`mailto:${agency.contact_email}`} className="text-sm hover:text-[#773344] transition-colors">
+                      {agency.contact_email}
                     </a>
                   </div>
                 )}
-                {agency.contactPhone && (
+                {agency.contact_phone && (
                   <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-[#7DC3EB]" />
-                    <a href={`tel:${agency.contactPhone}`} className="text-sm hover:text-[#7DC3EB] transition-colors">
-                      {agency.contactPhone}
+                    <Phone className="w-5 h-5 text-[#E3B5A4]" />
+                    <a href={`tel:${agency.contact_phone}`} className="text-sm hover:text-[#E3B5A4] transition-colors">
+                      {agency.contact_phone}
                     </a>
                   </div>
                 )}
                 {agency.website && (
                   <div className="flex items-center gap-3">
-                    <Globe className="w-5 h-5 text-[#F9CBA2]" />
-                    <a href={agency.website} target="_blank" rel="noopener noreferrer" className="text-sm hover:text-[#F9CBA2] transition-colors">
+                    <Globe className="w-5 h-5 text-[#773344]" />
+                    <a href={agency.website} target="_blank" rel="noopener noreferrer" className="text-sm hover:text-[#773344] transition-colors">
                       Visit Website
                     </a>
                   </div>
@@ -275,7 +279,7 @@ export default function AgencyDetailPage() {
             </Card>
 
             {/* Contact Form */}
-            <Card>
+            <Card className="glass-strong rounded-3xl">
               <CardHeader>
                 <CardTitle>Send a Message</CardTitle>
                 <CardDescription>Get in touch with {agency.name}</CardDescription>
@@ -297,6 +301,7 @@ export default function AgencyDetailPage() {
                         value={contactForm.name}
                         onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
                         placeholder="Your name"
+                        className="glass border-2"
                       />
                     </div>
                     <div>
@@ -308,6 +313,7 @@ export default function AgencyDetailPage() {
                         value={contactForm.email}
                         onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                         placeholder="your@email.com"
+                        className="glass border-2"
                       />
                     </div>
                     <div>
@@ -319,11 +325,12 @@ export default function AgencyDetailPage() {
                         onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                         placeholder="Tell us about your interest in fostering..."
                         rows={5}
+                        className="glass border-2"
                       />
                     </div>
                     <Button
                       type="submit"
-                      className="w-full bg-gradient-to-r from-[#7CE2A7] to-[#7DC3EB]"
+                      className="w-full btn-futuristic rounded-xl"
                       disabled={submitting}
                     >
                       {submitting ? 'Sending...' : 'Send Message'}

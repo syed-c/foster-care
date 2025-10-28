@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
-import connectDB from '@/lib/mongodb';
-import Agency from '@/lib/models/Agency';
-import User from '@/lib/models/User';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { sendContactEmail, sendGeneralInquiry } from '@/lib/email';
 
 // Helper function to handle CORS
@@ -20,13 +17,14 @@ export async function OPTIONS() {
 
 // Main route handler
 async function handleRoute(request, { params }) {
-  const { path = [] } = params;
+  // Fix: Await params before using its properties
+  const resolvedParams = await params;
+  const { path = [] } = resolvedParams;
   const route = `/${path.join('/')}`;
   const method = request.method;
   const url = new URL(request.url);
 
   try {
-    await connectDB();
 
     // ============ ROOT ENDPOINT ============
     if ((route === '/' || route === '/root') && method === 'GET') {
@@ -44,44 +42,56 @@ async function handleRoute(request, { params }) {
       const search = url.searchParams.get('search');
       const type = url.searchParams.get('type');
       const featured = url.searchParams.get('featured');
+      const userId = url.searchParams.get('userId');
       const limit = parseInt(url.searchParams.get('limit') || '50');
       const page = parseInt(url.searchParams.get('page') || '1');
+      const offset = (page - 1) * limit;
 
-      let query = {};
+      let query = supabaseAdmin.from('agencies').select('*', { count: 'exact' });
 
+      // User ID filter (for dashboard)
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
+
+      // Search filter
       if (search) {
-        query.$or = [
-          { name: { $regex: search, $options: 'i' } },
-          { 'location.city': { $regex: search, $options: 'i' } },
-          { 'location.region': { $regex: search, $options: 'i' } },
-          { 'location.postcode': { $regex: search, $options: 'i' } },
-        ];
+        query = query.or(`name.ilike.%${search}%,city.ilike.%${search}%,region.ilike.%${search}%,postcode.ilike.%${search}%`);
       }
 
+      // Type filter
       if (type) {
-        query.type = type;
+        query = query.eq('type', type);
       }
 
+      // Featured filter
       if (featured === 'true') {
-        query.featured = true;
+        query = query.eq('featured', true);
       }
 
-      const skip = (page - 1) * limit;
-      const agencies = await Agency.find(query)
-        .select('-reviews')
-        .limit(limit)
-        .skip(skip)
-        .sort({ featured: -1, rating: -1 });
+      // Pagination and sorting
+      query = query
+        .order('featured', { ascending: false })
+        .order('rating', { ascending: false })
+        .range(offset, offset + limit - 1);
 
-      const total = await Agency.countDocuments(query);
+      const { data: agencies, error, count } = await query;
+
+      if (error) {
+        console.error('Error fetching agencies:', error);
+        return handleCORS(NextResponse.json(
+          { error: 'Failed to fetch agencies' },
+          { status: 500 }
+        ));
+      }
 
       return handleCORS(NextResponse.json({
-        agencies,
+        agencies: agencies || [],
         pagination: {
           page,
           limit,
-          total,
-          pages: Math.ceil(total / limit),
+          total: count || 0,
+          pages: Math.ceil((count || 0) / limit),
         },
       }));
     }
@@ -90,12 +100,19 @@ async function handleRoute(request, { params }) {
     if (route === '/agencies' && method === 'POST') {
       const body = await request.json();
       
-      const agency = new Agency({
-        id: uuidv4(),
-        ...body,
-      });
+      const { data: agency, error } = await supabaseAdmin
+        .from('agencies')
+        .insert(body)
+        .select()
+        .single();
 
-      await agency.save();
+      if (error) {
+        console.error('Error creating agency:', error);
+        return handleCORS(NextResponse.json(
+          { error: 'Failed to create agency' },
+          { status: 500 }
+        ));
+      }
 
       return handleCORS(NextResponse.json({ 
         success: true,
@@ -106,14 +123,37 @@ async function handleRoute(request, { params }) {
     // GET /api/agencies/:id - Get single agency
     if (route.startsWith('/agencies/') && method === 'GET') {
       const agencyId = path[1];
-      const agency = await Agency.findOne({ id: agencyId });
+      
+      // Fetch agency with reviews
+      const { data: agency, error: agencyError } = await supabaseAdmin
+        .from('agencies')
+        .select('*')
+        .eq('id', agencyId)
+        .single();
 
-      if (!agency) {
+      if (agencyError || !agency) {
         return handleCORS(NextResponse.json(
           { error: 'Agency not found' },
           { status: 404 }
         ));
       }
+
+      // Fetch services
+      const { data: services } = await supabaseAdmin
+        .from('agency_services')
+        .select('service_name')
+        .eq('agency_id', agencyId);
+
+      // Fetch approved reviews
+      const { data: reviews } = await supabaseAdmin
+        .from('reviews')
+        .select('*')
+        .eq('agency_id', agencyId)
+        .eq('approved', true)
+        .order('created_at', { ascending: false });
+
+      agency.services = services?.map(s => s.service_name) || [];
+      agency.reviews = reviews || [];
 
       return handleCORS(NextResponse.json({ agency }));
     }
@@ -123,13 +163,14 @@ async function handleRoute(request, { params }) {
       const agencyId = path[1];
       const body = await request.json();
 
-      const agency = await Agency.findOneAndUpdate(
-        { id: agencyId },
-        { $set: body },
-        { new: true, runValidators: true }
-      );
+      const { data: agency, error } = await supabaseAdmin
+        .from('agencies')
+        .update(body)
+        .eq('id', agencyId)
+        .select()
+        .single();
 
-      if (!agency) {
+      if (error || !agency) {
         return handleCORS(NextResponse.json(
           { error: 'Agency not found' },
           { status: 404 }
@@ -146,9 +187,12 @@ async function handleRoute(request, { params }) {
     if (route.startsWith('/agencies/') && method === 'DELETE') {
       const agencyId = path[1];
       
-      const agency = await Agency.findOneAndDelete({ id: agencyId });
+      const { error } = await supabaseAdmin
+        .from('agencies')
+        .delete()
+        .eq('id', agencyId);
 
-      if (!agency) {
+      if (error) {
         return handleCORS(NextResponse.json(
           { error: 'Agency not found' },
           { status: 404 }
@@ -168,7 +212,12 @@ async function handleRoute(request, { params }) {
       const agencyId = path[1];
       const body = await request.json();
 
-      const agency = await Agency.findOne({ id: agencyId });
+      // Check if agency exists
+      const { data: agency } = await supabaseAdmin
+        .from('agencies')
+        .select('id')
+        .eq('id', agencyId)
+        .single();
 
       if (!agency) {
         return handleCORS(NextResponse.json(
@@ -177,27 +226,32 @@ async function handleRoute(request, { params }) {
         ));
       }
 
-      const review = {
-        id: uuidv4(),
-        userId: body.userId,
-        userName: body.userName,
-        comment: body.comment,
-        stars: body.stars,
-        createdAt: new Date(),
-      };
+      // Create review
+      const { data: review, error } = await supabaseAdmin
+        .from('reviews')
+        .insert({
+          agency_id: agencyId,
+          user_id: body.userId,
+          user_name: body.userName,
+          comment: body.comment,
+          stars: body.stars,
+          approved: false, // Requires approval
+        })
+        .select()
+        .single();
 
-      agency.reviews.push(review);
-      agency.updateRating();
-      await agency.save();
+      if (error) {
+        console.error('Error creating review:', error);
+        return handleCORS(NextResponse.json(
+          { error: 'Failed to create review' },
+          { status: 500 }
+        ));
+      }
 
       return handleCORS(NextResponse.json({ 
         success: true,
         review,
-        agency: {
-          id: agency.id,
-          rating: agency.rating,
-          reviewCount: agency.reviewCount,
-        }
+        message: 'Review submitted for approval'
       }, { status: 201 }));
     }
 
@@ -215,7 +269,11 @@ async function handleRoute(request, { params }) {
         ));
       }
 
-      const agency = await Agency.findOne({ id: agencyId });
+      const { data: agency } = await supabaseAdmin
+        .from('agencies')
+        .select('id, name, contact_email')
+        .eq('id', agencyId)
+        .single();
 
       if (!agency) {
         return handleCORS(NextResponse.json(
@@ -224,9 +282,20 @@ async function handleRoute(request, { params }) {
         ));
       }
 
+      // Store inquiry in database
+      await supabaseAdmin
+        .from('contact_inquiries')
+        .insert({
+          agency_id: agencyId,
+          name,
+          email,
+          message,
+          type: 'agency',
+        });
+
       // Send email to agency
       const emailResult = await sendContactEmail({
-        to: agency.contactEmail,
+        to: agency.contact_email,
         from: email,
         name,
         message,
@@ -258,6 +327,16 @@ async function handleRoute(request, { params }) {
         ));
       }
 
+      // Store inquiry in database
+      await supabaseAdmin
+        .from('contact_inquiries')
+        .insert({
+          name,
+          email,
+          message,
+          type: 'general',
+        });
+
       const emailResult = await sendGeneralInquiry({ name, email, message });
 
       if (!emailResult.success) {
@@ -278,9 +357,14 @@ async function handleRoute(request, { params }) {
     // GET /api/users/:id - Get user profile
     if (route.startsWith('/users/') && method === 'GET') {
       const userId = path[1];
-      const user = await User.findOne({ id: userId }).select('-password');
+      
+      const { data: user, error } = await supabaseAdmin
+        .from('users')
+        .select('id, name, email, image, role, created_at')
+        .eq('id', userId)
+        .single();
 
-      if (!user) {
+      if (error || !user) {
         return handleCORS(NextResponse.json(
           { error: 'User not found' },
           { status: 404 }
@@ -299,13 +383,14 @@ async function handleRoute(request, { params }) {
       delete body.password;
       delete body.role;
 
-      const user = await User.findOneAndUpdate(
-        { id: userId },
-        { $set: body },
-        { new: true }
-      ).select('-password');
+      const { data: user, error } = await supabaseAdmin
+        .from('users')
+        .update(body)
+        .eq('id', userId)
+        .select('id, name, email, image, role, created_at')
+        .single();
 
-      if (!user) {
+      if (error || !user) {
         return handleCORS(NextResponse.json(
           { error: 'User not found' },
           { status: 404 }
@@ -324,23 +409,31 @@ async function handleRoute(request, { params }) {
       const body = await request.json();
       const { agencyId } = body;
 
-      const user = await User.findOne({ id: userId });
+      // Upsert (insert or ignore if exists)
+      const { error } = await supabaseAdmin
+        .from('saved_agencies')
+        .upsert(
+          { user_id: userId, agency_id: agencyId },
+          { onConflict: 'user_id,agency_id' }
+        );
 
-      if (!user) {
+      if (error) {
+        console.error('Error saving agency:', error);
         return handleCORS(NextResponse.json(
-          { error: 'User not found' },
-          { status: 404 }
+          { error: 'Failed to save agency' },
+          { status: 500 }
         ));
       }
 
-      if (!user.savedAgencies.includes(agencyId)) {
-        user.savedAgencies.push(agencyId);
-        await user.save();
-      }
+      // Get all saved agencies
+      const { data: savedAgencies } = await supabaseAdmin
+        .from('saved_agencies')
+        .select('agency_id')
+        .eq('user_id', userId);
 
       return handleCORS(NextResponse.json({ 
         success: true,
-        savedAgencies: user.savedAgencies
+        savedAgencies: savedAgencies?.map(s => s.agency_id) || []
       }));
     }
 
@@ -349,176 +442,267 @@ async function handleRoute(request, { params }) {
       const userId = path[1];
       const agencyId = path[3];
 
-      const user = await User.findOne({ id: userId });
+      const { error } = await supabaseAdmin
+        .from('saved_agencies')
+        .delete()
+        .eq('user_id', userId)
+        .eq('agency_id', agencyId);
 
-      if (!user) {
+      if (error) {
+        console.error('Error removing saved agency:', error);
         return handleCORS(NextResponse.json(
-          { error: 'User not found' },
-          { status: 404 }
+          { error: 'Failed to remove agency' },
+          { status: 500 }
         ));
       }
 
-      user.savedAgencies = user.savedAgencies.filter(id => id !== agencyId);
-      await user.save();
+      // Get remaining saved agencies
+      const { data: savedAgencies } = await supabaseAdmin
+        .from('saved_agencies')
+        .select('agency_id')
+        .eq('user_id', userId);
 
       return handleCORS(NextResponse.json({ 
         success: true,
-        savedAgencies: user.savedAgencies
+        savedAgencies: savedAgencies?.map(s => s.agency_id) || []
+      }));
+    }
+
+    // ============ LOCATIONS ENDPOINTS ============
+    
+    // GET /api/locations - Get locations for an agency
+    if (route === '/locations' && method === 'GET') {
+      const agencyId = url.searchParams.get('agencyId');
+      
+      if (!agencyId) {
+        return handleCORS(NextResponse.json(
+          { error: 'Agency ID required' },
+          { status: 400 }
+        ));
+      }
+
+      const { data: locations, error } = await supabaseAdmin
+        .from('agency_locations')
+        .select('*')
+        .eq('agency_id', agencyId)
+        .order('is_primary', { ascending: false })
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching locations:', error);
+        return handleCORS(NextResponse.json(
+          { error: 'Failed to fetch locations' },
+          { status: 500 }
+        ));
+      }
+
+      return handleCORS(NextResponse.json({ locations: locations || [] }));
+    }
+
+    // POST /api/locations - Create new location
+    if (route === '/locations' && method === 'POST') {
+      const body = await request.json();
+
+      const { data: location, error } = await supabaseAdmin
+        .from('agency_locations')
+        .insert(body)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating location:', error);
+        return handleCORS(NextResponse.json(
+          { error: 'Failed to create location' },
+          { status: 500 }
+        ));
+      }
+
+      return handleCORS(NextResponse.json({ 
+        success: true,
+        location 
+      }, { status: 201 }));
+    }
+
+    // PUT /api/locations/:id - Update location
+    if (route.match(/^\/locations\/[^\/]+$/) && method === 'PUT') {
+      const locationId = path[1];
+      const body = await request.json();
+
+      const { data: location, error } = await supabaseAdmin
+        .from('agency_locations')
+        .update(body)
+        .eq('id', locationId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating location:', error);
+        return handleCORS(NextResponse.json(
+          { error: 'Failed to update location' },
+          { status: 500 }
+        ));
+      }
+
+      return handleCORS(NextResponse.json({ 
+        success: true,
+        location 
+      }));
+    }
+
+    // DELETE /api/locations/:id - Delete location
+    if (route.match(/^\/locations\/[^\/]+$/) && method === 'DELETE') {
+      const locationId = path[1];
+
+      const { error } = await supabaseAdmin
+        .from('agency_locations')
+        .delete()
+        .eq('id', locationId);
+
+      if (error) {
+        console.error('Error deleting location:', error);
+        return handleCORS(NextResponse.json(
+          { error: 'Failed to delete location' },
+          { status: 500 }
+        ));
+      }
+
+      return handleCORS(NextResponse.json({ 
+        success: true,
+        message: 'Location deleted successfully'
       }));
     }
 
     // ============ SEED DATA ENDPOINT (Development only) ============
     if (route === '/seed' && method === 'POST') {
       // Clear existing data
-      await Agency.deleteMany({});
+      await supabaseAdmin.from('agencies').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       
       // Create seed agencies
       const seedAgencies = [
         {
-          id: uuidv4(),
           name: 'Care4Kids London',
           logo: 'https://images.pexels.com/photos/3768146/pexels-photo-3768146.jpeg',
           description: 'Leading fostering agency in London with over 20 years of experience providing exceptional care and support to foster families and children.',
-          location: {
-            city: 'London',
-            region: 'Greater London',
-            postcode: 'SW1A 1AA',
-            address: '123 Care Street, London',
-          },
+          city: 'London',
+          region: 'Greater London',
+          postcode: 'SW1A 1AA',
+          address: '123 Care Street, London',
           type: 'Private',
           rating: 4.8,
-          reviewCount: 45,
-          services: ['Long-term Fostering', 'Respite Care', 'Emergency Placement', 'Training & Support'],
-          contactEmail: 'info@care4kidslondon.co.uk',
-          contactPhone: '020 1234 5678',
+          review_count: 45,
+          contact_email: 'info@care4kidslondon.co.uk',
+          contact_phone: '020 1234 5678',
           website: 'https://care4kidslondon.co.uk',
           featured: true,
           recruiting: true,
+          verified: true,
           accreditation: 'Ofsted Outstanding',
-          reviews: [
-            {
-              id: uuidv4(),
-              userId: 'user1',
-              userName: 'Sarah Johnson',
-              comment: 'Wonderful agency with incredible support staff. They have been there for us every step of the way.',
-              stars: 5,
-              createdAt: new Date('2024-01-15'),
-            },
-          ],
         },
         {
-          id: uuidv4(),
           name: 'Manchester Family Fostering',
           description: 'Dedicated to finding loving homes for children in Manchester and surrounding areas. Comprehensive training and 24/7 support.',
-          location: {
-            city: 'Manchester',
-            region: 'Greater Manchester',
-            postcode: 'M1 1AE',
-            address: '45 Foster Lane, Manchester',
-          },
+          city: 'Manchester',
+          region: 'Greater Manchester',
+          postcode: 'M1 1AE',
+          address: '45 Foster Lane, Manchester',
           type: 'Charity',
           rating: 4.6,
-          reviewCount: 32,
-          services: ['Long-term Fostering', 'Parent and Child', 'Sibling Groups', 'Specialist Support'],
-          contactEmail: 'hello@manchesterfostering.org.uk',
-          contactPhone: '0161 234 5678',
+          review_count: 32,
+          contact_email: 'hello@manchesterfostering.org.uk',
+          contact_phone: '0161 234 5678',
           website: 'https://manchesterfostering.org.uk',
           featured: true,
           recruiting: true,
+          verified: true,
           accreditation: 'Ofsted Good',
-          reviews: [],
         },
         {
-          id: uuidv4(),
           name: 'Birmingham Children First',
           description: 'Local authority fostering service committed to keeping children safe and helping them thrive in caring environments.',
-          location: {
-            city: 'Birmingham',
-            region: 'West Midlands',
-            postcode: 'B1 1BB',
-            address: 'City Hall, Birmingham',
-          },
+          city: 'Birmingham',
+          region: 'West Midlands',
+          postcode: 'B1 1BB',
+          address: 'City Hall, Birmingham',
           type: 'Local Authority',
           rating: 4.5,
-          reviewCount: 28,
-          services: ['Long-term Fostering', 'Short Breaks', 'Emergency Care', 'Adoption Support'],
-          contactEmail: 'fostering@birmingham.gov.uk',
-          contactPhone: '0121 303 1234',
+          review_count: 28,
+          contact_email: 'fostering@birmingham.gov.uk',
+          contact_phone: '0121 303 1234',
           recruiting: true,
+          verified: true,
           accreditation: 'Ofsted Good',
-          reviews: [],
         },
         {
-          id: uuidv4(),
           name: 'Glasgow Foster Care Network',
           description: 'Scotland\'s trusted fostering partner, providing compassionate care and professional support to children and foster families.',
-          location: {
-            city: 'Glasgow',
-            region: 'Scotland',
-            postcode: 'G1 1AA',
-            address: '78 Care Road, Glasgow',
-          },
+          city: 'Glasgow',
+          region: 'Scotland',
+          postcode: 'G1 1AA',
+          address: '78 Care Road, Glasgow',
           type: 'Private',
           rating: 4.7,
-          reviewCount: 38,
-          services: ['Long-term Fostering', 'Respite Care', 'Therapeutic Fostering', 'Kinship Care'],
-          contactEmail: 'info@glasgowfoster.co.uk',
-          contactPhone: '0141 234 5678',
+          review_count: 38,
+          contact_email: 'info@glasgowfoster.co.uk',
+          contact_phone: '0141 234 5678',
           website: 'https://glasgowfoster.co.uk',
           featured: true,
           recruiting: true,
+          verified: true,
           accreditation: 'Care Inspectorate',
-          reviews: [],
         },
         {
-          id: uuidv4(),
           name: 'Bristol Community Foster Care',
           description: 'Community-focused fostering agency dedicated to providing stable, loving homes for children in the South West.',
-          location: {
-            city: 'Bristol',
-            region: 'South West',
-            postcode: 'BS1 1AA',
-            address: '12 Community Street, Bristol',
-          },
+          city: 'Bristol',
+          region: 'South West',
+          postcode: 'BS1 1AA',
+          address: '12 Community Street, Bristol',
           type: 'Charity',
           rating: 4.4,
-          reviewCount: 22,
-          services: ['Long-term Fostering', 'Parent and Child', 'Emergency Placement'],
-          contactEmail: 'contact@bristolfoster.org.uk',
-          contactPhone: '0117 234 5678',
+          review_count: 22,
+          contact_email: 'contact@bristolfoster.org.uk',
+          contact_phone: '0117 234 5678',
           recruiting: true,
+          verified: true,
           accreditation: 'Ofsted Good',
-          reviews: [],
         },
         {
-          id: uuidv4(),
           name: 'Leeds Family Support Services',
           description: 'Experienced fostering agency providing comprehensive support and training to foster carers across Yorkshire.',
-          location: {
-            city: 'Leeds',
-            region: 'Yorkshire',
-            postcode: 'LS1 1AA',
-            address: '90 Support Avenue, Leeds',
-          },
+          city: 'Leeds',
+          region: 'Yorkshire',
+          postcode: 'LS1 1AA',
+          address: '90 Support Avenue, Leeds',
           type: 'Private',
           rating: 4.6,
-          reviewCount: 31,
-          services: ['Long-term Fostering', 'Short Breaks', 'Sibling Groups', 'Teen Fostering'],
-          contactEmail: 'info@leedsfamily.co.uk',
-          contactPhone: '0113 234 5678',
+          review_count: 31,
+          contact_email: 'info@leedsfamily.co.uk',
+          contact_phone: '0113 234 5678',
+          website: 'https://leedsfamily.co.uk',
           featured: true,
           recruiting: true,
+          verified: true,
           accreditation: 'Ofsted Outstanding',
-          reviews: [],
         },
       ];
 
-      await Agency.insertMany(seedAgencies);
+      const { data, error } = await supabaseAdmin
+        .from('agencies')
+        .insert(seedAgencies)
+        .select();
+
+      if (error) {
+        console.error('Seed error:', error);
+        return handleCORS(NextResponse.json(
+          { error: 'Failed to seed data', details: error.message },
+          { status: 500 }
+        ));
+      }
 
       return handleCORS(NextResponse.json({
         success: true,
-        message: `Seeded ${seedAgencies.length} agencies`,
-        count: seedAgencies.length,
+        message: `Seeded ${data?.length || 0} agencies`,
+        count: data?.length || 0,
       }));
     }
 

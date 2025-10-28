@@ -32,23 +32,33 @@ export default function ResourcesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAF9F6] to-white">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#7DC3EB]/20 to-[#F9CBA2]/20 py-16 md:py-24">
-        <div className="container mx-auto px-4 text-center">
-          <BookOpen className="w-16 h-16 mx-auto mb-6 text-[#7DC3EB]" />
-          <h1 className="text-4xl md:text-5xl font-bold text-[#2C2C2C] mb-4 font-poppins">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5E9E2] to-white">
+      {/* Modern Hero Header with Glassmorphism */}
+      <section className="relative py-16 md:py-24 overflow-hidden">
+        {/* Animated Gradient Background */}
+        <div className="absolute inset-0 gradient-mesh opacity-40" />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-10 left-10 w-64 h-64 bg-[#773344]/10 rounded-full blur-3xl float-animation" />
+          <div className="absolute bottom-10 right-10 w-72 h-72 bg-[#E3B5A4]/10 rounded-full blur-3xl float-animation" style={{ animationDelay: '2s' }} />
+        </div>
+
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+            <BookOpen className="w-4 h-4 text-[#773344]" />
+            <span className="text-sm font-medium text-[#2C2C2C]">Resources</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-[#2C2C2C] mb-4 font-poppins gradient-text">
             Resources & Guides
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Everything you need to know about fostering in the UK. Explore our guides, legal information, and inspiring family stories.
           </p>
         </div>
-      </div>
+      </section>
 
       <div className="container mx-auto px-4 py-12">
         {/* Note about CMS Integration */}
-        <Card className="mb-8 bg-blue-50 border-blue-200">
+        <Card className="glass-strong rounded-3xl mb-8 bg-blue-50/30 border-blue-200">
           <CardContent className="py-4">
             <p className="text-sm text-blue-800">
               <strong>Note:</strong> This page will be powered by Sanity CMS. Blog posts and resources will be managed through the Sanity Studio. 
@@ -63,7 +73,7 @@ export default function ResourcesPage() {
             <Button
               key={category}
               variant={category === 'All' ? 'default' : 'outline'}
-              className={category === 'All' ? 'bg-gradient-to-r from-[#7CE2A7] to-[#7DC3EB]' : ''}
+              className={`${category === 'All' ? 'bg-gradient-to-r from-[#773344] to-[#E3B5A4] text-white' : 'glass border-2'} rounded-2xl`}
             >
               {category}
             </Button>
@@ -73,8 +83,8 @@ export default function ResourcesPage() {
         {/* Resources Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {placeholderResources.map((resource) => (
-            <Card key={resource.slug} className="group hover:shadow-xl transition-all hover:-translate-y-1">
-              <div className="relative h-48 overflow-hidden rounded-t-xl">
+            <Card key={resource.slug} className="glass-strong rounded-3xl group hover-lift cursor-pointer">
+              <div className="relative h-48 overflow-hidden rounded-t-3xl">
                 <Image
                   src={resource.image}
                   alt={resource.title}
@@ -83,10 +93,10 @@ export default function ResourcesPage() {
                 />
               </div>
               <CardHeader>
-                <div className="text-xs font-semibold text-[#7DC3EB] mb-2">
+                <div className="text-xs font-semibold text-[#773344] mb-2">
                   {resource.category}
                 </div>
-                <CardTitle className="text-xl group-hover:text-[#7CE2A7] transition-colors">
+                <CardTitle className="text-xl group-hover:text-[#773344] transition-colors">
                   {resource.title}
                 </CardTitle>
                 <CardDescription className="mt-2">
@@ -94,7 +104,7 @@ export default function ResourcesPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="ghost" className="w-full group-hover:bg-[#7CE2A7]/10 group-hover:text-[#7CE2A7]" asChild>
+                <Button variant="ghost" className="w-full group-hover:bg-[#773344]/10 group-hover:text-[#773344] rounded-xl" asChild>
                   <Link href={`/resources/${resource.slug}`}>
                     Read More <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>
@@ -105,13 +115,13 @@ export default function ResourcesPage() {
         </div>
 
         {/* CTA Section */}
-        <Card className="mt-12 bg-gradient-to-br from-[#7CE2A7] to-[#7DC3EB] border-0 text-white">
+        <Card className="glass-strong rounded-3xl mt-12 bg-gradient-to-br from-[#773344] to-[#E3B5A4] border-0 text-white">
           <CardContent className="p-8 md:p-12 text-center">
             <h2 className="text-3xl font-bold mb-4 font-poppins">Ready to Start Your Fostering Journey?</h2>
             <p className="text-lg mb-6 text-white/90 max-w-2xl mx-auto">
               Browse our directory of verified fostering agencies and find the perfect match for your family.
             </p>
-            <Button size="lg" className="bg-white text-[#7CE2A7] hover:bg-gray-100" asChild>
+            <Button size="lg" className="bg-white text-[#773344] hover:bg-gray-100 btn-futuristic rounded-2xl" asChild>
               <Link href="/agencies">
                 Browse Agencies <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
