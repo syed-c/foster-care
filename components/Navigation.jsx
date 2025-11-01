@@ -27,15 +27,15 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <nav className="bg-background-offwhite border-b border-gray-100 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#7CE2A7] to-[#7DC3EB] flex items-center justify-center">
-              <Heart className="w-6 h-6 text-white" fill="white" />
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-green to-secondary-blue flex items-center justify-center">
+              <Heart className="w-6 h-6 text-text-charcoal" fill="currentColor" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-[#7CE2A7] to-[#7DC3EB] bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-primary-green to-secondary-blue bg-clip-text text-transparent font-poppins">
               Foster Care UK
             </span>
           </Link>
@@ -46,7 +46,7 @@ export default function Navigation() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary-green ${
+                className={`text-sm font-medium transition-colors hover:text-primary-green font-inter ${
                   pathname === link.href ? 'text-primary-green' : 'text-text-charcoal'
                 }`}
               >
@@ -67,18 +67,18 @@ export default function Navigation() {
                         <User className="w-4 h-4 text-text-charcoal" />
                       )}
                     </div>
-                    <span className="text-sm font-medium">{session.user.name}</span>
+                    <span className="text-sm font-medium font-inter">{session.user.name}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer">
+                    <Link href="/dashboard" className="cursor-pointer font-inter">
                       <User className="w-4 h-4 mr-2" />
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard/profile" className="cursor-pointer">
+                    <Link href="/dashboard/profile" className="cursor-pointer font-inter">
                       Profile
                     </Link>
                   </DropdownMenuItem>
@@ -86,7 +86,7 @@ export default function Navigation() {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/admin" className="cursor-pointer">
+                        <Link href="/admin" className="cursor-pointer font-inter">
                           <Settings className="w-4 h-4 mr-2" />
                           Admin Dashboard
                         </Link>
@@ -96,7 +96,7 @@ export default function Navigation() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => signOut({ callbackUrl: '/' })}
-                    className="cursor-pointer text-red-600"
+                    className="cursor-pointer text-red-600 font-inter"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign Out
@@ -105,7 +105,7 @@ export default function Navigation() {
               </DropdownMenu>
             ) : (
               <Button
-                className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90"
+                className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 font-inter"
                 asChild
               >
                 <Link href="/auth/signin">Sign In</Link>
@@ -124,12 +124,12 @@ export default function Navigation() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-4 border-t">
+          <div className="md:hidden py-4 border-t border-gray-100">
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`block py-2 text-sm font-medium ${
+                className={`block py-2 text-sm font-medium font-inter ${
                   pathname === link.href ? 'text-primary-green' : 'text-text-charcoal'
                 }`}
                 onClick={() => setIsOpen(false)}
@@ -141,7 +141,7 @@ export default function Navigation() {
               <>
                 <Link
                   href="/dashboard"
-                  className="block py-2 text-sm font-medium text-text-charcoal"
+                  className="block py-2 text-sm font-medium text-text-charcoal font-inter"
                   onClick={() => setIsOpen(false)}
                 >
                   Dashboard
@@ -149,7 +149,7 @@ export default function Navigation() {
                 {session.user.role === 'admin' && (
                   <Link
                     href="/admin"
-                    className="block py-2 text-sm font-medium text-text-charcoal"
+                    className="block py-2 text-sm font-medium text-text-charcoal font-inter"
                     onClick={() => setIsOpen(false)}
                   >
                     Admin Dashboard
@@ -157,7 +157,7 @@ export default function Navigation() {
                 )}
                 <Button
                   variant="outline"
-                  className="w-full mt-4"
+                  className="w-full mt-4 font-inter"
                   onClick={() => {
                     signOut({ callbackUrl: '/' });
                     setIsOpen(false);
@@ -168,7 +168,7 @@ export default function Navigation() {
               </>
             ) : (
               <Button
-                className="w-full mt-4 bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal"
+                className="w-full mt-4 bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal font-inter"
                 asChild
               >
                 <Link href="/auth/signin">Sign In</Link>

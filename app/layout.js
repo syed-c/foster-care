@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased bg-background`}>
         <AuthSessionProvider>
           <Navigation />
-          <main className="min-h-screen">
+          <main>
             {children}
           </main>
           <Footer />

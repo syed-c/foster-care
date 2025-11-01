@@ -4,18 +4,18 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%; /* #FAF9F6 (off white) */
+    --background: 36 6% 96%; /* #FAF9F6 */
     --foreground: 0 0% 17%; /* #2C2C2C (charcoal) */
     
-    /* Primary: #7CE2A7 (mint green) */
+    /* Primary: #7CE2A7 (Mint Green) */
     --primary: 145 60% 67%;
     --primary-foreground: 0 0% 17%;
     
-    /* Secondary: #7DC3EB (sky blue) */
+    /* Secondary: #7DC3EB (Sky Blue) */
     --secondary: 200 70% 70%;
     --secondary-foreground: 0 0% 17%;
     
-    /* Accent: #F9CBA2 (peach) */
+    /* Accent: #F9CBA2 (Peach) */
     --accent: 23 85% 81%;
     --accent-foreground: 0 0% 17%;
     
@@ -46,11 +46,11 @@
   }
  
   .dark {
-    --background: 0 0% 10%;
-    --foreground: 0 0% 98%;
-    --primary: 145 60% 67%;
+    --background: 36 6% 96%; /* #FAF9F6 */
+    --foreground: 0 0% 17%; /* #2C2C2C (charcoal) */
+    --primary: 145 60% 67%; /* #7CE2A7 (Mint Green) */
     --primary-foreground: 0 0% 17%;
-    --secondary: 200 70% 70%;
+    --secondary: 200 70% 70%; /* #7DC3EB (Sky Blue) */
     --secondary-foreground: 0 0% 17%;
     --accent: 23 85% 81%;
     --accent-foreground: 0 0% 17%;

@@ -41,7 +41,12 @@ import {
   Search,
   Users,
   Heart,
-  Shield
+  Shield,
+  MapPin,
+  Globe,
+  ChevronDown,
+  Folder,
+  FolderOpen
 } from 'lucide-react';
 
 export default function PageEditor() {
@@ -62,12 +67,112 @@ export default function PageEditor() {
   const [activeEditor, setActiveEditor] = useState(null);
 
   const [previewMode, setPreviewMode] = useState(false);
+  const [activeTab, setActiveTab] = useState('pages');
+  const [locationContent, setLocationContent] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [locationFormData, setLocationFormData] = useState({});
+  const [locationSearchQuery, setLocationSearchQuery] = useState('');
+  const [expandedCountries, setExpandedCountries] = useState({});
+  const [expandedRegions, setExpandedRegions] = useState({});
 
   useEffect(() => {
     // TEMPORARILY DISABLED ADMIN CHECK FOR TESTING
     setIsAdmin(true);
     fetchPages();
+    fetchLocationContent();
   }, []);
+
+  const fetchLocationContent = async () => {
+    try {
+      const response = await fetch('/api/admin/cms');
+      if (response.ok) {
+        const data = await response.json();
+        setLocationContent(Object.values(data));
+      }
+    } catch (error) {
+      console.error('Error fetching location content:', error);
+    }
+  };
+
+  const handleLocationSearch = async (e) => {
+    e.preventDefault();
+    if (!locationSearchQuery.trim()) {
+      fetchLocationContent();
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/admin/cms?q=${encodeURIComponent(locationSearchQuery)}`);
+      if (response.ok) {
+        const results = await response.json();
+        setLocationContent(results);
+      }
+    } catch (error) {
+      console.error('Error searching:', error);
+    }
+  };
+
+  const handleLocationEdit = (content) => {
+    setSelectedLocation(content);
+    setLocationFormData({ ...content });
+  };
+
+  const handleLocationSave = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/admin/cms', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(locationFormData),
+      });
+
+      if (response.ok) {
+        setSelectedLocation(null);
+        setLocationFormData({});
+        fetchLocationContent();
+        alert('Location content saved successfully!');
+      } else {
+        alert('Error saving location content');
+      }
+    } catch (error) {
+      console.error('Error saving:', error);
+      alert('Error saving location content');
+    }
+  };
+
+  // Organize locations by country > region > city
+  const organizeLocations = () => {
+    const organized = {};
+    locationContent.forEach(content => {
+      const parts = content.slug.split('/');
+      if (parts.length === 1) {
+        // Country
+        if (!organized[parts[0]]) {
+          organized[parts[0]] = { country: content, regions: {} };
+        }
+      } else if (parts.length === 2) {
+        // Region
+        const [country, region] = parts;
+        if (!organized[country]) {
+          organized[country] = { country: null, regions: {} };
+        }
+        if (!organized[country].regions[region]) {
+          organized[country].regions[region] = { region: content, cities: [] };
+        }
+      } else if (parts.length === 3) {
+        // City
+        const [country, region, city] = parts;
+        if (!organized[country]) {
+          organized[country] = { country: null, regions: {} };
+        }
+        if (!organized[country].regions[region]) {
+          organized[country].regions[region] = { region: null, cities: [] };
+        }
+        organized[country].regions[region].cities.push(content);
+      }
+    });
+    return organized;
+  };
 
   const fetchPages = async () => {
     try {
@@ -971,18 +1076,20 @@ export default function PageEditor() {
     return null;
   }
 
+  const organizedLocations = organizeLocations();
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background-offwhite">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-secondary text-white py-8">
+      <div className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal py-8">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Page Editor</h1>
-              <p className="opacity-90">Edit and manage website pages</p>
+              <h1 className="text-3xl font-bold mb-2 font-poppins">Page & Location Editor</h1>
+              <p className="opacity-90 font-inter">Edit and manage website pages and location content</p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" asChild className="bg-white text-primary hover:bg-gray-100">
+              <Button variant="outline" asChild className="bg-white text-text-charcoal hover:bg-gray-100">
                 <Link href="/admin">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Dashboard
@@ -994,6 +1101,22 @@ export default function PageEditor() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="glass-card rounded-modern">
+            <TabsTrigger value="pages" className="font-inter">
+              <FileText className="w-4 h-4 mr-2" />
+              Pages
+            </TabsTrigger>
+            <TabsTrigger value="locations" className="font-inter">
+              <MapPin className="w-4 h-4 mr-2" />
+              Location Content
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+      {/* Pages Tab Content */}
+      <TabsContent value="pages">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Page List */}
           <div className="lg:col-span-1">
@@ -1527,7 +1650,6 @@ export default function PageEditor() {
                                   </div>
                                 </>
                               )}
-                              
                               {section.title === 'Resources Section' && (
                                 <>
                                   <div className="border rounded-md p-2">
@@ -2217,7 +2339,286 @@ export default function PageEditor() {
             )}
           </div>
         </div>
+        </TabsContent>
+
+        {/* Location Content Tab */}
+        <TabsContent value="locations">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Location List Sidebar */}
+            <div className="lg:col-span-1">
+              <Card className="glass-card rounded-modern">
+                <CardHeader>
+                  <CardTitle className="font-poppins">Location Content</CardTitle>
+                  <CardDescription className="font-inter">Browse and edit location pages</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* Search */}
+                  <form onSubmit={handleLocationSearch} className="mb-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        type="text"
+                        placeholder="Search locations..."
+                        value={locationSearchQuery}
+                        onChange={(e) => setLocationSearchQuery(e.target.value)}
+                        className="pl-10 font-inter"
+                      />
+                    </div>
+                  </form>
+
+                  {/* Hierarchical Location Tree */}
+                  <div className="space-y-1 max-h-[600px] overflow-y-auto">
+                    {Object.keys(organizedLocations).map((countrySlug) => {
+                      const countryData = organizedLocations[countrySlug];
+                      const countryExpanded = expandedCountries[countrySlug] || false;
+                      const countryName = countryData.country?.title || countrySlug.charAt(0).toUpperCase() + countrySlug.slice(1);
+
+                      return (
+                        <div key={countrySlug} className="border rounded-lg mb-2">
+                          <button
+                            onClick={() => setExpandedCountries({ ...expandedCountries, [countrySlug]: !countryExpanded })}
+                            className="w-full flex items-center justify-between p-2 hover:bg-gray-50 rounded-t-lg font-inter"
+                          >
+                            <div className="flex items-center gap-2">
+                              {countryExpanded ? (
+                                <FolderOpen className="w-4 h-4 text-primary-green" />
+                              ) : (
+                                <Folder className="w-4 h-4 text-gray-400" />
+                              )}
+                              <span className="font-medium">{countryName}</span>
+                            </div>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${countryExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          {countryExpanded && (
+                            <div className="pl-4 border-t">
+                              {countryData.country && (
+                                <button
+                                  onClick={() => handleLocationEdit(countryData.country)}
+                                  className={`w-full text-left p-2 hover:bg-primary-green/10 rounded flex items-center gap-2 font-inter ${
+                                    selectedLocation?.slug === countryData.country.slug ? 'bg-primary-green/20' : ''
+                                  }`}
+                                >
+                                  <MapPin className="w-3 h-3" />
+                                  <span className="text-sm">Edit {countryName}</span>
+                                </button>
+                              )}
+
+                              {Object.keys(countryData.regions).map((regionSlug) => {
+                                const regionData = countryData.regions[regionSlug];
+                                const regionExpanded = expandedRegions[`${countrySlug}-${regionSlug}`] || false;
+                                const regionName = regionData.region?.title || regionSlug.charAt(0).toUpperCase() + regionSlug.slice(1);
+
+                                return (
+                                  <div key={regionSlug} className="mb-1">
+                                    <button
+                                      onClick={() => setExpandedRegions({ ...expandedRegions, [`${countrySlug}-${regionSlug}`]: !regionExpanded })}
+                                      className="w-full flex items-center justify-between p-2 hover:bg-gray-50 rounded font-inter"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        {regionExpanded ? (
+                                          <FolderOpen className="w-3 h-3 text-secondary-blue" />
+                                        ) : (
+                                          <Folder className="w-3 h-3 text-gray-400" />
+                                        )}
+                                        <span className="text-sm font-medium">{regionName}</span>
+                                      </div>
+                                      <ChevronDown className={`w-3 h-3 transition-transform ${regionExpanded ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {regionExpanded && (
+                                      <div className="pl-6">
+                                        {regionData.region && (
+                                          <button
+                                            onClick={() => handleLocationEdit(regionData.region)}
+                                            className={`w-full text-left p-2 hover:bg-secondary-blue/10 rounded flex items-center gap-2 text-sm font-inter ${
+                                              selectedLocation?.slug === regionData.region.slug ? 'bg-secondary-blue/20' : ''
+                                            }`}
+                                          >
+                                            <MapPin className="w-3 h-3" />
+                                            <span>Edit {regionName}</span>
+                                          </button>
+                                        )}
+
+                                        {regionData.cities.map((city) => (
+                                          <button
+                                            key={city.slug}
+                                            onClick={() => handleLocationEdit(city)}
+                                            className={`w-full text-left p-2 hover:bg-accent-peach/10 rounded flex items-center gap-2 text-sm font-inter ${
+                                              selectedLocation?.slug === city.slug ? 'bg-accent-peach/20' : ''
+                                            }`}
+                                          >
+                                            <Heart className="w-3 h-3" />
+                                            <span>{city.title || city.slug.split('/').pop()}</span>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Location Editor */}
+            <div className="lg:col-span-3">
+              {selectedLocation ? (
+                <div>
+                  <Tabs defaultValue="content">
+                    <TabsList>
+                      <TabsTrigger value="content">Content</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="content">
+                      <Card className="glass-card rounded-modern">
+                        <CardHeader>
+                          <CardTitle className="font-poppins">Edit Location: {selectedLocation.title || selectedLocation.slug}</CardTitle>
+                          <CardDescription className="font-inter">Edit content for /foster-agency/{selectedLocation.slug}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          <form onSubmit={handleLocationSave}>
+                            <div className="space-y-2">
+                              <Label htmlFor="slug" className="font-inter">Slug (read-only)</Label>
+                              <Input
+                                id="slug"
+                                value={locationFormData.slug || selectedLocation.slug}
+                                disabled
+                                className="bg-gray-50 font-inter"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="title" className="font-inter">Page Title</Label>
+                              <Input
+                                id="title"
+                                value={locationFormData.title || ''}
+                                onChange={(e) => setLocationFormData({ ...locationFormData, title: e.target.value })}
+                                placeholder="Foster Agencies in [Location]"
+                                className="font-inter"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="h1" className="font-inter">H1 Heading</Label>
+                              <Input
+                                id="h1"
+                                value={locationFormData.h1 || ''}
+                                onChange={(e) => setLocationFormData({ ...locationFormData, h1: e.target.value })}
+                                placeholder="Find the Best Foster Agencies in [Location]"
+                                className="font-inter"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="description" className="font-inter">Description</Label>
+                              <Textarea
+                                id="description"
+                                value={locationFormData.description || ''}
+                                onChange={(e) => setLocationFormData({ ...locationFormData, description: e.target.value })}
+                                placeholder="SEO-rich description..."
+                                rows={4}
+                                className="font-inter"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="meta_title" className="font-inter">Meta Title</Label>
+                              <Input
+                                id="meta_title"
+                                value={locationFormData.meta_title || ''}
+                                onChange={(e) => setLocationFormData({ ...locationFormData, meta_title: e.target.value })}
+                                placeholder="SEO meta title..."
+                                className="font-inter"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="meta_description" className="font-inter">Meta Description</Label>
+                              <Textarea
+                                id="meta_description"
+                                value={locationFormData.meta_description || ''}
+                                onChange={(e) => setLocationFormData({ ...locationFormData, meta_description: e.target.value })}
+                                placeholder="SEO meta description..."
+                                rows={3}
+                                className="font-inter"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="hero_text" className="font-inter">Hero Text</Label>
+                              <Textarea
+                                id="hero_text"
+                                value={locationFormData.hero_text || ''}
+                                onChange={(e) => setLocationFormData({ ...locationFormData, hero_text: e.target.value })}
+                                placeholder="Hero section text..."
+                                rows={3}
+                                className="font-inter"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="faqs" className="font-inter">FAQs (JSON)</Label>
+                              <Textarea
+                                id="faqs"
+                                value={locationFormData.faqs || ''}
+                                onChange={(e) => {
+                                  setLocationFormData({ ...locationFormData, faqs: e.target.value });
+                                  // Validate JSON
+                                  try {
+                                    if (e.target.value) JSON.parse(e.target.value);
+                                  } catch {
+                                    // Invalid JSON
+                                  }
+                                }}
+                                placeholder='[{"question": "FAQ question?", "answer": "FAQ answer"}]'
+                                rows={6}
+                                className="font-inter font-mono text-sm"
+                              />
+                              <p className="text-xs text-gray-500 font-inter">Format: JSON array of {`{question, answer}`} objects</p>
+                            </div>
+
+                            <div className="flex justify-end gap-2 mt-4">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedLocation(null);
+                                  setLocationFormData({});
+                                }}
+                                className="font-inter"
+                              >
+                                Cancel
+                              </Button>
+                              <Button 
+                                type="submit"
+                                className="font-inter"
+                              >
+                                <Save className="w-4 h-4 mr-2" />
+                                Save Changes
+                              </Button>
+                            </div>
+                          </form>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-muted-foreground">Select a location to edit</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </TabsContent>
       </div>
     </div>
   );
 }
+
