@@ -17,9 +17,7 @@ export async function OPTIONS() {
 
 // Main route handler
 async function handleRoute(request, { params }) {
-  // Fix: Await params before using its properties
-  const resolvedParams = await params;
-  const { path = [] } = resolvedParams;
+  const { path = [] } = params;
   const route = `/${path.join('/')}`;
   const method = request.method;
   const url = new URL(request.url);

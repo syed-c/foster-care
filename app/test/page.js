@@ -1,16 +1,38 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 
 export default function TestPage() {
+  const { data: session, status } = useSession();
+  const [serverSession, setServerSession] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/session-test')
+      .then(res => res.json())
+      .then(data => setServerSession(data.session));
+  }, []);
+
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5E9E2] to-white flex items-center justify-center">
-      <div className="text-center p-8">
-        <h1 className="text-4xl font-bold text-[#2C2C2C] mb-4">Test Page</h1>
-        <p className="text-lg text-gray-600 mb-8">This is a test page to check if the app is working properly.</p>
-        <Button className="bg-gradient-to-r from-[#773344] to-[#E3B5A4]">
-          Test Button
-        </Button>
+    <div className="p-8">
+      <h1 className="text-2xl font-bold mb-4">Session Test</h1>
+      
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-2">Client Session:</h2>
+        <pre className="bg-gray-100 p-4 rounded">
+          {JSON.stringify(session, null, 2)}
+        </pre>
+      </div>
+      
+      <div>
+        <h2 className="text-xl font-semibold mb-2">Server Session:</h2>
+        <pre className="bg-gray-100 p-4 rounded">
+          {JSON.stringify(serverSession, null, 2)}
+        </pre>
       </div>
     </div>
   );

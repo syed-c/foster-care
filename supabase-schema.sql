@@ -301,6 +301,16 @@ CREATE POLICY "Agency owners can insert analytics" ON agency_analytics FOR INSER
   EXISTS (SELECT 1 FROM agencies WHERE agencies.id = agency_analytics.agency_id AND agencies.user_id = auth.uid())
 );
 
+-- Admin access: Service role can do anything
+CREATE POLICY "Admins can do anything" ON users FOR ALL USING ( EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role = 'admin') );
+CREATE POLICY "Admins can do anything" ON agencies FOR ALL USING ( EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role = 'admin') );
+CREATE POLICY "Admins can do anything" ON agency_services FOR ALL USING ( EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role = 'admin') );
+CREATE POLICY "Admins can do anything" ON agency_locations FOR ALL USING ( EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role = 'admin') );
+CREATE POLICY "Admins can do anything" ON reviews FOR ALL USING ( EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role = 'admin') );
+CREATE POLICY "Admins can do anything" ON saved_agencies FOR ALL USING ( EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role = 'admin') );
+CREATE POLICY "Admins can do anything" ON contact_inquiries FOR ALL USING ( EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role = 'admin') );
+CREATE POLICY "Admins can do anything" ON agency_analytics FOR ALL USING ( EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role = 'admin') );
+
 -- =====================================================
 -- FUNCTIONS for Agency Rating Updates
 -- =====================================================

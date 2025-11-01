@@ -4,34 +4,42 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { name, email, password, role } = body;
+    const { name, email, password, role } = await request.json();
 
-    // Validation
-    if (!name || !email || !password) {
+    // Validate required fields
+    if (!name || !email || !password || !role) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    if (password.length < 8) {
+    // Validate password length
+    if (password.length < 6) {
       return NextResponse.json(
-        { error: 'Password must be at least 8 characters' },
+        { error: 'Password must be at least 6 characters' },
         { status: 400 }
       );
     }
 
     // Check if user already exists
-    const { data: existingUser } = await supabaseAdmin
+    const { data: existingUser, error: existingUserError } = await supabaseAdmin
       .from('users')
-      .select('id')
+      .select()
       .eq('email', email)
       .single();
 
+    if (existingUserError && existingUserError.code !== 'PGRST116') {
+      console.error('Error checking existing user:', existingUserError);
+      return NextResponse.json(
+        { error: 'Database error while checking user' },
+        { status: 500 }
+      );
+    }
+
     if (existingUser) {
       return NextResponse.json(
-        { error: 'Email already registered' },
+        { error: 'User already exists' },
         { status: 400 }
       );
     }
@@ -40,39 +48,103 @@ export async function POST(request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
-    const { data: newUser, error: createError } = await supabaseAdmin
+    const { data: newUser, error: userError } = await supabaseAdmin
       .from('users')
       .insert({
         name,
         email,
         password: hashedPassword,
-        role: role || 'user',
+        role
       })
       .select()
       .single();
 
-    if (createError) {
-      console.error('Error creating user:', createError);
+    if (userError) {
+      console.error('Error creating user:', userError);
       return NextResponse.json(
-        { error: 'Failed to create account' },
+        { error: 'Failed to create user: ' + userError.message },
         { status: 500 }
       );
     }
 
     // If agency role, create agency profile
     if (role === 'agency') {
-      const { error: agencyError } = await supabaseAdmin
-        .from('agencies')
-        .insert({
-          user_id: newUser.id,
-          name: name,
-          contact_email: email,
-          subscription_plan: 'free',
-          subscription_status: 'active',
-        });
+      try {
+        // Generate a slug from the name
+        const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now().toString().slice(-4);
+        
+        // Create agency with only the absolutely required fields
+        const { data: agencyData, error: agencyError } = await supabaseAdmin
+          .from('agencies')
+          .insert({
+            user_id: newUser.id,
+            name: name,
+            slug: slug,
+            contact_email: email,
+            // Default values for required fields
+            type: 'Private',
+            featured: false,
+            verified: false,
+            recruiting: true,
+            rating: 0,
+            review_count: 0,
+            subscription_plan: 'free',
+            subscription_status: 'active'
+          })
+          .select()
+          .single();
 
-      if (agencyError) {
-        console.error('Error creating agency:', agencyError);
+        if (agencyError) {
+          console.error('Error creating agency:', agencyError);
+          console.error('Agency data being inserted:', {
+            user_id: newUser.id,
+            name: name,
+            slug: slug,
+            contact_email: email,
+            type: 'Private',
+            featured: false,
+            verified: false,
+            recruiting: true,
+            rating: 0,
+            review_count: 0,
+            subscription_plan: 'free',
+            subscription_status: 'active'
+          });
+          
+          // Delete the user if agency creation fails
+          const { error: deleteUserError } = await supabaseAdmin
+            .from('users')
+            .delete()
+            .eq('id', newUser.id);
+            
+          if (deleteUserError) {
+            console.error('Failed to cleanup user after agency creation failure:', deleteUserError);
+          }
+            
+          return NextResponse.json(
+            { error: 'Failed to create agency account: ' + agencyError.message },
+            { status: 500 }
+          );
+        }
+        
+        console.log('Successfully created agency:', agencyData);
+      } catch (agencyCreateError) {
+        console.error('Exception creating agency:', agencyCreateError);
+        
+        // Delete the user if agency creation fails
+        const { error: deleteUserError } = await supabaseAdmin
+          .from('users')
+          .delete()
+          .eq('id', newUser.id);
+          
+        if (deleteUserError) {
+          console.error('Failed to cleanup user after agency creation exception:', deleteUserError);
+        }
+          
+        return NextResponse.json(
+          { error: 'Failed to create account: ' + agencyCreateError.message },
+          { status: 500 }
+        );
       }
     }
 
@@ -81,9 +153,9 @@ export async function POST(request) {
         success: true,
         user: {
           id: newUser.id,
-          name: newUser.name,
-          email: newUser.email,
-          role: newUser.role,
+          name,
+          email,
+          role
         },
       },
       { status: 201 }
@@ -92,7 +164,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Signup error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'An unexpected error occurred: ' + error.message },
       { status: 500 }
     );
   }

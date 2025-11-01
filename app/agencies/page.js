@@ -26,7 +26,7 @@ export default function AgenciesPage() {
     fetchAgencies(searchParam || '');
   }, []);
 
-  const fetchAgencies = async (search = searchQuery) => {
+  const fetchAgencies = async (search) => {
     setLoading(true);
     try {
       let url = '/api/agencies?limit=50';
@@ -58,7 +58,7 @@ export default function AgenciesPage() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchAgencies();
+    fetchAgencies(searchQuery);
   };
 
   const handleFilterChange = (value, type) => {
@@ -67,7 +67,7 @@ export default function AgenciesPage() {
     } else if (type === 'sort') {
       setSortBy(value);
     }
-    setTimeout(() => fetchAgencies(), 100);
+    setTimeout(() => fetchAgencies(searchQuery), 100);
   };
 
   const renderStars = (rating) => {
@@ -84,69 +84,56 @@ export default function AgenciesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5E9E2] to-white">
+    <div className="min-h-screen bg-background-offwhite">
       {/* Header */}
-      <div className="relative py-12 md:py-16 overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 gradient-mesh opacity-30" />
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-[#773344]/10 rounded-full blur-3xl float-animation" />
-          <div className="absolute bottom-10 right-10 w-72 h-72 bg-[#E3B5A4]/10 rounded-full blur-3xl float-animation" style={{ animationDelay: '2s' }} />
-        </div>
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-              <Heart className="w-4 h-4 text-[#773344]" />
-              <span className="text-sm font-medium text-[#2C2C2C]">UK's Leading Fostering Directory</span>
-            </div>
-            <h1 className="text-3xl md:text-5xl font-bold text-[#2C2C2C] mb-4 font-poppins text-center gradient-text">
-              Browse Fostering Agencies
-            </h1>
-            <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
-              Discover trusted fostering agencies across the UK. Filter by location, type, and rating to find the perfect match.
-            </p>
-          </div>
+      <div className="bg-gradient-to-r from-background-offwhite to-secondary-blue/20 py-12 md:py-16">
+        <div className="container mx-auto px-4">
+          <h1 className="text-3xl md:text-5xl font-bold text-text-charcoal mb-4 font-poppins text-center">
+            Browse Fostering Agencies
+          </h1>
+          <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto font-inter">
+            Discover trusted fostering agencies across the UK. Filter by location, type, and rating to find the perfect match.
+          </p>
 
-          {/* Modern Search Bar */}
-          <div className="glass-strong rounded-3xl p-6 max-w-3xl mx-auto">
-            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="max-w-3xl mx-auto">
+            <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
                   type="text"
                   placeholder="Search by location, city, or postcode..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-12 text-base border-2 border-white/30 bg-white/50 backdrop-blur-sm focus:border-[#773344] rounded-2xl"
+                  className="pl-10 h-12 text-base border-2 focus:border-primary-green font-inter"
                 />
               </div>
               <Button 
                 type="submit"
                 size="lg"
-                className="h-12 px-8 btn-futuristic text-base font-semibold rounded-2xl"
+                className="h-12 px-8 bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 font-inter"
               >
-                Search Agencies
+                Search
               </Button>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-12">
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-8 items-center justify-between">
-          <div className="flex items-center gap-2 text-gray-600">
+          <div className="flex items-center gap-2 text-gray-600 font-inter">
             <Filter className="w-5 h-5" />
             <span className="font-medium">Filters:</span>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
             <Select value={typeFilter} onValueChange={(value) => handleFilterChange(value, 'type')}>
-              <SelectTrigger className="w-full sm:w-[200px] glass rounded-2xl">
+              <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Agency Type" />
               </SelectTrigger>
-              <SelectContent className="glass rounded-2xl border-0">
+              <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="Private">Private</SelectItem>
                 <SelectItem value="Charity">Charity</SelectItem>
@@ -155,10 +142,10 @@ export default function AgenciesPage() {
             </Select>
 
             <Select value={sortBy} onValueChange={(value) => handleFilterChange(value, 'sort')}>
-              <SelectTrigger className="w-full sm:w-[200px] glass rounded-2xl">
+              <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Sort By" />
               </SelectTrigger>
-              <SelectContent className="glass rounded-2xl border-0">
+              <SelectContent>
                 <SelectItem value="rating">Highest Rated</SelectItem>
                 <SelectItem value="reviews">Most Reviewed</SelectItem>
                 <SelectItem value="name">A-Z</SelectItem>
@@ -169,8 +156,8 @@ export default function AgenciesPage() {
 
         {/* Results Count */}
         <div className="mb-6">
-          <p className="text-gray-600">
-            Showing <span className="font-semibold text-[#2C2C2C]">{agencies.length}</span> agencies
+          <p className="text-gray-600 font-inter">
+            Showing <span className="font-semibold text-text-charcoal">{agencies.length}</span> agencies
           </p>
         </div>
 
@@ -178,63 +165,56 @@ export default function AgenciesPage() {
         {loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-80 bg-gray-200 rounded-3xl animate-pulse glass" />
+              <div key={i} className="h-80 bg-gray-200 rounded-modern animate-pulse" />
             ))}
           </div>
         ) : agencies.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {agencies.map((agency) => (
-              <Card key={agency.id} className="glass-strong rounded-3xl group hover-lift cursor-pointer">
+              <Card key={agency.id} className="glass-card group hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer rounded-modern">
                 <Link href={`/agency/${agency.id}`}>
                   <CardHeader>
                     <div className="flex items-start justify-between mb-4">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#773344]/20 to-[#E3B5A4]/20 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center">
                         {agency.logo ? (
                           <Image src={agency.logo} alt={agency.name} width={48} height={48} className="rounded" />
                         ) : (
-                          <Heart className="w-8 h-8 text-[#773344]" />
+                          <Heart className="w-8 h-8 text-primary-green" />
                         )}
                       </div>
                       {agency.featured && (
-                        <Badge className="bg-gradient-to-r from-[#773344] to-[#E3B5A4] text-white border-0">
-                          Featured
-                        </Badge>
+                        <Badge className="bg-accent-peach font-inter">Featured</Badge>
                       )}
                     </div>
-                    <CardTitle className="text-xl group-hover:text-[#773344] transition-colors">
+                    <CardTitle className="text-xl group-hover:text-primary-green transition-colors font-poppins">
                       {agency.name}
                     </CardTitle>
-                    <CardDescription className="flex items-center gap-1 mt-2">
+                    <CardDescription className="flex items-center gap-1 mt-2 font-inter">
                       <MapPin className="w-4 h-4" />
                       {agency.city || 'UK'}{agency.region && `, ${agency.region}`}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-gray-600 line-clamp-3 mb-4">
+                    <p className="text-sm text-gray-600 line-clamp-3 mb-4 font-inter">
                       {agency.description || 'Dedicated to providing exceptional foster care services.'}
                     </p>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-1">
                         {renderStars(agency.rating || 0)}
-                        <span className="text-sm text-gray-600 ml-2">
+                        <span className="text-sm text-gray-600 ml-2 font-inter">
                           ({agency.review_count || 0})
                         </span>
                       </div>
-                      <Badge variant="outline" className="glass border-2">
-                        {agency.type}
-                      </Badge>
+                      <Badge variant="outline" className="font-inter">{agency.type}</Badge>
                     </div>
                     {agency.recruiting && (
-                      <Badge className="bg-green-100 text-green-700 hover:bg-green-200 glass">
+                      <Badge className="bg-green-100 text-green-700 hover:bg-green-200 font-inter">
                         Currently Recruiting
                       </Badge>
                     )}
                   </CardContent>
                   <CardFooter>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full group-hover:bg-[#773344]/10 group-hover:text-[#773344] rounded-xl"
-                    >
+                    <Button variant="ghost" className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter">
                       View Profile <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
                   </CardFooter>
@@ -243,17 +223,14 @@ export default function AgenciesPage() {
             ))}
           </div>
         ) : (
-          <Card className="glass-strong rounded-3xl p-12 text-center">
+          <Card className="glass-card p-12 text-center rounded-modern">
             <CardContent>
-              <p className="text-lg text-gray-600 mb-4">No agencies found matching your criteria.</p>
-              <Button 
-                onClick={() => {
-                  setSearchQuery('');
-                  setTypeFilter('all');
-                  fetchAgencies('');
-                }}
-                className="btn-futuristic rounded-xl"
-              >
+              <p className="text-lg text-gray-600 mb-4 font-inter">No agencies found matching your criteria.</p>
+              <Button onClick={() => {
+                setSearchQuery('');
+                setTypeFilter('all');
+                fetchAgencies('');
+              }} className="font-inter">
                 Clear Filters
               </Button>
             </CardContent>

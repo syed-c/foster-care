@@ -38,8 +38,8 @@ export default function SignUpPage() {
       return;
     }
 
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
       setLoading(false);
       return;
     }
@@ -87,18 +87,11 @@ export default function SignUpPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5E9E2] to-white py-12 px-4">
-        {/* Animated Background */}
-        <div className="absolute inset-0 gradient-mesh opacity-30" />
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#773344]/10 rounded-full blur-3xl float-animation" />
-          <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-[#E3B5A4]/10 rounded-full blur-3xl float-animation" style={{ animationDelay: '2s' }} />
-        </div>
-        
-        <Card className="glass-strong rounded-3xl w-full max-w-md text-center p-8 relative z-10">
+      <div className="min-h-screen flex items-center justify-center bg-background-offwhite py-12 px-4">
+        <Card className="glass-card w-full max-w-md text-center p-8 rounded-modern">
           <CheckCircle2 className="w-20 h-20 text-green-600 mx-auto mb-4" />
-          <CardTitle className="text-2xl mb-2">Account Created!</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl mb-2 font-poppins">Account Created!</CardTitle>
+          <CardDescription className="font-inter">
             Redirecting you to your dashboard...
           </CardDescription>
         </Card>
@@ -107,22 +100,15 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5E9E2] to-white py-12 px-4">
-      {/* Animated Background */}
-      <div className="absolute inset-0 gradient-mesh opacity-30" />
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#773344]/10 rounded-full blur-3xl float-animation" />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-[#E3B5A4]/10 rounded-full blur-3xl float-animation" style={{ animationDelay: '2s' }} />
-      </div>
-
-      <Card className="glass-strong rounded-3xl w-full max-w-md relative z-10">
+    <div className="min-h-screen flex items-center justify-center bg-background-offwhite py-12 px-4">
+      <Card className="glass-card w-full max-w-md rounded-modern">
         <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto w-16 h-16 rounded-xl bg-gradient-to-br from-[#773344] to-[#E3B5A4] flex items-center justify-center glass">
-            <Heart className="w-8 h-8 text-white" fill="white" />
+          <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-primary-green to-secondary-blue flex items-center justify-center">
+            <Heart className="w-8 h-8 text-text-charcoal" fill="currentColor" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold gradient-text">Create Account</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold font-poppins">Create Account</CardTitle>
+            <CardDescription className="font-inter">
               Join Foster Care Directory UK today
             </CardDescription>
           </div>
@@ -130,15 +116,15 @@ export default function SignUpPage() {
 
         <CardContent className="space-y-4">
           {error && (
-            <Alert variant="destructive" className="glass rounded-2xl">
+            <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <span className="ml-2">{error}</span>
+              <span className="ml-2 font-inter">{error}</span>
             </Alert>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name" className="font-inter">Full Name</Label>
               <div className="relative mt-1">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
@@ -148,13 +134,13 @@ export default function SignUpPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="John Smith"
-                  className="pl-10 glass border-2 rounded-2xl"
+                  className="pl-10 font-inter"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email" className="font-inter">Email Address</Label>
               <div className="relative mt-1">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
@@ -164,18 +150,18 @@ export default function SignUpPage() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="your@email.com"
-                  className="pl-10 glass border-2 rounded-2xl"
+                  className="pl-10 font-inter"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="role">Account Type</Label>
+              <Label htmlFor="role" className="font-inter">Account Type</Label>
               <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                <SelectTrigger className="mt-1 glass border-2 rounded-2xl">
+                <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="glass rounded-2xl border-0">
+                <SelectContent>
                   <SelectItem value="user">Foster Carer / Parent</SelectItem>
                   <SelectItem value="agency">Fostering Agency</SelectItem>
                 </SelectContent>
@@ -183,7 +169,7 @@ export default function SignUpPage() {
             </div>
 
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="font-inter">Password</Label>
               <div className="relative mt-1">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
@@ -193,14 +179,14 @@ export default function SignUpPage() {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   placeholder="••••••••"
-                  className="pl-10 glass border-2 rounded-2xl"
+                  className="pl-10 font-inter"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">At least 8 characters</p>
+              <p className="text-xs text-gray-500 mt-1 font-inter">At least 6 characters</p>
             </div>
 
             <div>
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword" className="font-inter">Confirm Password</Label>
               <div className="relative mt-1">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
@@ -210,14 +196,14 @@ export default function SignUpPage() {
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   placeholder="••••••••"
-                  className="pl-10 glass border-2 rounded-2xl"
+                  className="pl-10 font-inter"
                 />
               </div>
             </div>
 
             <Button
               type="submit"
-              className="w-full btn-futuristic rounded-2xl"
+              className="w-full bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 font-inter"
               disabled={loading}
             >
               {loading ? 'Creating account...' : 'Create Account'}
@@ -226,17 +212,17 @@ export default function SignUpPage() {
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-200" />
+              <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white/80 glass px-2 text-gray-500 rounded-full">Or continue with</span>
+              <span className="bg-background-offwhite px-2 text-gray-500 font-inter">Or continue with</span>
             </div>
           </div>
 
           <Button
             type="button"
             variant="outline"
-            className="w-full glass border-2 rounded-2xl"
+            className="w-full font-inter"
             onClick={handleGoogleSignUp}
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -260,22 +246,22 @@ export default function SignUpPage() {
             Sign up with Google
           </Button>
 
-          <p className="text-xs text-gray-500 text-center">
+          <p className="text-xs text-gray-500 text-center font-inter">
             By creating an account, you agree to our{' '}
-            <Link href="/terms" className="text-[#773344] hover:underline">
+            <Link href="/terms" className="text-primary-green hover:underline">
               Terms of Service
             </Link>
             {' and '}
-            <Link href="/privacy" className="text-[#773344] hover:underline">
+            <Link href="/privacy" className="text-primary-green hover:underline">
               Privacy Policy
             </Link>
           </p>
         </CardContent>
 
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 font-inter">
             Already have an account?{' '}
-            <Link href="/auth/signin" className="text-[#773344] hover:underline font-medium">
+            <Link href="/auth/signin" className="text-primary-green hover:underline font-medium">
               Sign in
             </Link>
           </p>

@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,9 +24,8 @@ import {
   Globe
 } from 'lucide-react';
 
-function DashboardContent() {
-  const session = useSession();
-  const { data, status } = session || { data: null, status: 'loading' };
+export default function DashboardPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [agency, setAgency] = useState(null);
@@ -41,15 +40,15 @@ function DashboardContent() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin?callbackUrl=/dashboard');
-    } else if (status === 'authenticated' && data?.user) {
+    } else if (status === 'authenticated' && session?.user) {
       fetchDashboardData();
     }
-  }, [status, data, router]);
+  }, [status, session, router]);
 
   const fetchDashboardData = async () => {
     try {
       // Fetch agency data
-      const agencyResponse = await fetch(`/api/agencies?userId=${data?.user?.id}`);
+      const agencyResponse = await fetch(`/api/agencies?userId=${session.user.id}`);
       if (agencyResponse.ok) {
         const agencyData = await agencyResponse.json();
         if (agencyData.agencies && agencyData.agencies.length > 0) {
@@ -74,33 +73,33 @@ function DashboardContent() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5E9E2] to-white">
+      <div className="min-h-screen flex items-center justify-center bg-background-offwhite">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#773344] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading dashboard...</p>
+          <div className="w-16 h-16 border-4 border-primary-green border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 font-inter">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
-  if (!data) {
+  if (!session) {
     return null;
   }
 
   // User doesn't have an agency yet
-  if (!agency && data.user.role === 'agency') {
+  if (!agency && session.user.role === 'agency') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#F5E9E2] to-white py-12 px-4">
+      <div className="min-h-screen bg-background-offwhite py-12 px-4">
         <div className="container mx-auto max-w-4xl">
-          <Card className="p-8 text-center">
-            <Building2 className="w-20 h-20 text-[#773344] mx-auto mb-4" />
-            <CardTitle className="text-2xl mb-2">Welcome to Your Dashboard!</CardTitle>
-            <CardDescription className="mb-6">
+          <Card className="glass-card p-8 text-center rounded-modern">
+            <Building2 className="w-20 h-20 text-primary-green mx-auto mb-4" />
+            <CardTitle className="text-2xl mb-2 font-poppins">Welcome to Your Dashboard!</CardTitle>
+            <CardDescription className="mb-6 font-inter">
               Let's set up your agency profile to get started.
             </CardDescription>
             <Button 
               size="lg"
-              className="bg-gradient-to-r from-[#773344] to-[#E3B5A4]"
+              className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 font-inter"
               asChild
             >
               <Link href="/dashboard/profile/setup">Create Agency Profile</Link>
@@ -112,33 +111,33 @@ function DashboardContent() {
   }
 
   // Regular user dashboard (not an agency)
-  if (data.user.role !== 'agency') {
+  if (session.user.role !== 'agency') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#F5E9E2] to-white py-12 px-4">
+      <div className="min-h-screen bg-background-offwhite py-12 px-4">
         <div className="container mx-auto max-w-4xl">
-          <h1 className="text-3xl font-bold text-[#2C2C2C] mb-6">Welcome, {data.user.name}!</h1>
+          <h1 className="text-3xl font-bold text-text-charcoal mb-6 font-poppins">Welcome, {session.user.name}!</h1>
           
           <div className="grid md:grid-cols-2 gap-6">
-            <Card>
+            <Card className="glass-card rounded-modern">
               <CardHeader>
-                <CardTitle>Saved Agencies</CardTitle>
-                <CardDescription>Agencies you've favorited</CardDescription>
+                <CardTitle className="font-poppins">Saved Agencies</CardTitle>
+                <CardDescription className="font-inter">Agencies you've favorited</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">You haven't saved any agencies yet.</p>
-                <Button className="mt-4 bg-gradient-to-r from-[#773344] to-[#E3B5A4]" asChild>
+                <p className="text-gray-600 font-inter">You haven't saved any agencies yet.</p>
+                <Button className="mt-4 bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal font-inter" asChild>
                   <Link href="/agencies">Browse Agencies</Link>
                 </Button>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="glass-card rounded-modern">
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Your latest interactions</CardDescription>
+                <CardTitle className="font-poppins">Recent Activity</CardTitle>
+                <CardDescription className="font-inter">Your latest interactions</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">No recent activity.</p>
+                <p className="text-gray-600 font-inter">No recent activity.</p>
               </CardContent>
             </Card>
           </div>
@@ -147,34 +146,28 @@ function DashboardContent() {
     );
   }
 
+  // Agency Dashboard
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5E9E2] via-white to-[#F5E9E2]/30">
-      {/* Modern Hero Header */}
-      <section className="relative overflow-hidden pt-32 pb-12">
-        {/* Animated Background */}
-        <div className="absolute inset-0 gradient-mesh opacity-40" />
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-10 right-20 w-64 h-64 bg-[#773344]/10 rounded-full blur-3xl float-animation" />
-          <div className="absolute bottom-10 left-20 w-72 h-72 bg-[#E3B5A4]/10 rounded-full blur-3xl float-animation" style={{ animationDelay: '2s' }} />
-        </div>
-
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#773344] to-[#E3B5A4] flex items-center justify-center">
-              <Building2 className="w-6 h-6 text-white" />
+    <div className="min-h-screen bg-background-offwhite">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2 font-poppins">{agency?.name || 'Agency Dashboard'}</h1>
+              <p className="opacity-90 font-inter">Manage your agency profile and track performance</p>
             </div>
-            <Badge className="bg-gradient-to-r from-[#773344] to-[#E3B5A4] text-white border-0">
-              Agency Dashboard
-            </Badge>
+            <Button variant="outline" className="bg-white text-text-charcoal border-white hover:bg-gray-100 font-inter" asChild>
+              <Link href="/dashboard/profile">
+                <Settings className="w-4 h-4 mr-2" />
+                Edit Profile
+              </Link>
+            </Button>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-[#2C2C2C] mb-2 font-poppins">
-            {agency?.name || 'Agency Dashboard'}
-          </h1>
-          <p className="text-gray-600">Manage your agency profile and track performance</p>
         </div>
-      </section>
+      </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      <div className="container mx-auto px-4 py-8">
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
@@ -182,73 +175,73 @@ function DashboardContent() {
             title="Profile Views"
             value={stats.profileViews}
             subtitle="Last 30 days"
-            color="#773344"
+            color="primary-green"
           />
           <StatCard
             icon={Mail}
             title="Contact Clicks"
             value={stats.contactClicks}
             subtitle="Total inquiries"
-            color="#E3B5A4"
+            color="secondary-blue"
           />
           <StatCard
             icon={Star}
             title="Average Rating"
             value={agency?.rating?.toFixed(1) || '0.0'}
             subtitle={`${agency?.review_count || 0} reviews`}
-            color="#773344"
+            color="primary-green"
           />
           <StatCard
             icon={Users}
             title="Total Clicks"
             value={stats.emailClicks + stats.phoneClicks + stats.websiteClicks}
             subtitle="All interactions"
-            color="#E3B5A4"
+            color="accent-peach"
           />
         </div>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="glass rounded-2xl p-1.5">
-            <TabsTrigger value="overview" className="rounded-xl">Overview</TabsTrigger>
-            <TabsTrigger value="analytics" className="rounded-xl">Analytics</TabsTrigger>
-            <TabsTrigger value="reviews" className="rounded-xl">Reviews</TabsTrigger>
-            <TabsTrigger value="settings" className="rounded-xl">Settings</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto rounded-modern">
+            <TabsTrigger value="overview" className="rounded-modern">Overview</TabsTrigger>
+            <TabsTrigger value="analytics" className="rounded-modern">Analytics</TabsTrigger>
+            <TabsTrigger value="reviews" className="rounded-modern">Reviews</TabsTrigger>
+            <TabsTrigger value="settings" className="rounded-modern">Settings</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               {/* Agency Status */}
-              <Card className="glass-strong rounded-3xl">
+              <Card className="glass-card rounded-modern">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building2 className="w-5 h-5 text-[#773344]" />
+                  <CardTitle className="flex items-center gap-2 font-poppins">
+                    <Building2 className="w-5 h-5 text-primary-green" />
                     Agency Status
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Subscription Plan</span>
-                    <Badge className="bg-[#773344]">
+                    <span className="text-sm text-gray-600 font-inter">Subscription Plan</span>
+                    <Badge className="bg-primary-green font-inter">
                       {agency?.subscription_plan || 'Free'}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Status</span>
+                    <span className="text-sm text-gray-600 font-inter">Status</span>
                     <Badge className={agency?.verified ? 'bg-green-600' : 'bg-yellow-600'}>
                       {agency?.verified ? 'Verified' : 'Pending'}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Recruiting</span>
+                    <span className="text-sm text-gray-600 font-inter">Recruiting</span>
                     <Badge className={agency?.recruiting ? 'bg-green-600' : 'bg-gray-600'}>
                       {agency?.recruiting ? 'Active' : 'Inactive'}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Featured</span>
-                    <Badge className={agency?.featured ? 'bg-[#E3B5A4]' : 'bg-gray-400'}>
+                    <span className="text-sm text-gray-600 font-inter">Featured</span>
+                    <Badge className={agency?.featured ? 'bg-accent-peach' : 'bg-gray-400'}>
                       {agency?.featured ? 'Yes' : 'No'}
                     </Badge>
                   </div>
@@ -256,30 +249,30 @@ function DashboardContent() {
               </Card>
 
               {/* Quick Actions */}
-              <Card className="glass-strong rounded-3xl">
+              <Card className="glass-card rounded-modern">
                 <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
+                  <CardTitle className="font-poppins">Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start glass border-2 hover:bg-white/50 rounded-xl" asChild>
+                  <Button variant="outline" className="w-full justify-start font-inter" asChild>
                     <Link href="/dashboard/profile">
                       <Settings className="w-4 h-4 mr-2" />
                       Edit Profile
                     </Link>
                   </Button>
-                  <Button variant="outline" className="w-full justify-start glass border-2 hover:bg-white/50 rounded-xl" asChild>
+                  <Button variant="outline" className="w-full justify-start font-inter" asChild>
                     <Link href="/dashboard/locations">
                       <MapPin className="w-4 h-4 mr-2" />
                       Manage Locations
                     </Link>
                   </Button>
-                  <Button variant="outline" className="w-full justify-start glass border-2 hover:bg-white/50 rounded-xl" asChild>
+                  <Button variant="outline" className="w-full justify-start font-inter" asChild>
                     <Link href="/dashboard/reviews">
                       <MessageSquare className="w-4 h-4 mr-2" />
                       View Reviews
                     </Link>
                   </Button>
-                  <Button variant="outline" className="w-full justify-start glass border-2 hover:bg-white/50 rounded-xl" asChild>
+                  <Button variant="outline" className="w-full justify-start font-inter" asChild>
                     <Link href={`/agency/${agency?.id}`} target="_blank">
                       <Globe className="w-4 h-4 mr-2" />
                       View Public Profile
@@ -289,10 +282,10 @@ function DashboardContent() {
               </Card>
 
               {/* Recent Activity */}
-              <Card className="md:col-span-2 glass-strong rounded-3xl">
+              <Card className="glass-card md:col-span-2 rounded-modern">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-[#773344]" />
+                  <CardTitle className="flex items-center gap-2 font-poppins">
+                    <TrendingUp className="w-5 h-5 text-primary-green" />
                     Performance Overview
                   </CardTitle>
                 </CardHeader>
@@ -301,28 +294,28 @@ function DashboardContent() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Eye className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm">Profile Views</span>
+                        <span className="text-sm font-inter">Profile Views</span>
                       </div>
                       <span className="font-semibold">{stats.profileViews}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm">Email Clicks</span>
+                        <span className="text-sm font-inter">Email Clicks</span>
                       </div>
                       <span className="font-semibold">{stats.emailClicks}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Phone className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm">Phone Clicks</span>
+                        <span className="text-sm font-inter">Phone Clicks</span>
                       </div>
                       <span className="font-semibold">{stats.phoneClicks}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Globe className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm">Website Clicks</span>
+                        <span className="text-sm font-inter">Website Clicks</span>
                       </div>
                       <span className="font-semibold">{stats.websiteClicks}</span>
                     </div>
@@ -334,40 +327,38 @@ function DashboardContent() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            <Card className="glass-strong rounded-3xl">
+            <Card className="glass-card rounded-modern">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-[#773344]" />
+                <CardTitle className="flex items-center gap-2 font-poppins">
+                  <BarChart3 className="w-5 h-5 text-primary-green" />
                   Analytics Dashboard
                 </CardTitle>
-                <CardDescription>Detailed insights coming soon</CardDescription>
+                <CardDescription className="font-inter">Detailed insights coming soon</CardDescription>
               </CardHeader>
               <CardContent className="py-12 text-center text-gray-500">
-                <div className="w-20 h-20 rounded-2xl bg-[#773344]/10 flex items-center justify-center mx-auto mb-4">
-                  <BarChart3 className="w-10 h-10 text-[#773344]" />
-                </div>
-                <p>Advanced analytics and charts will be available soon.</p>
-                <p className="text-sm mt-2">Track views, clicks, and engagement over time.</p>
+                <BarChart3 className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <p className="font-inter">Advanced analytics and charts will be available soon.</p>
+                <p className="text-sm mt-2 font-inter">Track views, clicks, and engagement over time.</p>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Reviews Tab */}
           <TabsContent value="reviews">
-            <Card className="glass-strong rounded-3xl">
+            <Card className="glass-card rounded-modern">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-[#773344]" />
+                <CardTitle className="flex items-center gap-2 font-poppins">
+                  <MessageSquare className="w-5 h-5 text-primary-green" />
                   Customer Reviews
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="font-inter">
                   {agency?.review_count || 0} total reviews
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-500 text-center py-8">
+                <p className="text-gray-500 text-center py-8 font-inter">
                   Review management coming soon. You can view your public reviews on your{' '}
-                  <Link href={`/agency/${agency?.id}`} className="text-[#773344] hover:underline">
+                  <Link href={`/agency/${agency?.id}`} className="text-primary-green hover:underline">
                     public profile
                   </Link>
                   .
@@ -378,37 +369,37 @@ function DashboardContent() {
 
           {/* Settings Tab */}
           <TabsContent value="settings">
-            <Card className="glass-strong rounded-3xl">
+            <Card className="glass-card rounded-modern">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="w-5 h-5 text-[#773344]" />
+                <CardTitle className="flex items-center gap-2 font-poppins">
+                  <Settings className="w-5 h-5 text-primary-green" />
                   Account Settings
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="font-semibold mb-2">Profile Settings</h3>
-                  <div className="text-sm text-gray-600 mb-4">
+                  <h3 className="font-semibold mb-2 font-poppins">Profile Settings</h3>
+                  <p className="text-sm text-gray-600 mb-4 font-inter">
                     Manage your agency information, logo, and contact details.
-                  </div>
-                  <Button className="btn-futuristic rounded-xl" asChild>
+                  </p>
+                  <Button className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal font-inter" asChild>
                     <Link href="/dashboard/profile">Edit Profile</Link>
                   </Button>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold mb-2">Subscription</h3>
-                  <div className="text-sm text-gray-600 mb-4">
-                    Current plan: <Badge className="bg-[#773344] text-white">{agency?.subscription_plan || 'Free'}</Badge>
-                  </div>
-                  <Button variant="outline" className="glass border-2 hover:bg-white/50 rounded-xl" asChild>
+                  <h3 className="font-semibold mb-2 font-poppins">Subscription</h3>
+                  <p className="text-sm text-gray-600 mb-4 font-inter">
+                    Current plan: <Badge className="bg-primary-green font-inter">{agency?.subscription_plan || 'Free'}</Badge>
+                  </p>
+                  <Button variant="outline" className="font-inter" asChild>
                     <Link href="/dashboard/subscription">Upgrade Plan</Link>
                   </Button>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-2">Account Information</h3>
-                  <div className="space-y-2 text-sm glass rounded-2xl p-4">
+                  <h3 className="font-semibold mb-2 font-poppins">Account Information</h3>
+                  <div className="space-y-2 text-sm font-inter">
                     <p><strong>Email:</strong> {session.user.email}</p>
                     <p><strong>Name:</strong> {session.user.name}</p>
                     <p><strong>Role:</strong> {session.user.role}</p>
@@ -423,41 +414,22 @@ function DashboardContent() {
   );
 }
 
-function DashboardFallback() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5E9E2] to-white">
-      <div className="text-center">
-        <div className="w-16 h-16 border-4 border-[#773344] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-gray-600">Loading dashboard...</p>
-      </div>
-    </div>
-  );
-}
-
-export default function DashboardPage() {
-  return (
-    <Suspense fallback={<DashboardFallback />}>
-      <DashboardContent />
-    </Suspense>
-  );
-}
-
 function StatCard({ icon: Icon, title, value, subtitle, color }) {
   return (
-    <Card className="glass-strong rounded-2xl hover-lift">
+    <Card className="glass-card rounded-modern">
       <CardContent className="pt-6">
         <div className="flex items-center justify-between mb-4">
           <div 
-            className="w-12 h-12 rounded-xl flex items-center justify-center"
-            style={{ backgroundColor: `${color}20` }}
+            className="w-12 h-12 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: `var(--${color})/20` }}
           >
-            <Icon className="w-6 h-6" style={{ color }} />
+            <Icon className="w-6 h-6" style={{ color: `var(--${color})` }} />
           </div>
         </div>
         <div>
-          <p className="text-2xl font-bold text-[#2C2C2C] mb-1">{value}</p>
-          <p className="text-sm font-medium text-gray-900">{title}</p>
-          <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+          <p className="text-2xl font-bold text-text-charcoal">{value}</p>
+          <p className="text-sm font-medium text-gray-900 font-poppins">{title}</p>
+          <p className="text-xs text-gray-500 mt-1 font-inter">{subtitle}</p>
         </div>
       </CardContent>
     </Card>
