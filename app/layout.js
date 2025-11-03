@@ -1,4 +1,5 @@
 import { Inter, Poppins } from 'next/font/google';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css";
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
             {children}
           </main>
           <Footer />
+          <SpeedInsights/>
         </AuthSessionProvider>
       </body>
     </html>
