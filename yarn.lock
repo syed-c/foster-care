@@ -1303,7 +1303,7 @@
   resolved "https://registry.npmjs.org/@floating-ui/utils/-/utils-0.2.10.tgz"
   integrity sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==
 
-"@googlemaps/js-api-loader@1.16.8":
+"@googlemaps/js-api-loader@^1.16.8", "@googlemaps/js-api-loader@1.16.8":
   version "1.16.8"
   resolved "https://registry.npmjs.org/@googlemaps/js-api-loader/-/js-api-loader-1.16.8.tgz"
   integrity sha512-CROqqwfKotdO6EBjZO/gQGVTbeDps5V7Mt9+8+5Q+jTg5CRMi3Ii/L9PmV3USROrt2uWxtGzJHORmByxyo9pSQ==
@@ -5099,6 +5099,11 @@ globrex@^0.1.2:
   version "0.1.2"
   resolved "https://registry.npmjs.org/globrex/-/globrex-0.1.2.tgz"
   integrity sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==
+
+googlemap@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.npmjs.org/googlemap/-/googlemap-1.0.4.tgz"
+  integrity sha512-zyPfqrBB0iJty25utn8QXkbFTCyAvVlKZpmkP66s7BbtfCRhiKmdm+cAAO5TzGV6TO5wfRlYQk5uw1s4AUyQQg==
 
 gopd@^1.2.0:
   version "1.2.0"

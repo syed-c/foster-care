@@ -22,6 +22,7 @@ export default function Navigation() {
   const links = [
     { href: '/', label: 'Home' },
     { href: '/agencies', label: 'Browse Agencies' },
+    { href: '/foster-agency', label: 'Locations' },
     { href: '/resources', label: 'Resources' },
     { href: '/contact', label: 'Contact' },
   ];

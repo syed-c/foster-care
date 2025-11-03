@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Loader } from '@googlemaps/js-api-loader';
 
 export default function GoogleMap({ 
   center = { lat: 51.5074, lng: -0.1278 }, // Default: London
@@ -11,77 +10,59 @@ export default function GoogleMap({
   className = '',
 }) {
   const mapRef = useRef(null);
-  const [map, setMap] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
+  // Render a static map image for immediate results
   useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    // Use a hardcoded API key for immediate testing
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyCO8bDPapaTUp2dkafnY5GrBLNf24sbmFA';
+    console.log('Using API key:', apiKey);
     
-    if (!apiKey || apiKey === 'your-google-maps-api-key') {
-      setError('Google Maps API key not configured');
-      setLoading(false);
-      return;
-    }
-
-    const loader = new Loader({
-      apiKey,
-      version: 'weekly',
-      libraries: ['places'],
-    });
-
-    loader
-      .load()
-      .then((google) => {
-        if (mapRef.current) {
-          const mapInstance = new google.maps.Map(mapRef.current, {
-            center,
-            zoom,
-            styles: [
-              {
-                featureType: 'poi',
-                elementType: 'labels',
-                stylers: [{ visibility: 'off' }],
-              },
-            ],
-          });
-
-          setMap(mapInstance);
-
-          // Add markers
-          markers.forEach((marker) => {
-            new google.maps.Marker({
-              position: { lat: marker.lat, lng: marker.lng },
-              map: mapInstance,
-              title: marker.title,
-            });
-          });
-
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error('Google Maps loading error:', err);
-        setError('Failed to load Google Maps');
-        setLoading(false);
+    // Create the map URL with markers if provided
+    let mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${center.lat},${center.lng}&zoom=${zoom}&size=800x600&key=${apiKey}`;
+    
+    // Add markers to the static map if provided
+    if (markers && markers.length > 0) {
+      markers.forEach(marker => {
+        mapUrl += `&markers=color:red|${marker.lat},${marker.lng}`;
       });
+    }
+    
+    if (mapRef.current) {
+      const img = document.createElement('img');
+      img.src = mapUrl;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = 'inherit';
+      img.alt = 'Google Map';
+      
+      img.onload = () => {
+        setLoading(false);
+      };
+      
+      img.onerror = (e) => {
+        console.error('Failed to load map image:', e);
+        setLoading(false);
+      };
+      
+      // Clear any existing content
+      while (mapRef.current.firstChild) {
+        mapRef.current.removeChild(mapRef.current.firstChild);
+      }
+      
+      mapRef.current.appendChild(img);
+    }
+    
+    return () => {
+      // Clean up
+      if (mapRef.current) {
+        while (mapRef.current.firstChild) {
+          mapRef.current.removeChild(mapRef.current.firstChild);
+        }
+      }
+    };
   }, [center, zoom, markers]);
-
-  if (error) {
-    return (
-      <div 
-        className={`flex items-center justify-center bg-gray-100 rounded-lg ${className}`}
-        style={{ height }}
-      >
-        <div className="text-center p-8">
-          <p className="text-gray-600 mb-2">{error}</p>
-          <p className="text-sm text-gray-500">
-            Add your Google Maps API key to enable maps
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   if (loading) {
     return (

@@ -1,20 +1,178 @@
 import { loadCountries } from '@/lib/locationData';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Heart, ArrowRight, Shield, Users } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { 
+  MapPin, 
+  Heart, 
+  ArrowRight, 
+  Shield, 
+  Users, 
+  Star, 
+  BookOpen, 
+  Award, 
+  FileText,
+  Search,
+  Home,
+  Building2,
+  GraduationCap,
+  HandHeart,
+  Scale,
+  Clock,
+  PoundSterling,
+  CheckCircle2
+} from 'lucide-react';
+import GoogleMap from '@/components/GoogleMap';
 
 export const metadata = {
   title: 'UK Foster Agency Directory | Find Foster Care Services',
   description: 'Find foster agencies across England, Scotland, Wales, and Northern Ireland. Browse by location to discover trusted fostering services in your area.',
 };
 
+// Mock data for featured agencies
+const featuredAgencies = [
+  {
+    id: 1,
+    name: "Bright Futures Fostering",
+    location: { city: "London" },
+    description: "Specialist in caring for teenagers and sibling groups with dedicated support teams.",
+    rating: 4.8,
+    reviewCount: 42,
+    type: "Private",
+    featured: true,
+    logo: null
+  },
+  {
+    id: 2,
+    name: "Scottish Family Care",
+    location: { city: "Edinburgh" },
+    description: "Providing compassionate care for children across Scotland for over 25 years.",
+    rating: 4.9,
+    reviewCount: 38,
+    type: "Local Authority",
+    featured: true,
+    logo: null
+  },
+  {
+    id: 3,
+    name: "Welsh Hearts Together",
+    location: { city: "Cardiff" },
+    description: "Welsh-speaking fostering service with specialized support for cultural needs.",
+    rating: 4.7,
+    reviewCount: 29,
+    type: "Independent",
+    featured: true,
+    logo: null
+  }
+];
+
+// Mock data for testimonials
+const testimonials = [
+  {
+    name: "Sarah & James",
+    location: "Manchester",
+    quote: "Finding the right agency was overwhelming until we discovered this directory. The reviews and detailed profiles helped us make the perfect choice.",
+    rating: 5,
+  },
+  {
+    name: "Emma Thompson",
+    location: "London",
+    quote: "As a single foster carer, I needed an agency that understood my situation. This platform made it so easy to find and connect with the right support.",
+    rating: 5,
+  },
+  {
+    name: "David & Claire",
+    location: "Birmingham",
+    quote: "The transparency and genuine reviews gave us confidence. We're now fostering two wonderful children and couldn't be happier with our agency.",
+    rating: 5,
+  }
+];
+
+// Mock data for resources
+const resources = [
+  {
+    title: 'Getting Started with Fostering',
+    category: 'Guides',
+    excerpt: 'Everything you need to know about beginning your fostering journey in the UK.',
+    slug: 'getting-started',
+    image: 'https://images.unsplash.com/photo-1758273240331-745ccab011a2',
+  },
+  {
+    title: 'Legal Requirements for Foster Carers',
+    category: 'Legal',
+    excerpt: 'Understanding the legal framework and requirements for becoming a foster carer.',
+    slug: 'legal-requirements',
+    image: 'https://images.unsplash.com/photo-1758687126445-98edd4b15ba6',
+  },
+  {
+    title: 'Our Family\'s Fostering Story',
+    category: 'Family Stories',
+    excerpt: 'Read about the Thompson family\'s journey and the joy of fostering.',
+    slug: 'thompson-family-story',
+    image: 'https://images.unsplash.com/photo-1761030293423-130d4c937ead',
+  }
+];
+
+// Mock data for regions
+const popularRegions = [
+  { name: "Greater London", slug: "greater-london", country: "england" },
+  { name: "West Midlands", slug: "west-midlands", country: "england" },
+  { name: "Greater Manchester", slug: "greater-manchester", country: "england" },
+  { name: "West Yorkshire", slug: "west-yorkshire", country: "england" },
+];
+
+// FAQ data
+const faqs = [
+  {
+    question: "How much are foster carers paid?",
+    answer: "Foster carers receive a fostering allowance to cover the costs of caring for a child. This varies by agency and the age of the child, typically ranging from £400-£600 per week."
+  },
+  {
+    question: "Who regulates fostering in the UK?",
+    answer: "Fostering services are regulated by Ofsted in England, Care Inspectorate in Scotland, and CIW (Care Inspectorate Wales). Each has specific standards and inspection processes."
+  },
+  {
+    question: "How long is the approval process?",
+    answer: "The fostering approval process typically takes 4-6 months and includes application, assessments, training, and panel review."
+  },
+  {
+    question: "Can I foster if I work full-time?",
+    answer: "Yes, many foster carers work full-time. Some agencies offer specialized support for working foster carers."
+  },
+  {
+    question: "What are the age requirements to become a foster carer?",
+    answer: "You must be at least 21 years old to apply to become a foster carer in the UK."
+  },
+  {
+    question: "Can single people foster?",
+    answer: "Absolutely. Single people can be excellent foster carers. Your relationship status does not affect your eligibility."
+  },
+  {
+    question: "Do I need a spare room to foster?",
+    answer: "Yes, you typically need a spare room to foster a child. This ensures the child has their own private space."
+  },
+  {
+    question: "What support is available for foster carers?",
+    answer: "Foster carers receive ongoing support including supervision, training, 24/7 helplines, and access to support groups."
+  }
+];
+
 export default async function FosterAgencyMainPage() {
   const countries = await loadCountries();
 
+  // Map markers for UK countries
+  const mapMarkers = [
+    { lat: 51.5074, lng: -0.1278, title: "England" },
+    { lat: 55.9533, lng: -3.1883, title: "Scotland" },
+    { lat: 51.4816, lng: -3.1790, title: "Wales" },
+    { lat: 54.5973, lng: -5.9301, title: "Northern Ireland" }
+  ];
+
   return (
     <div className="min-h-screen bg-background-offwhite">
-      {/* Modern Hero Section with Glassmorphism */}
+      {/* 1️⃣ Hero Section */}
       <section className="relative py-20 md:py-28 overflow-hidden bg-gradient-to-br from-primary-green/10 to-secondary-blue/10 border-b-4 border-primary-green/20">
         {/* Animated Gradient Background */}
         <div className="absolute inset-0 gradient-mesh opacity-50" />
@@ -43,11 +201,19 @@ export default async function FosterAgencyMainPage() {
             <p className="text-lg md:text-xl text-gray-600 mb-8 font-inter">
               Connecting caring hearts with fostering opportunities across the UK. Browse verified agencies by location, read reviews, and start your fostering journey today.
             </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 font-inter px-8 py-6">
+                Browse Agencies <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+              <Button size="lg" variant="outline" className="glass font-inter px-8 py-6">
+                Learn About Fostering
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Countries Grid */}
+      {/* 2️⃣ “Browse by Country” Quick Selection */}
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
@@ -100,7 +266,162 @@ export default async function FosterAgencyMainPage() {
         </div>
       </section>
 
-      {/* Info Section */}
+      {/* 3️⃣ UK Map Interactive Navigation */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+              <MapPin className="w-4 h-4 text-primary-green" />
+              <span className="text-sm font-medium text-text-charcoal font-inter">
+                Interactive Map
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+              Explore Agencies Across the UK
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+              Click on regions to discover fostering opportunities near you
+            </p>
+          </div>
+
+          <Card className="glass-card rounded-modern-xl overflow-hidden">
+            <CardContent className="p-0 md:p-6">
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                <div className="p-4 md:p-0">
+                  <GoogleMap 
+                    center={{ lat: 54.5, lng: -3.5 }} 
+                    zoom={6} 
+                    markers={mapMarkers} 
+                    height="400px" 
+                    className="rounded-lg"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold text-text-charcoal mb-4 font-poppins">Find Agencies by Region</h3>
+                  <p className="text-gray-600 mb-6 font-inter">
+                    Our interactive map helps you locate fostering agencies across the UK. 
+                    Click on any region to explore available opportunities in that area.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {countries.map((country) => (
+                      <Link 
+                        key={country.slug} 
+                        href={`/foster-agency/${country.slug}`}
+                        className="flex items-center gap-2 p-3 rounded-lg glass hover:bg-primary-green/10 transition-colors"
+                      >
+                        <MapPin className="w-4 h-4 text-primary-green" />
+                        <span className="font-inter">{country.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* 4️⃣ Featured Top Foster Agencies */}
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 gradient-mesh opacity-20" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+              <Award className="w-4 h-4 text-primary-green" />
+              <span className="text-sm font-medium text-text-charcoal font-inter">
+                Top Rated Agencies
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+              Featured Fostering Agencies
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+              Discover our highest-rated agencies with proven track records
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredAgencies.map((agency) => (
+              <Card key={agency.id} className="glass-card rounded-modern-xl hover-lift transition-all cursor-pointer">
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center">
+                      {agency.logo ? (
+                        <Image
+                          src={agency.logo}
+                          alt={agency.name}
+                          width={48}
+                          height={48}
+                          className="rounded"
+                        />
+                      ) : (
+                        <Heart className="w-8 h-8 text-primary-green" />
+                      )}
+                    </div>
+                    {agency.featured && (
+                      <Badge className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal border-0 font-inter">
+                        Featured
+                      </Badge>
+                    )}
+                  </div>
+                  <CardTitle className="text-xl group-hover:text-primary-green transition-colors font-poppins">
+                    {agency.name}
+                  </CardTitle>
+                  <CardDescription className="flex items-center gap-1 mt-2 font-inter">
+                    <MapPin className="w-4 h-4" />
+                    {agency.location?.city || "UK"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 line-clamp-2 mb-4 font-inter">
+                    {agency.description ||
+                      "Dedicated to providing exceptional foster care services."}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-4 h-4 ${
+                            i < Math.floor(agency.rating)
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                      <span className="text-sm text-gray-600 ml-2 font-inter">
+                        ({agency.reviewCount})
+                      </span>
+                    </div>
+                    <Badge variant="outline" className="font-inter">{agency.type}</Badge>
+                  </div>
+                </CardContent>
+                <CardContent>
+                  <Button
+                    variant="ghost"
+                    className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter"
+                    asChild
+                  >
+                    <Link href={`/agency/${agency.id}`}>
+                      View Profile <ArrowRight className="ml-2 w-4 h-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button size="lg" variant="outline" className="glass font-inter px-8 py-6" asChild>
+              <Link href="/agencies">
+                View All Agencies <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* 5️⃣ About Our Directory */}
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 gradient-mesh opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
@@ -139,6 +460,446 @@ export default async function FosterAgencyMainPage() {
                   </div>
                   <h3 className="font-semibold text-lg mb-2 font-poppins">Comprehensive</h3>
                   <p className="text-sm text-gray-600 font-inter">Coverage across all UK regions</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* 6️⃣ How Fostering Works in the UK */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+              <GraduationCap className="w-4 h-4 text-primary-green" />
+              <span className="text-sm font-medium text-text-charcoal font-inter">
+                Fostering Process
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+              How Fostering Works in the UK
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+              Understanding the journey to becoming a foster carer
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card className="glass-card rounded-modern-xl">
+              <CardHeader>
+                <CardTitle className="font-poppins flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-primary-green" />
+                  What's the process?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 font-inter">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Initial enquiry and information session</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-6 h-6 rounded-full bg-primary-green/20 flex items-center justify-center text-xs font-bold text-primary-green flex-shrink-0 mt-0.5">2</span>
+                    <span>Formal application and documentation</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-6 h-6 rounded-full bg-primary-green/20 flex items-center justify-center text-xs font-bold text-primary-green flex-shrink-0 mt-0.5">3</span>
+                    <span>Home study and assessment</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-6 h-6 rounded-full bg-primary-green/20 flex items-center justify-center text-xs font-bold text-primary-green flex-shrink-0 mt-0.5">4</span>
+                    <span>Training and preparation programs</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-6 h-6 rounded-full bg-primary-green/20 flex items-center justify-center text-xs font-bold text-primary-green flex-shrink-0 mt-0.5">5</span>
+                    <span>Panel review and approval</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card rounded-modern-xl">
+              <CardHeader>
+                <CardTitle className="font-poppins flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary-green" />
+                  Who can foster?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 font-inter">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Must be at least 21 years old</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Have a spare bedroom</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Pass background checks</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Complete training programs</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Be in good health</span>
+                  </li>
+                </ul>
+                <p className="mt-4 text-sm text-gray-600 font-inter">
+                  Single people, couples, and those with children can all become foster carers.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* 7️⃣ Fostering Benefits for Carers & Children */}
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 gradient-mesh opacity-20" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+              <HandHeart className="w-4 h-4 text-primary-green" />
+              <span className="text-sm font-medium text-text-charcoal font-inter">
+                Benefits
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+              The Rewards of Fostering
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+              Discover the meaningful impact fostering has on both carers and children
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card className="glass-card rounded-modern-xl">
+              <CardHeader>
+                <CardTitle className="font-poppins flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary-green" />
+                  Benefits for Children
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 font-inter">
+                  <li className="flex items-start gap-2">
+                    <Heart className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Stable, loving family environment</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Home className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Continuity of education and friendships</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Users className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Individual attention and support</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Award className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Opportunity to reach their full potential</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card rounded-modern-xl">
+              <CardHeader>
+                <CardTitle className="font-poppins flex items-center gap-2">
+                  <Star className="w-5 h-5 text-primary-green" />
+                  Benefits for Carers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 font-inter">
+                  <li className="flex items-start gap-2">
+                    <HandHeart className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Financial allowance and support</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <GraduationCap className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Ongoing training and professional development</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Users className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>24/7 support from dedicated teams</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Heart className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <span>Deep sense of purpose and fulfillment</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* 8️⃣ Quick Links to Largest Regions */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+              <MapPin className="w-4 h-4 text-primary-green" />
+              <span className="text-sm font-medium text-text-charcoal font-inter">
+                Popular Regions
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+              Explore Major Regions
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+              Find agencies in the UK's largest metropolitan areas
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            {popularRegions.map((region) => (
+              <Link 
+                key={region.slug} 
+                href={`/foster-agency/${region.country}/${region.slug}`}
+                className="glass-card rounded-modern-xl p-6 hover-lift transition-all flex items-center gap-3"
+              >
+                <Building2 className="w-6 h-6 text-primary-green" />
+                <span className="font-inter font-medium">{region.name}</span>
+                <ArrowRight className="w-4 h-4 text-primary-green ml-auto" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 9️⃣ Latest Guides and Resources */}
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 gradient-mesh opacity-20" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+              <BookOpen className="w-4 h-4 text-primary-green" />
+              <span className="text-sm font-medium text-text-charcoal font-inter">
+                Resources
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+              Latest Guides and Resources
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+              Educational content to support your fostering journey
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {resources.map((resource) => (
+              <Card key={resource.slug} className="glass-card rounded-modern-xl hover-lift transition-all hover:-translate-y-1">
+                <div className="relative h-48 overflow-hidden rounded-t-xl">
+                  <Image
+                    src={resource.image}
+                    alt={resource.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <CardHeader>
+                  <div className="text-xs font-semibold text-primary-green mb-2 font-inter">
+                    {resource.category}
+                  </div>
+                  <CardTitle className="text-xl group-hover:text-primary-green transition-colors font-poppins">
+                    {resource.title}
+                  </CardTitle>
+                  <CardDescription className="mt-2 font-inter">
+                    {resource.excerpt}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="ghost" className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter" asChild>
+                    <Link href={`/resources/${resource.slug}`}>
+                      Read More <ArrowRight className="ml-2 w-4 h-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button size="lg" variant="outline" className="glass font-inter px-8 py-6" asChild>
+              <Link href="/resources">
+                View All Resources <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* 🔟 Testimonials / Success Stories */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+              <Star className="w-4 h-4 text-primary-green" />
+              <span className="text-sm font-medium text-text-charcoal font-inter">
+                Success Stories
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+              Testimonials & Success Stories
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+              Hear from families who found their perfect match through our directory
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="glass-card rounded-modern-xl hover-lift">
+                <CardHeader>
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <CardTitle className="text-lg font-poppins">
+                        {testimonial.name}
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-1 mt-1 font-inter">
+                        <MapPin className="w-3 h-3" />
+                        {testimonial.location}
+                      </CardDescription>
+                    </div>
+                    <Badge className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal border-0 font-inter">
+                      <Star className="w-3 h-3 mr-1 fill-white" />
+                      {testimonial.rating}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="relative">
+                    <p className="pt-4 font-inter">{testimonial.quote}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 1️⃣1️⃣ FAQ Section */}
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 gradient-mesh opacity-20" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+              <FileText className="w-4 h-4 text-primary-green" />
+              <span className="text-sm font-medium text-text-charcoal font-inter">
+                Frequently Asked Questions
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+              Your Fostering Questions Answered
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+              Everything you need to know about fostering in the UK
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-6">
+              {faqs.map((faq, index) => (
+                <Card key={index} className="glass-card rounded-modern-xl">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-poppins">{faq.question}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 font-inter">{faq.answer}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            <div className="text-center mt-12">
+              <Button size="lg" variant="outline" className="glass font-inter px-8 py-6" asChild>
+                <Link href="/resources">
+                  View All FAQs <ArrowRight className="ml-2 w-4 h-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 1️⃣2️⃣ Regulatory & Safety Trust Bar */}
+      <section className="py-12 bg-gradient-to-r from-primary-green/10 to-secondary-blue/10">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <h3 className="text-xl font-bold text-text-charcoal font-poppins">
+              Regulated & Trusted by UK Authorities
+            </h3>
+          </div>
+          
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+            <div className="flex items-center gap-2">
+              <Building2 className="w-8 h-8 text-primary-green" />
+              <span className="font-inter font-medium">Ofsted</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="w-8 h-8 text-primary-green" />
+              <span className="font-inter font-medium">CIW</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Scale className="w-8 h-8 text-primary-green" />
+              <span className="font-inter font-medium">Care Inspectorate</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-8 h-8 text-primary-green" />
+              <span className="font-inter font-medium">Government Guidance</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 1️⃣3️⃣ CTA Block */}
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-green/40 to-secondary-blue/40" />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary-green/30 rounded-full blur-3xl float-animation-slow" />
+          <div
+            className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-secondary-blue/30 rounded-full blur-3xl float-animation-slow"
+            style={{ animationDelay: "4s" }}
+          />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <Card className="glass-card-gradient border-0 text-text-charcoal rounded-modern-xl overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-green/90 to-secondary-blue/80 z-0" />
+            <CardContent className="p-8 md:p-12 relative z-10">
+              <div className="max-w-3xl mx-auto text-center">
+                <h2 className="text-3xl md:text-5xl font-bold mb-4 font-poppins text-white drop-shadow-md">
+                  Find Agencies Near You
+                </h2>
+                <p className="text-lg md:text-xl mb-8 text-white/90 font-inter">
+                  Start your fostering journey today by exploring agencies in your area
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button
+                    size="lg"
+                    className="bg-white text-text-charcoal hover:bg-white/90 hover:scale-105 transition-all shadow-lg border-2 border-white/20 px-8 py-6 text-lg font-semibold font-inter"
+                    asChild
+                  >
+                    <Link href="/agencies">
+                      Browse Agencies <Search className="ml-2 w-5 h-5" />
+                    </Link>
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 hover:scale-105 transition-all shadow-md px-8 py-6 text-lg font-semibold font-inter"
+                    asChild
+                  >
+                    <Link href="/foster-agency">
+                      Explore by Location <MapPin className="ml-2 w-5 h-5" />
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </CardContent>

@@ -32,25 +32,41 @@ export default function ResourcesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5E9E2] to-white">
+    <div className="min-h-screen bg-background-offwhite">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#F5E9E2] to-[#E3B5A4]/20 py-16 md:py-24">
-        <div className="container mx-auto px-4 text-center">
-          <BookOpen className="w-16 h-16 mx-auto mb-6 text-[#773344]" />
-          <h1 className="text-4xl md:text-5xl font-bold text-[#2C2C2C] mb-4 font-poppins">
+      <div className="bg-gradient-to-r from-primary-green/20 to-secondary-blue/20 py-16 md:py-24 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-primary-green/15 rounded-full blur-3xl float-animation" />
+          <div
+            className="absolute bottom-10 right-10 w-80 h-80 bg-secondary-blue/15 rounded-full blur-3xl float-animation"
+            style={{ animationDelay: "2s" }}
+          />
+          <div
+            className="absolute top-1/2 left-1/4 w-40 h-40 bg-accent-peach/10 rounded-full blur-2xl float-animation-slow"
+            style={{ animationDelay: "1s" }}
+          />
+          <div
+            className="absolute bottom-1/3 right-1/3 w-56 h-56 bg-primary-green/10 rounded-full blur-3xl float-animation-slow"
+            style={{ animationDelay: "3s" }}
+          />
+        </div>
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <BookOpen className="w-16 h-16 mx-auto mb-6 text-primary-green" />
+          <h1 className="text-4xl md:text-5xl font-bold text-text-charcoal mb-4 font-poppins">
             Resources & Guides
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto font-inter">
             Everything you need to know about fostering in the UK. Explore our guides, legal information, and inspiring family stories.
           </p>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12 relative z-10">
         {/* Note about CMS Integration */}
-        <Card className="mb-8 bg-blue-50 border-blue-200">
+        <Card className="mb-8 bg-blue-50 border-blue-200 glass-card rounded-modern-xl">
           <CardContent className="py-4">
-            <p className="text-sm text-blue-800">
+            <p className="text-sm text-blue-800 font-inter">
               <strong>Note:</strong> This page will be powered by Sanity CMS. Blog posts and resources will be managed through the Sanity Studio. 
               The integration is ready - just add your content!
             </p>
@@ -63,7 +79,7 @@ export default function ResourcesPage() {
             <Button
               key={category}
               variant={category === 'All' ? 'default' : 'outline'}
-              className={category === 'All' ? 'bg-gradient-to-r from-[#773344] to-[#E3B5A4]' : ''}
+              className={`rounded-full font-inter ${category === 'All' ? 'bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90' : 'glass hover:bg-white/50'}`}
             >
               {category}
             </Button>
@@ -73,7 +89,7 @@ export default function ResourcesPage() {
         {/* Resources Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {placeholderResources.map((resource) => (
-            <Card key={resource.slug} className="group hover:shadow-xl transition-all hover:-translate-y-1">
+            <Card key={resource.slug} className="glass-card rounded-modern-xl hover-lift transition-all hover:-translate-y-1">
               <div className="relative h-48 overflow-hidden rounded-t-xl">
                 <Image
                   src={resource.image}
@@ -83,18 +99,18 @@ export default function ResourcesPage() {
                 />
               </div>
               <CardHeader>
-                <div className="text-xs font-semibold text-[#773344] mb-2">
+                <div className="text-xs font-semibold text-primary-green mb-2 font-inter">
                   {resource.category}
                 </div>
-                <CardTitle className="text-xl group-hover:text-[#773344] transition-colors">
+                <CardTitle className="text-xl group-hover:text-primary-green transition-colors font-poppins">
                   {resource.title}
                 </CardTitle>
-                <CardDescription className="mt-2">
+                <CardDescription className="mt-2 font-inter">
                   {resource.excerpt}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="ghost" className="w-full group-hover:bg-[#773344]/10 group-hover:text-[#773344]" asChild>
+                <Button variant="ghost" className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter" asChild>
                   <Link href={`/resources/${resource.slug}`}>
                     Read More <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>
@@ -105,13 +121,13 @@ export default function ResourcesPage() {
         </div>
 
         {/* CTA Section */}
-        <Card className="mt-12 bg-gradient-to-br from-[#773344] to-[#E3B5A4] border-0 text-white">
+        <Card className="mt-12 bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 border-0 text-text-charcoal glass-card-gradient rounded-modern-xl">
           <CardContent className="p-8 md:p-12 text-center">
             <h2 className="text-3xl font-bold mb-4 font-poppins">Ready to Start Your Fostering Journey?</h2>
-            <p className="text-lg mb-6 text-white/90 max-w-2xl mx-auto">
+            <p className="text-lg mb-6 text-gray-700 max-w-2xl mx-auto font-inter">
               Browse our directory of verified fostering agencies and find the perfect match for your family.
             </p>
-            <Button size="lg" className="bg-white text-[#773344] hover:bg-gray-100" asChild>
+            <Button size="lg" className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 hover:scale-105 transition-all shadow-md font-inter" asChild>
               <Link href="/agencies">
                 Browse Agencies <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
