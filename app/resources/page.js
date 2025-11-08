@@ -34,7 +34,7 @@ export default function ResourcesPage() {
   return (
     <div className="min-h-screen bg-background-offwhite">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary-green/20 to-secondary-blue/20 py-16 md:py-24 relative overflow-hidden">
+      <div className="section-hero py-16 md:py-24 relative overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-10 left-10 w-72 h-72 bg-primary-green/15 rounded-full blur-3xl float-animation" />
@@ -64,7 +64,7 @@ export default function ResourcesPage() {
 
       <div className="container mx-auto px-4 py-12 relative z-10">
         {/* Note about CMS Integration */}
-        <Card className="mb-8 bg-blue-50 border-blue-200 glass-card rounded-modern-xl">
+        <Card className="mb-8 bg-blue-50 border-blue-200 section-card">
           <CardContent className="py-4">
             <p className="text-sm text-blue-800 font-inter">
               <strong>Note:</strong> This page will be powered by Sanity CMS. Blog posts and resources will be managed through the Sanity Studio. 
@@ -89,7 +89,7 @@ export default function ResourcesPage() {
         {/* Resources Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {placeholderResources.map((resource) => (
-            <Card key={resource.slug} className="glass-card rounded-modern-xl hover-lift transition-all hover:-translate-y-1">
+            <Card key={resource.slug} className="section-card hover-lift transition-all hover:-translate-y-1">
               <div className="relative h-48 overflow-hidden rounded-t-xl">
                 <Image
                   src={resource.image}
@@ -121,7 +121,7 @@ export default function ResourcesPage() {
         </div>
 
         {/* CTA Section */}
-        <Card className="mt-12 bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 border-0 text-text-charcoal glass-card-gradient rounded-modern-xl">
+        <Card className="mt-12 section-card-contrast border-0 text-text-charcoal">
           <CardContent className="p-8 md:p-12 text-center">
             <h2 className="text-3xl font-bold mb-4 font-poppins">Ready to Start Your Fostering Journey?</h2>
             <p className="text-lg mb-6 text-gray-700 max-w-2xl mx-auto font-inter">

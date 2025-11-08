@@ -77,8 +77,7 @@ const PLANS = {
 };
 
 function SubscriptionContent() {
-  const session = useSession();
-  const { data, status } = session || { data: null, status: 'loading' };
+  const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -90,7 +89,7 @@ function SubscriptionContent() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin?callbackUrl=/dashboard/subscription');
-    } else if (status === 'authenticated') {
+    } else if (status === 'authenticated' && session?.user) {
       fetchAgency();
     }
 
@@ -103,10 +102,16 @@ function SubscriptionContent() {
       setShowError(true);
       setTimeout(() => setShowError(false), 5000);
     }
-  }, [status, searchParams, router]);
+  }, [status, session, searchParams, router]);
 
   const fetchAgency = async () => {
     try {
+      // Check if user data exists
+      if (!session?.user?.id) {
+        console.error('User data not available');
+        return;
+      }
+      
       const response = await fetch(`/api/agencies?userId=${session.user.id}`);
       if (response.ok) {
         const data = await response.json();

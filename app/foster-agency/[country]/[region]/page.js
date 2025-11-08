@@ -185,7 +185,7 @@ export default async function RegionPage({ params }) {
       </div>
 
       {/* Hero Section */}
-      <section className="relative py-16 md:py-24 overflow-hidden bg-gradient-to-br from-primary-green/10 to-secondary-blue/10">
+      <section className="relative py-16 md:py-24 overflow-hidden section-hero">
         <div className="absolute inset-0 gradient-mesh opacity-50" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-10 left-10 w-72 h-72 bg-primary-green/15 rounded-full blur-3xl float-animation" />
@@ -226,7 +226,7 @@ export default async function RegionPage({ params }) {
       </section>
 
       {/* About Fostering in Region */}
-      <section className="py-16 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 section-alt">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -239,7 +239,7 @@ export default async function RegionPage({ params }) {
               </h2>
             </div>
             
-            <Card className="glass-card rounded-modern-xl p-6 md:p-8">
+            <Card className="section-card rounded-modern-xl p-6 md:p-8">
               <div className="prose max-w-none text-gray-600 font-inter">
                 {content?.intro_text ? (
                   <div dangerouslySetInnerHTML={{ __html: content.intro_text }} />
@@ -284,7 +284,7 @@ export default async function RegionPage({ params }) {
       </section>
 
       {/* Benefits and Support for Foster Carers */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 section-highlight">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -301,7 +301,7 @@ export default async function RegionPage({ params }) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Heart className="w-5 h-5 text-primary-green mr-2" />
                   Financial Support
@@ -334,7 +334,7 @@ export default async function RegionPage({ params }) {
                 </ul>
               </Card>
               
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Shield className="w-5 h-5 text-primary-green mr-2" />
                   Professional Support
@@ -367,7 +367,7 @@ export default async function RegionPage({ params }) {
                 </ul>
               </Card>
               
-              <Card className="glass-card rounded-modern-xl p-6 md:col-span-2">
+              <Card className="section-card rounded-modern-xl p-6 md:col-span-2">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Award className="w-5 h-5 text-primary-green mr-2" />
                   Training and Development
@@ -402,7 +402,7 @@ export default async function RegionPage({ params }) {
       </section>
 
       {/* Popular Cities in Region */}
-      <section id="cities" className="py-16 md:py-24 relative overflow-hidden">
+      <section id="cities" className="py-16 md:py-24 relative overflow-hidden section-contrast">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
           <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
@@ -424,7 +424,7 @@ export default async function RegionPage({ params }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {popularCities.map((city, index) => (
-              <Card key={index} className="glass-card rounded-modern-xl p-6 hover-lift transition-all">
+              <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all">
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-lg font-bold text-text-charcoal font-poppins">{city.name}</h3>
                   <span className="bg-primary-green/10 text-primary-green text-xs px-2 py-1 rounded-full">
@@ -446,7 +446,7 @@ export default async function RegionPage({ params }) {
             {/* Actual cities from data */}
             {citiesToShow.slice(0, 3).map((city) => (
               <Link key={city.slug} href={`/foster-agency/${country}/${region}/${city.slug}`}>
-                <Card className="glass-card rounded-modern-xl hover-lift transition-all cursor-pointer group">
+                <Card className="section-card rounded-modern-xl hover-lift transition-all cursor-pointer group">
                   <CardHeader>
                     <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                       <MapPin className="w-7 h-7 text-primary-green" />
@@ -471,7 +471,7 @@ export default async function RegionPage({ params }) {
       </section>
 
       {/* Testimonials / Trust Signals */}
-      <section className="py-16 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 section-alt">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -485,7 +485,7 @@ export default async function RegionPage({ params }) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <div className="flex items-center mb-4">
                   <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mr-4">
                     <span className="text-primary-green font-bold">S</span>
@@ -506,7 +506,7 @@ export default async function RegionPage({ params }) {
                 </div>
               </Card>
               
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <div className="flex items-center mb-4">
                   <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mr-4">
                     <span className="text-primary-green font-bold">M</span>
@@ -532,7 +532,7 @@ export default async function RegionPage({ params }) {
       </section>
 
       {/* Top Agencies in Region */}
-      <section id="agencies" className="py-16 md:py-24 relative overflow-hidden">
+      <section id="agencies" className="py-16 md:py-24 relative overflow-hidden section-muted">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
           <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
@@ -554,7 +554,7 @@ export default async function RegionPage({ params }) {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {featuredAgencies.map((agency) => (
-              <Card key={agency.id} className="glass-card rounded-modern-xl hover-lift transition-all">
+              <Card key={agency.id} className="section-card rounded-modern-xl hover-lift transition-all">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center">
@@ -633,7 +633,7 @@ export default async function RegionPage({ params }) {
       </section>
 
       {/* Region-Specific FAQs */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 section-highlight">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -651,7 +651,7 @@ export default async function RegionPage({ params }) {
             
             <Accordion type="single" collapsible className="space-y-4">
               {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`} className="glass-card rounded-modern-xl px-6">
+                <AccordionItem key={index} value={`item-${index}`} className="section-card rounded-modern-xl px-6">
                   <AccordionTrigger className="text-left text-text-charcoal font-poppins hover:no-underline py-4">
                     {faq.question}
                   </AccordionTrigger>
@@ -700,9 +700,9 @@ export default async function RegionPage({ params }) {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 md:py-24 section-contrast">
         <div className="container mx-auto px-4">
-          <Card className="glass-card-gradient rounded-modern-xl p-8 md:p-12 max-w-4xl mx-auto text-center">
+          <Card className="section-card-contrast rounded-modern-xl p-8 md:p-12 max-w-4xl mx-auto text-center">
             <CardHeader>
               <CardTitle className="text-2xl md:text-3xl font-bold text-text-charcoal mb-4 font-poppins">
                 Ready to Start Fostering in {regionName}?

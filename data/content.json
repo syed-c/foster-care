@@ -71,7 +71,8 @@
       }
     ],
     "intro_text": "Welcome to our directory of foster agencies in Redbridge. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.",
-    "last_updated": "2025-11-01T13:32:54.944Z"
+    "last_updated": "2025-11-06T08:18:36.320Z",
+    "hero_heading": "eddrftgyhujio"
   },
   "northern-ireland/causeway-coast-and-glens/ballycastle": {
     "slug": "northern-ireland/causeway-coast-and-glens/ballycastle",
@@ -1626,5 +1627,210 @@
     ],
     "intro_text": "Welcome to our directory of foster agencies in Bath and North East Somerset. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.",
     "last_updated": "2025-11-03T13:43:07.218Z"
+  },
+  "scotland": {
+    "slug": "scotland",
+    "title": "Foster Agencies in Scotland",
+    "h1": "Find the Best Foster Agencies in Scotland",
+    "description": "Discover top-rated foster agencies in Scotland. Get support and guidance for your fostering journey.",
+    "meta_title": "Foster Agencies in Scotland | UK Foster Care Directory",
+    "meta_description": "Find accredited foster agencies in Scotland. Expert support and guidance for prospective foster carers.",
+    "hero_text": "Find the perfect foster agency in Scotland",
+    "faqs": [
+      {
+        "question": "How do I become a foster carer?",
+        "answer": "Becoming a foster carer involves several steps including an application, assessments, training, and approval process. Contact your local foster agency to begin your journey."
+      },
+      {
+        "question": "What are the requirements to be a foster carer?",
+        "answer": "Requirements vary by agency but typically include being over 21, having a spare room, passing background checks, and completing training programs."
+      },
+      {
+        "question": "How long does the fostering process take?",
+        "answer": "The process typically takes 4-6 months from initial enquiry to approval, depending on your circumstances and the agency."
+      }
+    ],
+    "useful_resources": [
+      {
+        "title": "Gov.uk - Fostering",
+        "url": "https://www.gov.uk/fostering",
+        "description": "Official government information about fostering"
+      },
+      {
+        "title": "Fostering Network",
+        "url": "https://www.thefosteringnetwork.org.uk",
+        "description": "Support and resources for foster carers"
+      }
+    ],
+    "intro_text": "Welcome to our directory of foster agencies in Scotland. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.",
+    "last_updated": "2025-11-04T12:19:50.551Z"
+  },
+  "scotland/aberdeen-city": {
+    "slug": "scotland/aberdeen-city",
+    "title": "Foster Agencies in Aberdeen City",
+    "h1": "Find the Best Foster Agencies in Aberdeen City",
+    "description": "Discover top-rated foster agencies in Aberdeen City. Get support and guidance for your fostering journey.",
+    "meta_title": "Foster Agencies in Aberdeen City | UK Foster Care Directory",
+    "meta_description": "Find accredited foster agencies in Aberdeen City. Expert support and guidance for prospective foster carers.",
+    "hero_text": "Find the perfect foster agency in Aberdeen City",
+    "faqs": [
+      {
+        "question": "How do I become a foster carer?",
+        "answer": "Becoming a foster carer involves several steps including an application, assessments, training, and approval process. Contact your local foster agency to begin your journey."
+      },
+      {
+        "question": "What are the requirements to be a foster carer?",
+        "answer": "Requirements vary by agency but typically include being over 21, having a spare room, passing background checks, and completing training programs."
+      },
+      {
+        "question": "How long does the fostering process take?",
+        "answer": "The process typically takes 4-6 months from initial enquiry to approval, depending on your circumstances and the agency."
+      }
+    ],
+    "useful_resources": [
+      {
+        "title": "Gov.uk - Fostering",
+        "url": "https://www.gov.uk/fostering",
+        "description": "Official government information about fostering"
+      },
+      {
+        "title": "Fostering Network",
+        "url": "https://www.thefosteringnetwork.org.uk",
+        "description": "Support and resources for foster carers"
+      }
+    ],
+    "intro_text": "Welcome to our directory of foster agencies in Aberdeen City. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.",
+    "last_updated": "2025-11-04T12:20:05.163Z"
+  },
+  "england/bath-and-north-east-somerset/bath": {
+    "slug": "england/bath-and-north-east-somerset/bath",
+    "title": "Foster Agencies in Bath",
+    "h1": "Find the Best Foster Agencies in Bath",
+    "description": "Discover top-rated foster agencies in Bath. Get support and guidance for your fostering journey.",
+    "meta_title": "Foster Agencies in Bath | UK Foster Care Directory",
+    "meta_description": "Find accredited foster agencies in Bath. Expert support and guidance for prospective foster carers.",
+    "hero_text": "Find the perfect foster agency in Bath",
+    "faqs": [
+      {
+        "question": "How do I become a foster carer?",
+        "answer": "Becoming a foster carer involves several steps including an application, assessments, training, and approval process. Contact your local foster agency to begin your journey."
+      },
+      {
+        "question": "What are the requirements to be a foster carer?",
+        "answer": "Requirements vary by agency but typically include being over 21, having a spare room, passing background checks, and completing training programs."
+      },
+      {
+        "question": "How long does the fostering process take?",
+        "answer": "The process typically takes 4-6 months from initial enquiry to approval, depending on your circumstances and the agency."
+      }
+    ],
+    "useful_resources": [
+      {
+        "title": "Gov.uk - Fostering",
+        "url": "https://www.gov.uk/fostering",
+        "description": "Official government information about fostering"
+      },
+      {
+        "title": "Fostering Network",
+        "url": "https://www.thefosteringnetwork.org.uk",
+        "description": "Support and resources for foster carers"
+      }
+    ],
+    "intro_text": "Welcome to our directory of foster agencies in Bath. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.",
+    "last_updated": "2025-11-08T09:46:14.074Z"
+  },
+  "bath-and-north-east-somerset": {
+    "slug": "bath-and-north-east-somerset",
+    "title": "bath-and-north-east-somerset",
+    "meta_title": "Foster Agencies in Bath and North East Somerset | UK Foster Care Directory",
+    "meta_description": "Find accredited foster agencies in Bath and North East Somerset. Expert support and guidance for prospective foster carers.",
+    "last_updated": "2025-11-08T10:48:42.600Z",
+    "template_type": "city",
+    "id": "02ebafcd-d930-41dc-b748-a4d25e0c3b82",
+    "name": "Bath and North East Somerset",
+    "type": "region",
+    "editable": true,
+    "children": [
+      {
+        "id": "26118208-ebf9-47c7-9188-7d8a98ed6171",
+        "name": "Bath",
+        "slug": "bath",
+        "canonical_slug": "/foster-agency/england/bath-and-north-east-somerset/bath",
+        "type": "city",
+        "editable": true,
+        "children": []
+      },
+      {
+        "id": "1520cce1-1add-4905-86f1-dce2e5483948",
+        "name": "Bridgwater",
+        "slug": "bridgwater",
+        "canonical_slug": "/foster-agency/england/bath-and-north-east-somerset/bridgwater",
+        "type": "city",
+        "editable": true,
+        "children": []
+      },
+      {
+        "id": "33039f0b-e613-4595-b3e6-4258c5c38900",
+        "name": "Keynsham",
+        "slug": "keynsham",
+        "canonical_slug": "/foster-agency/england/bath-and-north-east-somerset/keynsham",
+        "type": "city",
+        "editable": true,
+        "children": []
+      },
+      {
+        "id": "746ae5f0-0272-4a72-8245-a42cf162f1c8",
+        "name": "Taunton",
+        "slug": "taunton",
+        "canonical_slug": "/foster-agency/england/bath-and-north-east-somerset/taunton",
+        "type": "city",
+        "editable": true,
+        "children": []
+      },
+      {
+        "id": "35d4111b-3b98-4b2b-927a-77d2a06d1275",
+        "name": "Weston-super-Mare",
+        "slug": "weston-super-mare",
+        "canonical_slug": "/foster-agency/england/bath-and-north-east-somerset/weston-super-mare",
+        "type": "city",
+        "editable": true,
+        "children": []
+      },
+      {
+        "id": "52726a62-4aff-4fb8-9db0-f1ed0de97244",
+        "name": "Yeovil",
+        "slug": "yeovil",
+        "canonical_slug": "/foster-agency/england/bath-and-north-east-somerset/yeovil",
+        "type": "city",
+        "editable": true,
+        "children": []
+      }
+    ],
+    "about": {
+      "title": "esdfxghbnjk",
+      "body": "cfgvbhnm"
+    }
+  },
+  "bath": {
+    "slug": "bath",
+    "title": "foster-agency/england/bath-and-north-east-somerset/bath",
+    "meta_title": "Foster Agencies in Bath | UK Foster Care Directory",
+    "meta_description": "Find accredited foster agencies in Bath. Expert support and guidance for prospective foster carers.",
+    "last_updated": "2025-11-08T11:00:35.054Z",
+    "template_type": "city",
+    "id": "26118208-ebf9-47c7-9188-7d8a98ed6171",
+    "name": "Bath",
+    "type": "city",
+    "editable": true,
+    "children": [],
+    "about": {
+      "title": "unhbgfyhtgf",
+      "body": "ijuyhgtrfeds"
+    }
+  },
+  "/foster-agency/england": {
+    "slug": "/foster-agency/england",
+    "last_updated": "2025-11-08T11:00:47.378Z",
+    "template_type": "city"
   }
 }

@@ -91,7 +91,7 @@ export default function HomePage() {
       <div className="particle particle-4"></div>
       
       {/* Modern Hero Header with Glassmorphism */}
-      <section className="relative py-20 md:py-28 overflow-hidden bg-gradient-to-br from-primary-green/10 to-secondary-blue/10 border-b-4 border-primary-green/20">
+      <section className="relative py-20 md:py-28 overflow-hidden section-hero">
         {/* Animated Gradient Background */}
         <div className="absolute inset-0 gradient-mesh opacity-50" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -173,7 +173,7 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
+      <section className="py-16 md:py-24 relative overflow-hidden section-alt">
         {/* Decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
@@ -215,7 +215,7 @@ export default function HomePage() {
                 return (
               <Card
                   key={index}
-                  className="glass-card rounded-modern-xl hover-lift transition-all card-3d hover:scale-105"
+                  className="section-card hover-lift transition-all card-3d hover:scale-105"
                   style={{ transitionDelay: `${index * 0.1}s` }}
                 >
                   <CardHeader>
@@ -279,7 +279,7 @@ export default function HomePage() {
               ].map((step, index) => (
                 <Card
                   key={index}
-                  className="glass-card rounded-modern-xl hover-lift transition-all card-3d hover:scale-105"
+                  className="section-card hover-lift transition-all card-3d hover:scale-105"
                   style={{ transitionDelay: `${index * 0.1}s` }}
                 >
                   <CardHeader>
@@ -323,7 +323,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured Agencies */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
+      <section className="py-16 md:py-24 relative overflow-hidden section-highlight">
         {/* Decorative elements */}
         <div className="absolute inset-0 gradient-mesh opacity-20" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -366,7 +366,7 @@ export default function HomePage() {
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div
                   key={i}
-                  className="h-64 glass-card rounded-modern-xl animate-pulse shimmer"
+                  className="h-64 section-card animate-pulse shimmer"
                 />
               ))}
             </div>
@@ -377,7 +377,7 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <Card className="glass-card rounded-modern-xl p-12 text-center hover:scale-105 transition-all duration-300">
+            <Card className="section-card p-12 text-center hover:scale-105 transition-all duration-300">
               <CardDescription className="font-inter">
                 No featured agencies available yet. Check back soon!
               </CardDescription>
@@ -399,7 +399,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
+      <section className="py-16 md:py-24 relative overflow-hidden section-contrast">
         {/* Animated Background */}
         <div className="absolute inset-0 gradient-mesh opacity-30" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -430,7 +430,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {pageSections?.find(s => s.title === 'Success Stories Section')?.testimonials ? 
               JSON.parse(pageSections.find(s => s.title === 'Success Stories Section').testimonials).map((testimonial, index) => (
-                <Card key={index} className="glass-card rounded-modern-xl hover-lift card-3d hover:scale-105 transition-all duration-300">
+                <Card key={index} className="section-card hover-lift card-3d hover:scale-105 transition-all duration-300">
                   <CardHeader>
                     <div className="flex items-center justify-between mb-2">
                       <div>
@@ -478,7 +478,7 @@ export default function HomePage() {
                 rating: 5,
               },
             ].map((testimonial, index) => (
-              <Card key={index} className="glass-card rounded-modern-xl hover-lift card-3d hover:scale-105 transition-all duration-300">
+              <Card key={index} className="section-card hover-lift card-3d hover:scale-105 transition-all duration-300">
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
                     <div>
@@ -509,7 +509,7 @@ export default function HomePage() {
       </section>
 
       {/* Resources Highlight */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
+      <section className="py-16 md:py-24 relative overflow-hidden section-alt">
         {/* Enhanced Animated Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-background-offwhite/70 to-white/70" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -557,7 +557,7 @@ export default function HomePage() {
                     default: IconComponent = BookOpen;
                   }
                   return (
-                    <div key={index} className="glass p-6 rounded-2xl hover-lift card-3d hover:scale-105 transition-all duration-300">
+                    <div key={index} className="section-card-alt p-6 hover-lift card-3d hover:scale-105 transition-all duration-300">
                       <IconComponent className="w-8 h-8 text-primary-green mb-3 transition-all duration-300 hover:scale-110" />
                       <h3 className="font-semibold text-lg mb-2 font-poppins">{highlight.title}</h3>
                       <p className="text-sm text-gray-600 font-inter">{highlight.description}</p>
@@ -575,7 +575,7 @@ export default function HomePage() {
                     description: "Understanding the legal aspects of becoming a foster carer"
                   }
                 ].map((highlight, index) => (
-                  <div key={index} className="glass p-6 rounded-2xl hover-lift card-3d hover:scale-105 transition-all duration-300">
+                  <div key={index} className="section-card-alt p-6 hover-lift card-3d hover:scale-105 transition-all duration-300">
                     <highlight.icon className="w-8 h-8 text-primary-green mb-3 transition-all duration-300 hover:scale-110" />
                     <h3 className="font-semibold text-lg mb-2 font-poppins">{highlight.title}</h3>
                     <p className="text-sm text-gray-600 font-inter">{highlight.description}</p>
@@ -609,7 +609,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
+      <section className="py-16 md:py-24 relative overflow-hidden section-muted">
         {/* Enhanced Animated Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary-green/40 to-secondary-blue/40" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -635,7 +635,7 @@ export default function HomePage() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
-          <Card className="glass-card-gradient border-0 text-text-charcoal rounded-modern-xl overflow-hidden shadow-2xl transform hover:scale-[1.01] transition-all duration-300 card-3d">
+          <Card className="section-card-contrast border-0 text-text-charcoal rounded-modern-xl overflow-hidden shadow-2xl transform hover:scale-[1.01] transition-all duration-300 card-3d">
             <div className="absolute inset-0 bg-gradient-to-br from-primary-green/90 to-secondary-blue/80 z-0" />
             <div className="absolute inset-0 bg-[url('/images/pattern.png')] opacity-15 z-0" />
             <CardContent className="p-8 md:p-12 relative z-10">
@@ -692,7 +692,7 @@ function AgencyCard({ agency }) {
   };
 
   return (
-    <Card className="glass-card rounded-modern hover-lift transition-all cursor-pointer card-3d hover:scale-105">
+    <Card className="section-card rounded-modern hover-lift transition-all cursor-pointer card-3d hover:scale-105">
       <Link href={`/agency/${agency.id}`}>
         <CardHeader>
           <div className="flex items-start justify-between mb-4">

@@ -208,7 +208,7 @@ export default async function CountryPage({ params }) {
       </div>
 
       {/* Hero Section */}
-      <section className="relative py-16 md:py-24 overflow-hidden bg-gradient-to-br from-primary-green/10 to-secondary-blue/10">
+      <section className="relative py-16 md:py-24 overflow-hidden section-hero">
         <div className="absolute inset-0 gradient-mesh opacity-50" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-10 left-10 w-72 h-72 bg-primary-green/15 rounded-full blur-3xl float-animation" />
@@ -261,7 +261,7 @@ export default async function CountryPage({ params }) {
       </section>
 
       {/* Overview of Fostering in Country */}
-      <section className="py-16 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 section-alt">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -274,7 +274,7 @@ export default async function CountryPage({ params }) {
               </h2>
             </div>
             
-            <Card className="glass-card rounded-modern-xl p-6 md:p-8">
+            <Card className="section-card rounded-modern-xl p-6 md:p-8">
               <div className="prose max-w-none text-gray-600 font-inter">
                 {content?.intro_text ? (
                   <div dangerouslySetInnerHTML={{ __html: content.intro_text }} />
@@ -330,7 +330,7 @@ export default async function CountryPage({ params }) {
       </section>
 
       {/* Foster Agency Finder by Region */}
-      <section id="regions" className="py-16 md:py-24 relative overflow-hidden">
+      <section id="regions" className="py-16 md:py-24 relative overflow-hidden section-highlight">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
           <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
@@ -351,7 +351,7 @@ export default async function CountryPage({ params }) {
           </div>
 
           {/* Country Stats */}
-          <Card className="glass-card rounded-modern-xl p-6 mb-12 max-w-4xl mx-auto">
+          <Card className="section-card rounded-modern-xl p-6 mb-12 max-w-4xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="w-16 h-16 rounded-full bg-primary-green/10 flex items-center justify-center mx-auto mb-3">
@@ -377,14 +377,14 @@ export default async function CountryPage({ params }) {
             </div>
           </Card>
 
-          {/* Popular Regions */}
+          {/* Popular Regions
           <div className="mb-12">
             <h3 className="text-2xl font-bold text-text-charcoal mb-6 font-poppins text-center">
               Popular Regions in {countryName}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {currentPopularRegions.map((region, index) => (
-                <Card key={index} className="glass-card rounded-modern-xl p-6 hover-lift transition-all">
+                <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all">
                   <div className="flex justify-between items-start">
                     <h4 className="text-lg font-bold text-text-charcoal font-poppins">{region.name}</h4>
                     <span className="bg-primary-green/10 text-primary-green text-xs px-2 py-1 rounded-full">
@@ -403,7 +403,7 @@ export default async function CountryPage({ params }) {
                 </Card>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* All Regions with Pagination */}
           <div className="max-w-6xl mx-auto">
@@ -415,7 +415,7 @@ export default async function CountryPage({ params }) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {regionsToShow.slice(0, regionsPerPage).map((region) => (
                 <Link key={region.slug} href={`/foster-agency/${country}/${region.slug}`}>
-                  <Card className="glass-card rounded-modern-xl hover-lift transition-all cursor-pointer group">
+                  <Card className="section-card rounded-modern-xl hover-lift transition-all cursor-pointer group">
                     <CardHeader>
                       <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                         <MapPin className="w-7 h-7 text-primary-green" />
@@ -468,7 +468,7 @@ export default async function CountryPage({ params }) {
       </section>
 
       {/* Featured Popular Locations */}
-      <section className="py-16 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 section-contrast">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -486,7 +486,7 @@ export default async function CountryPage({ params }) {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {currentPopularRegions.map((region, index) => (
-                <Card key={index} className="glass-card rounded-modern-xl p-6 hover-lift transition-all">
+                <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all">
                   <div className="flex justify-between items-start">
                     <h4 className="text-lg font-bold text-text-charcoal font-poppins">{region.name}</h4>
                     <span className="bg-primary-green/10 text-primary-green text-xs px-2 py-1 rounded-full">
@@ -510,7 +510,7 @@ export default async function CountryPage({ params }) {
       </section>
 
       {/* Top Agencies in Country */}
-      <section id="agencies" className="py-16 md:py-24 relative overflow-hidden">
+      <section id="agencies" className="py-16 md:py-24 relative overflow-hidden section-muted">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
           <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
@@ -532,7 +532,7 @@ export default async function CountryPage({ params }) {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {featuredAgencies.map((agency) => (
-              <Card key={agency.id} className="glass-card rounded-modern-xl hover-lift transition-all">
+              <Card key={agency.id} className="section-card rounded-modern-xl hover-lift transition-all">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center">
@@ -611,7 +611,7 @@ export default async function CountryPage({ params }) {
       </section>
 
       {/* What is the Foster Care System Like */}
-      <section className="py-16 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 section-alt">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -625,7 +625,7 @@ export default async function CountryPage({ params }) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Heart className="w-5 h-5 text-primary-green mr-2" />
                   Allowances & Support
@@ -658,7 +658,7 @@ export default async function CountryPage({ params }) {
                 </ul>
               </Card>
               
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <BookOpen className="w-5 h-5 text-primary-green mr-2" />
                   Matching Process
@@ -691,7 +691,7 @@ export default async function CountryPage({ params }) {
                 </ul>
               </Card>
               
-              <Card className="glass-card rounded-modern-xl p-6 md:col-span-2">
+              <Card className="section-card rounded-modern-xl p-6 md:col-span-2">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Award className="w-5 h-5 text-primary-green mr-2" />
                   Training Requirements
@@ -726,7 +726,7 @@ export default async function CountryPage({ params }) {
       </section>
 
       {/* Why Choose to Foster in Country */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 section-highlight">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
@@ -776,7 +776,7 @@ export default async function CountryPage({ params }) {
       </section>
 
       {/* FAQs */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 section-contrast">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -794,7 +794,7 @@ export default async function CountryPage({ params }) {
             
             <Accordion type="single" collapsible className="space-y-4">
               {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`} className="glass-card rounded-modern-xl px-6">
+                <AccordionItem key={index} value={`item-${index}`} className="section-card rounded-modern-xl px-6">
                   <AccordionTrigger className="text-left text-text-charcoal font-poppins hover:no-underline py-4">
                     {faq.question}
                   </AccordionTrigger>
@@ -809,7 +809,7 @@ export default async function CountryPage({ params }) {
       </section>
 
       {/* Regulated & Trusted by UK Authorities */}
-      <section className="py-12 bg-background-offwhite">
+      <section className="py-12 bg-gradient-to-r from-primary-green/10 to-secondary-blue/10">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
@@ -843,7 +843,7 @@ export default async function CountryPage({ params }) {
       </section>
 
       {/* Find Agencies Near You */}
-      <section className="py-16 bg-gradient-to-br from-background-offwhite to-secondary-blue/10">
+      <section className="py-16 section-muted">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">

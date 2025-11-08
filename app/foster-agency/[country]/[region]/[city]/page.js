@@ -235,7 +235,7 @@ export default async function CityPage({ params }) {
       />
 
       {/* Hero Section */}
-      <section className="relative py-16 md:py-24 overflow-hidden bg-gradient-to-br from-primary-green/10 to-secondary-blue/10">
+      <section className="relative py-16 md:py-24 overflow-hidden section-hero">
         <div className="absolute inset-0 gradient-mesh opacity-50" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-10 left-10 w-72 h-72 bg-primary-green/15 rounded-full blur-3xl float-animation" />
@@ -276,7 +276,7 @@ export default async function CityPage({ params }) {
       </section>
 
       {/* City Overview Content */}
-      <section className="py-16 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 section-alt">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -289,7 +289,7 @@ export default async function CityPage({ params }) {
               </h2>
             </div>
             
-            <Card className="glass-card rounded-modern-xl p-6 md:p-8">
+            <Card className="section-card rounded-modern-xl p-6 md:p-8">
               <div className="prose max-w-none text-gray-600 font-inter">
                 {content?.intro_text ? (
                   <div dangerouslySetInnerHTML={{ __html: content.intro_text }} />
@@ -333,7 +333,7 @@ export default async function CityPage({ params }) {
       </section>
 
       {/* Types of Fostering in City */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 section-highlight">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -350,7 +350,7 @@ export default async function CityPage({ params }) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Heart className="w-5 h-5 text-primary-green mr-2" />
                   Short-term Fostering
@@ -375,7 +375,7 @@ export default async function CityPage({ params }) {
                 </ul>
               </Card>
               
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Shield className="w-5 h-5 text-primary-green mr-2" />
                   Long-term Fostering
@@ -400,7 +400,7 @@ export default async function CityPage({ params }) {
                 </ul>
               </Card>
               
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Star className="w-5 h-5 text-primary-green mr-2" />
                   Specialist Fostering
@@ -425,7 +425,7 @@ export default async function CityPage({ params }) {
                 </ul>
               </Card>
               
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Award className="w-5 h-5 text-primary-green mr-2" />
                   Foster-to-Adopt
@@ -455,7 +455,7 @@ export default async function CityPage({ params }) {
       </section>
 
       {/* Top Agencies in City */}
-      <section id="agencies" className="py-16 md:py-24 relative overflow-hidden">
+      <section id="agencies" className="py-16 md:py-24 relative overflow-hidden section-contrast">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
           <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
@@ -477,7 +477,7 @@ export default async function CityPage({ params }) {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {featuredAgencies.map((agency) => (
-              <Card key={agency.id} className="glass-card rounded-modern-xl hover-lift transition-all">
+              <Card key={agency.id} className="section-card rounded-modern-xl hover-lift transition-all">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center">
@@ -556,7 +556,7 @@ export default async function CityPage({ params }) {
       </section>
 
       {/* Why Foster in City */}
-      <section className="py-16 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 section-alt">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
@@ -606,7 +606,7 @@ export default async function CityPage({ params }) {
       </section>
 
       {/* Foster Allowances & Support in City */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 section-highlight">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -623,7 +623,7 @@ export default async function CityPage({ params }) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Heart className="w-5 h-5 text-primary-green mr-2" />
                   Financial Support
@@ -656,7 +656,7 @@ export default async function CityPage({ params }) {
                 </ul>
               </Card>
               
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Shield className="w-5 h-5 text-primary-green mr-2" />
                   Professional Support
@@ -690,7 +690,7 @@ export default async function CityPage({ params }) {
               </Card>
             </div>
             
-            <Card className="glass-card rounded-modern-xl p-6 mt-8">
+            <Card className="section-card rounded-modern-xl p-6 mt-8">
               <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins">
                 Who Pays Foster Carers in {cityName}?
               </h3>
@@ -706,7 +706,7 @@ export default async function CityPage({ params }) {
       </section>
 
       {/* Local Support & Resources */}
-      <section className="py-16 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 section-contrast">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -723,7 +723,7 @@ export default async function CityPage({ params }) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Shield className="w-5 h-5 text-primary-green mr-2" />
                   {regionName} {getLocalAuthority(country)}
@@ -739,7 +739,7 @@ export default async function CityPage({ params }) {
                 </Button>
               </Card>
               
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Users className="w-5 h-5 text-primary-green mr-2" />
                   Foster Carer Communities
@@ -755,7 +755,7 @@ export default async function CityPage({ params }) {
                 </Button>
               </Card>
               
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <BookOpen className="w-5 h-5 text-primary-green mr-2" />
                   Training Centres
@@ -771,7 +771,7 @@ export default async function CityPage({ params }) {
                 </Button>
               </Card>
               
-              <Card className="glass-card rounded-modern-xl p-6">
+              <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Heart className="w-5 h-5 text-primary-green mr-2" />
                   Support Networks
@@ -792,7 +792,7 @@ export default async function CityPage({ params }) {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 section-muted">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -810,7 +810,7 @@ export default async function CityPage({ params }) {
             
             <Accordion type="single" collapsible className="space-y-4">
               {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`} className="glass-card rounded-modern-xl px-6">
+                <AccordionItem key={index} value={`item-${index}`} className="section-card rounded-modern-xl px-6">
                   <AccordionTrigger className="text-left text-text-charcoal font-poppins hover:no-underline py-4">
                     {faq.question}
                   </AccordionTrigger>
@@ -859,9 +859,9 @@ export default async function CityPage({ params }) {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 md:py-24 section-alt">
         <div className="container mx-auto px-4">
-          <Card className="glass-card-gradient rounded-modern-xl p-8 md:p-12 max-w-4xl mx-auto text-center">
+          <Card className="section-card-contrast rounded-modern-xl p-8 md:p-12 max-w-4xl mx-auto text-center">
             <CardHeader>
               <CardTitle className="text-2xl md:text-3xl font-bold text-text-charcoal mb-4 font-poppins">
                 Ready to Start Fostering in {cityName}?

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MapPin, Navigation, Loader2 } from "lucide-react";
+import googleMapsLoader from '@/lib/googleMapsLoader';
 
 export default function InteractiveMap({
   center = { lat: 54.5, lng: -3.5 }, // UK center
@@ -19,7 +20,7 @@ export default function InteractiveMap({
   const [nearbyRegions, setNearbyRegions] = useState(null);
   const [selectedRegion, setSelectedRegion] = useState(null);
 
-  // Load Google Maps API
+  // Load Google Maps API using singleton loader
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -33,33 +34,20 @@ export default function InteractiveMap({
       return;
     }
 
-    // Check if Google Maps is already loaded
-    if (typeof window.google !== "undefined" && window.google.maps) {
-      initMap();
-      return;
-    }
-
-    // Load Google Maps script
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    script.onload = initMap;
-    script.onerror = () => {
-      setError({
-        title: "Map Loading Failed",
-        message: "Failed to load Google Maps",
-        solution: "Check your API key and internet connection",
-      });
-      setLoading(false);
-    };
-    document.head.appendChild(script);
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
+    // Use the singleton loader to ensure API is only loaded once
+    googleMapsLoader.load((err) => {
+      if (err) {
+        setError({
+          title: "Map Loading Failed",
+          message: "Failed to load Google Maps",
+          solution: "Check your API key and internet connection",
+        });
+        setLoading(false);
+        return;
       }
-    };
+      
+      initMap();
+    });
   }, []);
 
   // Initialize the map

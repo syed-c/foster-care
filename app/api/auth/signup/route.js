@@ -67,49 +67,54 @@ export async function POST(request) {
       );
     }
 
-    // If agency role, create agency profile
+    // If agency role, create agency profile with registration_complete = false
     if (role === 'agency') {
       try {
         // Generate a slug from the name
         const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now().toString().slice(-4);
         
-        // Create agency with only the absolutely required fields
-        const { data: agencyData, error: agencyError } = await supabaseAdmin
+        // Prepare agency data
+        let agencyData = {
+          user_id: newUser.id,
+          name: name,
+          slug: slug,
+          contact_email: email,
+          // Default values for required fields
+          type: 'Private',
+          featured: false,
+          verified: false,
+          recruiting: true,
+          rating: 0,
+          review_count: 0,
+          subscription_plan: 'free',
+          subscription_status: 'active'
+        };
+
+        // Try to add registration_complete field
+        let finalAgencyData = { ...agencyData, registration_complete: false };
+        
+        // Create agency with registration_complete
+        let { data: agencyDataResult, error: agencyError } = await supabaseAdmin
           .from('agencies')
-          .insert({
-            user_id: newUser.id,
-            name: name,
-            slug: slug,
-            contact_email: email,
-            // Default values for required fields
-            type: 'Private',
-            featured: false,
-            verified: false,
-            recruiting: true,
-            rating: 0,
-            review_count: 0,
-            subscription_plan: 'free',
-            subscription_status: 'active'
-          })
+          .insert(finalAgencyData)
           .select()
           .single();
 
+        // If registration_complete column doesn't exist, try without it
+        if (agencyError && agencyError.message.includes('registration_complete')) {
+          const { data, error } = await supabaseAdmin
+            .from('agencies')
+            .insert(agencyData)
+            .select()
+            .single();
+          
+          agencyDataResult = data;
+          agencyError = error;
+        }
+
         if (agencyError) {
           console.error('Error creating agency:', agencyError);
-          console.error('Agency data being inserted:', {
-            user_id: newUser.id,
-            name: name,
-            slug: slug,
-            contact_email: email,
-            type: 'Private',
-            featured: false,
-            verified: false,
-            recruiting: true,
-            rating: 0,
-            review_count: 0,
-            subscription_plan: 'free',
-            subscription_status: 'active'
-          });
+          console.error('Agency data being inserted:', finalAgencyData);
           
           // Delete the user if agency creation fails
           const { error: deleteUserError } = await supabaseAdmin
@@ -127,7 +132,7 @@ export async function POST(request) {
           );
         }
         
-        console.log('Successfully created agency:', agencyData);
+        console.log('Successfully created agency:', agencyDataResult);
       } catch (agencyCreateError) {
         console.error('Exception creating agency:', agencyCreateError);
         

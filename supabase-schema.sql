@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS agencies (
   featured BOOLEAN DEFAULT FALSE,
   recruiting BOOLEAN DEFAULT TRUE,
   verified BOOLEAN DEFAULT FALSE,
+  registration_complete BOOLEAN DEFAULT FALSE,
   
   -- Ratings
   rating DECIMAL(3, 2) DEFAULT 0,
@@ -227,6 +228,14 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+-- Drop triggers if they exist to avoid conflicts
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+DROP TRIGGER IF EXISTS update_accounts_updated_at ON accounts;
+DROP TRIGGER IF EXISTS update_agencies_updated_at ON agencies;
+DROP TRIGGER IF EXISTS update_agency_locations_updated_at ON agency_locations;
+DROP TRIGGER IF EXISTS update_reviews_updated_at ON reviews;
+
+-- Then create the triggers
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -257,6 +266,33 @@ ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE saved_agencies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contact_inquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE agency_analytics ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist to avoid conflicts
+DROP POLICY IF EXISTS "Users can read own data" ON users;
+DROP POLICY IF EXISTS "Users can update own data" ON users;
+DROP POLICY IF EXISTS "Agencies are viewable by everyone" ON agencies;
+DROP POLICY IF EXISTS "Users can insert their own agency" ON agencies;
+DROP POLICY IF EXISTS "Users can update their own agency" ON agencies;
+DROP POLICY IF EXISTS "Users can delete their own agency" ON agencies;
+DROP POLICY IF EXISTS "Agency services viewable by everyone" ON agency_services;
+DROP POLICY IF EXISTS "Agency owners can manage services" ON agency_services;
+DROP POLICY IF EXISTS "Agency locations viewable by everyone" ON agency_locations;
+DROP POLICY IF EXISTS "Agency owners can manage locations" ON agency_locations;
+DROP POLICY IF EXISTS "Approved reviews viewable by everyone" ON reviews;
+DROP POLICY IF EXISTS "Users can add reviews" ON reviews;
+DROP POLICY IF EXISTS "Users can manage their saved agencies" ON saved_agencies;
+DROP POLICY IF EXISTS "Anyone can submit contact inquiry" ON contact_inquiries;
+DROP POLICY IF EXISTS "Agencies can view their inquiries" ON contact_inquiries;
+DROP POLICY IF EXISTS "Agency owners can view analytics" ON agency_analytics;
+DROP POLICY IF EXISTS "Agency owners can insert analytics" ON agency_analytics;
+DROP POLICY IF EXISTS "Admins can do anything" ON users;
+DROP POLICY IF EXISTS "Admins can do anything" ON agencies;
+DROP POLICY IF EXISTS "Admins can do anything" ON agency_services;
+DROP POLICY IF EXISTS "Admins can do anything" ON agency_locations;
+DROP POLICY IF EXISTS "Admins can do anything" ON reviews;
+DROP POLICY IF EXISTS "Admins can do anything" ON saved_agencies;
+DROP POLICY IF EXISTS "Admins can do anything" ON contact_inquiries;
+DROP POLICY IF EXISTS "Admins can do anything" ON agency_analytics;
 
 -- Users: Can read their own data, service role can do anything
 CREATE POLICY "Users can read own data" ON users FOR SELECT USING (auth.uid() = id);
@@ -335,6 +371,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Drop trigger if it exists
+DROP TRIGGER IF EXISTS update_agency_rating_on_review ON reviews;
+
+-- Create trigger
 CREATE TRIGGER update_agency_rating_on_review
 AFTER INSERT OR UPDATE OR DELETE ON reviews
 FOR EACH ROW

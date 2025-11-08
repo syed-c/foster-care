@@ -178,7 +178,7 @@ export default async function FosterAgencyMainPage() {
   return (
     <div className="min-h-screen bg-background-offwhite">
       {/* 1️⃣ Hero Section */}
-      <section className="relative py-20 md:py-28 overflow-hidden bg-gradient-to-br from-primary-green/10 to-secondary-blue/10 border-b-4 border-primary-green/20">
+      <section className="relative py-20 md:py-28 overflow-hidden section-hero">
         {/* Animated Gradient Background */}
         <div className="absolute inset-0 gradient-mesh opacity-50" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -219,7 +219,7 @@ export default async function FosterAgencyMainPage() {
       </section>
 
       {/* 2️⃣ “Browse by Country” Quick Selection */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
+      <section className="py-16 md:py-24 relative overflow-hidden section-alt">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
           <div
@@ -247,7 +247,7 @@ export default async function FosterAgencyMainPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {countriesToDisplay.map((country) => (
               <Link key={country.slug} href={`/foster-agency/${country.slug}`}>
-                <Card className="glass-card rounded-modern-xl hover-lift transition-all cursor-pointer group">
+                <Card className="section-card rounded-modern-xl hover-lift transition-all cursor-pointer group">
                   <CardHeader>
                     <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
                       <MapPin className="w-8 h-8 text-primary-green" />
@@ -272,7 +272,7 @@ export default async function FosterAgencyMainPage() {
       </section>
 
       {/* 3️⃣ UK Map Interactive Navigation */}
-      <section className="py-12 md:py-16 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-12 md:py-16 section-highlight">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 md:mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-3 md:mb-4">
@@ -289,7 +289,7 @@ export default async function FosterAgencyMainPage() {
             </p>
           </div>
 
-          <Card className="glass-card rounded-modern-xl overflow-hidden">
+          <Card className="section-card rounded-modern-xl overflow-hidden">
             <CardContent className="p-0 md:p-6">
               <MapSection countries={countriesToDisplay} />
             </CardContent>
@@ -298,7 +298,7 @@ export default async function FosterAgencyMainPage() {
       </section>
 
       {/* 4️⃣ Featured Top Foster Agencies */}
-      <section className="py-12 md:py-16 relative overflow-hidden">
+      <section className="py-12 md:py-16 relative overflow-hidden section-contrast">
         <div className="absolute inset-0 gradient-mesh opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12">
@@ -318,7 +318,7 @@ export default async function FosterAgencyMainPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredAgencies.map((agency) => (
-              <Card key={agency.id} className="glass-card rounded-modern-xl hover-lift transition-all cursor-pointer">
+              <Card key={agency.id} className="section-card rounded-modern-xl hover-lift transition-all cursor-pointer">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center">
@@ -398,10 +398,10 @@ export default async function FosterAgencyMainPage() {
       </section>
 
       {/* 5️⃣ About Our Directory */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
+      <section className="py-16 md:py-24 relative overflow-hidden section-alt">
         <div className="absolute inset-0 gradient-mesh opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
-          <Card className="glass-card-gradient rounded-modern-xl p-8 md:p-12 max-w-4xl mx-auto">
+          <Card className="section-card-contrast rounded-modern-xl p-8 md:p-12 max-w-4xl mx-auto">
             <CardHeader>
               <CardTitle className="text-2xl md:text-3xl font-bold text-text-charcoal mb-4 font-poppins text-center">
                 About Our Directory
@@ -444,7 +444,7 @@ export default async function FosterAgencyMainPage() {
       </section>
 
       {/* 6️⃣ How Fostering Works in the UK */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 md:py-24 section-muted">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
@@ -463,7 +463,7 @@ export default async function FosterAgencyMainPage() {
 
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-2 gap-8">
-              <Card className="glass-card rounded-modern-xl">
+              <Card className="section-card">
                 <CardHeader>
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mb-4">
                     <HandHeart className="w-6 h-6 text-primary-green" />
@@ -506,7 +506,7 @@ export default async function FosterAgencyMainPage() {
                 </CardContent>
               </Card>
 
-              <Card className="glass-card rounded-modern-xl">
+              <Card className="section-card">
                 <CardHeader>
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mb-4">
                     <Scale className="w-6 h-6 text-primary-green" />
@@ -544,7 +544,7 @@ export default async function FosterAgencyMainPage() {
       </section>
 
       {/* 7️⃣ Fostering Benefits for Carers & Children */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
+      <section className="py-16 md:py-24 relative overflow-hidden section-highlight">
         <div className="absolute inset-0 gradient-mesh opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12">
@@ -563,7 +563,7 @@ export default async function FosterAgencyMainPage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            <Card className="glass-card rounded-modern-xl">
+            <Card className="section-card">
               <CardHeader>
                 <CardTitle className="text-2xl font-poppins flex items-center">
                   <Users className="w-6 h-6 text-primary-green mr-2" />
@@ -612,7 +612,7 @@ export default async function FosterAgencyMainPage() {
               </CardContent>
             </Card>
 
-            <Card className="glass-card rounded-modern-xl">
+            <Card className="section-card">
               <CardHeader>
                 <CardTitle className="text-2xl font-poppins flex items-center">
                   <Home className="w-6 h-6 text-primary-green mr-2" />
@@ -665,7 +665,7 @@ export default async function FosterAgencyMainPage() {
       </section>
 
       {/* 8️⃣ Quick Links to Largest Regions */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 md:py-24 section-alt">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
@@ -687,7 +687,7 @@ export default async function FosterAgencyMainPage() {
               <Link 
                 key={region.slug} 
                 href={`/foster-agency/${region.country}/${region.slug}`}
-                className="glass-card rounded-modern-xl p-6 hover-lift transition-all flex items-center gap-3"
+                className="section-card-alt p-6 hover-lift transition-all flex items-center gap-3"
               >
                 <Building2 className="w-6 h-6 text-primary-green" />
                 <span className="font-inter font-medium">{region.name}</span>
@@ -699,7 +699,7 @@ export default async function FosterAgencyMainPage() {
       </section>
 
       {/* 9️⃣ Latest Guides and Resources */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
+      <section className="py-16 md:py-24 relative overflow-hidden section-contrast">
         <div className="absolute inset-0 gradient-mesh opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12">
@@ -719,7 +719,7 @@ export default async function FosterAgencyMainPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {resources.map((resource) => (
-              <Card key={resource.slug} className="glass-card rounded-modern-xl hover-lift transition-all hover:-translate-y-1">
+              <Card key={resource.slug} className="section-card hover-lift transition-all hover:-translate-y-1">
                 <div className="relative h-48 overflow-hidden rounded-t-xl">
                   <Image
                     src={resource.image}
@@ -761,7 +761,7 @@ export default async function FosterAgencyMainPage() {
       </section>
 
       {/* 🔟 Testimonials / Success Stories */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-background-offwhite to-secondary-blue/5">
+      <section className="py-16 md:py-24 section-muted">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
@@ -780,7 +780,7 @@ export default async function FosterAgencyMainPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="glass-card rounded-modern-xl hover-lift">
+              <Card key={index} className="section-card rounded-modern-xl hover-lift">
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
                     <div>
@@ -810,7 +810,7 @@ export default async function FosterAgencyMainPage() {
       </section>
 
       {/* 1️⃣1️⃣ FAQ Section */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
+      <section className="py-16 md:py-24 relative overflow-hidden section-alt">
         <div className="absolute inset-0 gradient-mesh opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12">
@@ -831,7 +831,7 @@ export default async function FosterAgencyMainPage() {
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-2 gap-6">
               {faqs.map((faq, index) => (
-                <Card key={index} className="glass-card rounded-modern-xl">
+                <Card key={index} className="section-card">
                   <CardHeader>
                     <CardTitle className="text-lg font-poppins">{faq.question}</CardTitle>
                   </CardHeader>
@@ -884,7 +884,7 @@ export default async function FosterAgencyMainPage() {
       </section>
 
       {/* 1️⃣3️⃣ CTA Block */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
+      <section className="py-16 md:py-24 relative overflow-hidden section-hero">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-green/40 to-secondary-blue/40" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary-green/30 rounded-full blur-3xl float-animation-slow" />
@@ -895,7 +895,7 @@ export default async function FosterAgencyMainPage() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
-          <Card className="glass-card-gradient border-0 text-text-charcoal rounded-modern-xl overflow-hidden shadow-2xl">
+          <Card className="section-card-contrast border-0 text-text-charcoal rounded-modern-xl overflow-hidden shadow-2xl">
             <div className="absolute inset-0 bg-gradient-to-br from-primary-green/90 to-secondary-blue/80 z-0" />
             <CardContent className="p-8 md:p-12 relative z-10">
               <div className="max-w-3xl mx-auto text-center">

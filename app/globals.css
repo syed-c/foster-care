@@ -420,3 +420,36 @@
     transform: translateY(0);
   }
 }
+
+/* Section Differentiation Styles */
+.section-hero {
+  @apply bg-gradient-to-br from-primary/10 to-secondary/10 border-b-4 border-primary/20;
+}
+
+.section-alt {
+  @apply bg-gradient-to-br from-background to-secondary/5;
+}
+
+.section-highlight {
+  @apply bg-gradient-to-br from-primary/20 to-secondary/10;
+}
+
+.section-contrast {
+  @apply bg-gradient-to-br from-secondary/20 to-accent/10;
+}
+
+.section-muted {
+  @apply bg-background/50;
+}
+
+.section-card {
+  @apply glass-card rounded-modern-xl;
+}
+
+.section-card-alt {
+  @apply bg-white/80 backdrop-blur-lg border border-white/60 shadow-lg rounded-modern-xl;
+}
+
+.section-card-contrast {
+  @apply bg-gradient-to-br from-primary/10 to-secondary/5 border border-primary/10 rounded-modern-xl;
+}

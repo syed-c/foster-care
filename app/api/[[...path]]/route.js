@@ -47,6 +47,9 @@ async function handleRoute(request, { params }) {
 
       let query = supabaseAdmin.from('agencies').select('*', { count: 'exact' });
 
+      // Only show verified agencies in public listings
+      query = query.eq('verified', true);
+
       // User ID filter (for dashboard)
       if (userId) {
         query = query.eq('user_id', userId);
@@ -127,6 +130,7 @@ async function handleRoute(request, { params }) {
         .from('agencies')
         .select('*')
         .eq('id', agencyId)
+        .eq('verified', true) // Only show verified agencies
         .single();
 
       if (agencyError || !agency) {

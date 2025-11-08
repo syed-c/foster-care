@@ -4,8 +4,10 @@ import {
   getContentBySlug, 
   updateContent, 
   saveContent, 
-  searchContent 
+  ensureContentExists
 } from '@/lib/cms';
+import { updateCanonicalSlug } from '@/services/locationService';
+import { locationSchemas, getDefaultContent } from '@/lib/locationSchemas';
 
 export async function GET(request) {
   try {
@@ -14,10 +16,15 @@ export async function GET(request) {
     const query = searchParams.get('q');
 
     if (slug) {
-      const content = getContentBySlug(slug);
+      // Try to find existing content
+      let content = getContentBySlug(slug);
+      
+      // If no content exists, we might need to create default content
+      // But we need more context about the location type
       if (!content) {
-        return NextResponse.json({ error: 'Content not found' }, { status: 404 });
+        content = saveContent({ slug });
       }
+      
       return NextResponse.json(content);
     }
 
@@ -45,6 +52,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
     }
 
+    // Save content with structured sections
     saveContent({ ...content, slug });
     return NextResponse.json({ success: true, slug });
   } catch (error) {
@@ -58,10 +66,25 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     const body = await request.json();
-    const { slug, ...updates } = body;
+    const { slug, canonical_slug, template_type, ...updates } = body;
 
     if (!slug) {
       return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
+    }
+
+    // If canonical_slug is provided, we're updating location content
+    if (canonical_slug) {
+      // Extract location info from slug
+      const parts = slug.split('/');
+      if (parts.length >= 4 && parts[0] === 'foster-agency') {
+        // This is a location content update
+        // Update with structured sections
+        const updated = updateContent(slug, {
+          ...updates,
+          template_type: template_type || 'city'
+        });
+        return NextResponse.json({ success: true, content: updated });
+      }
     }
 
     const updated = updateContent(slug, updates);
@@ -73,4 +96,3 @@ export async function PUT(request) {
     );
   }
 }
-

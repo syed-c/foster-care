@@ -39,7 +39,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-background-offwhite">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary-green/20 to-secondary-blue/20 py-16 md:py-24 relative overflow-hidden">
+      <div className="section-hero py-16 md:py-24 relative overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-10 left-10 w-72 h-72 bg-primary-green/15 rounded-full blur-3xl float-animation" />
@@ -70,7 +70,7 @@ export default function ContactPage() {
         <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Information */}
           <div>
-            <Card className="mb-6 glass-card rounded-modern-xl">
+            <Card className="mb-6 section-card">
               <CardHeader>
                 <CardTitle className="font-poppins">Contact Information</CardTitle>
                 <CardDescription className="font-inter">
@@ -118,7 +118,7 @@ export default function ContactPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-primary-green/10 to-secondary-blue/10 border-primary-green glass-card rounded-modern-xl">
+            <Card className="section-card-contrast">
               <CardHeader>
                 <CardTitle className="font-poppins">Are You a Fostering Agency?</CardTitle>
               </CardHeader>
@@ -135,7 +135,7 @@ export default function ContactPage() {
 
           {/* Contact Form */}
           <div>
-            <Card className="glass-card rounded-modern-xl">
+            <Card className="section-card">
               <CardHeader>
                 <CardTitle className="font-poppins">Send Us a Message</CardTitle>
                 <CardDescription className="font-inter">

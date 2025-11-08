@@ -68,11 +68,24 @@ export default function SignUpPage() {
 
       // Auto sign in after successful registration
       setTimeout(async () => {
-        await signIn('credentials', {
+        const result = await signIn('credentials', {
           email: formData.email,
           password: formData.password,
-          callbackUrl: formData.role === 'agency' ? '/dashboard' : '/',
+          redirect: false,
         });
+        
+        if (result.error) {
+          setError('Failed to sign in');
+          setLoading(false);
+          return;
+        }
+        
+        // Redirect based on role
+        if (formData.role === 'agency') {
+          router.push('/auth/signup/agency-registration');
+        } else {
+          router.push('/');
+        }
       }, 2000);
 
     } catch (err) {
@@ -92,7 +105,7 @@ export default function SignUpPage() {
           <CheckCircle2 className="w-20 h-20 text-green-600 mx-auto mb-4" />
           <CardTitle className="text-2xl mb-2 font-poppins">Account Created!</CardTitle>
           <CardDescription className="font-inter">
-            Redirecting you to your dashboard...
+            Redirecting you...
           </CardDescription>
         </Card>
       </div>

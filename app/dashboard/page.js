@@ -47,6 +47,12 @@ export default function DashboardPage() {
 
   const fetchDashboardData = async () => {
     try {
+      // Check if user data exists
+      if (!session?.user?.id) {
+        console.error('User data not available');
+        return;
+      }
+      
       // Fetch agency data
       const agencyResponse = await fetch(`/api/agencies?userId=${session.user.id}`);
       if (agencyResponse.ok) {
@@ -55,15 +61,6 @@ export default function DashboardPage() {
           setAgency(agencyData.agencies[0]);
         }
       }
-
-      // TODO: Fetch analytics data when implemented
-      setStats({
-        profileViews: 234,
-        contactClicks: 45,
-        emailClicks: 28,
-        phoneClicks: 17,
-        websiteClicks: 32,
-      });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -82,32 +79,21 @@ export default function DashboardPage() {
     );
   }
 
-  if (!session) {
+  if (!session || !session.user) {
     return null;
   }
 
-  // User doesn't have an agency yet
-  if (!agency && session.user.role === 'agency') {
-    return (
-      <div className="min-h-screen bg-background-offwhite py-12 px-4">
-        <div className="container mx-auto max-w-4xl">
-          <Card className="glass-card p-8 text-center rounded-modern">
-            <Building2 className="w-20 h-20 text-primary-green mx-auto mb-4" />
-            <CardTitle className="text-2xl mb-2 font-poppins">Welcome to Your Dashboard!</CardTitle>
-            <CardDescription className="mb-6 font-inter">
-              Let's set up your agency profile to get started.
-            </CardDescription>
-            <Button 
-              size="lg"
-              className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 font-inter"
-              asChild
-            >
-              <Link href="/dashboard/profile/setup">Create Agency Profile</Link>
-            </Button>
-          </Card>
-        </div>
-      </div>
-    );
+  // Check if agency user hasn't completed registration
+  if (session.user.role === 'agency') {
+    if (!agency) {
+      // No agency profile at all, redirect to registration
+      router.push('/auth/signup/agency-registration');
+      return null;
+    } else if (!agency.registration_complete) {
+      // Agency exists but registration not complete, redirect to registration
+      router.push('/auth/signup/agency-registration');
+      return null;
+    }
   }
 
   // Regular user dashboard (not an agency)
@@ -379,9 +365,9 @@ export default function DashboardPage() {
               <CardContent className="space-y-6">
                 <div>
                   <h3 className="font-semibold mb-2 font-poppins">Profile Settings</h3>
-                  <p className="text-sm text-gray-600 mb-4 font-inter">
+                  <div className="text-sm text-gray-600 mb-4 font-inter">
                     Manage your agency information, logo, and contact details.
-                  </p>
+                  </div>
                   <Button className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal font-inter" asChild>
                     <Link href="/dashboard/profile">Edit Profile</Link>
                   </Button>
@@ -389,9 +375,9 @@ export default function DashboardPage() {
                 
                 <div>
                   <h3 className="font-semibold mb-2 font-poppins">Subscription</h3>
-                  <p className="text-sm text-gray-600 mb-4 font-inter">
+                  <div className="text-sm text-gray-600 mb-4 font-inter">
                     Current plan: <Badge className="bg-primary-green font-inter">{agency?.subscription_plan || 'Free'}</Badge>
-                  </p>
+                  </div>
                   <Button variant="outline" className="font-inter" asChild>
                     <Link href="/dashboard/subscription">Upgrade Plan</Link>
                   </Button>

@@ -21,82 +21,49 @@ export default function AdminAgencies() {
   const router = useRouter();
   const [agencies, setAgencies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    fetchAgencies();
-  }, [currentPage, filter]);
+    // Check if user is admin by verifying admin token
+    const checkAdminStatus = async () => {
+      try {
+        const response = await fetch('/api/auth/admin/me');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user && data.user.role === 'admin') {
+            setIsAdmin(true);
+          } else {
+            router.push('/admin/signin');
+          }
+        } else {
+          router.push('/admin/signin');
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        router.push('/admin/signin');
+      }
+    };
+
+    checkAdminStatus();
+  }, [router]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAgencies();
+    }
+  }, [isAdmin, currentPage, filter]);
 
   const fetchAgencies = async () => {
     try {
       setLoading(true);
       
-      // Mock data for testing - this will ensure agencies are displayed
-      let mockAgencies = [
-        {
-          id: 1,
-          name: "Happy Foster Care Agency",
-          city: "London",
-          type: "Foster Agency",
-          verified: true,
-          featured: true,
-          rating: 4.5,
-          review_count: 12,
-          status: "approved"
-        },
-        {
-          id: 2,
-          name: "Caring Hearts Foster Services",
-          city: "Manchester",
-          type: "Foster Agency",
-          verified: false,
-          featured: false,
-          rating: 4.2,
-          review_count: 8,
-          status: "pending"
-        },
-        {
-          id: 3,
-          name: "Family First Fostering",
-          city: "Birmingham",
-          type: "Foster Agency",
-          verified: true,
-          featured: false,
-          rating: 4.7,
-          review_count: 15,
-          status: "approved"
-        }
-      ];
-      
-      // Apply filters
-      if (filter !== 'all') {
-        mockAgencies = mockAgencies.filter(agency => agency.status === filter.toLowerCase());
-      }
-      
-      // Apply search
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        mockAgencies = mockAgencies.filter(agency => 
-          agency.name.toLowerCase().includes(query) || 
-          agency.city.toLowerCase().includes(query)
-        );
-      }
-      
-      setAgencies(mockAgencies);
-      setTotalPages(1);
-      setLoading(false);
-      
-      // Original API call code commented out
-      /*
       const params = new URLSearchParams();
       params.append('page', currentPage);
       params.append('limit', 50); // Increased limit to show more agencies
-      
-      // Debug log
-      console.log('Fetching agencies with filter:', filter);
       
       if (filter !== 'all') {
         params.append('status', filter);
@@ -112,7 +79,6 @@ export default function AdminAgencies() {
         setAgencies(data.agencies || []);
         setTotalPages(data.totalPages || 1);
       }
-      */
     } catch (error) {
       console.error('Error fetching agencies:', error);
     } finally {
@@ -122,15 +88,6 @@ export default function AdminAgencies() {
 
   const handleApprove = async (agencyId) => {
     try {
-      // For mock data implementation
-      setAgencies(prevAgencies => 
-        prevAgencies.map(agency => 
-          agency.id === agencyId ? { ...agency, status: 'approved' } : agency
-        )
-      );
-      
-      // Uncomment for real API implementation
-      /*
       const response = await fetch(`/api/admin/agencies/${agencyId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -139,7 +96,6 @@ export default function AdminAgencies() {
       if (response.ok) {
         fetchAgencies();
       }
-      */
     } catch (error) {
       console.error('Error approving agency:', error);
     }
@@ -147,15 +103,6 @@ export default function AdminAgencies() {
 
   const handleReject = async (agencyId) => {
     try {
-      // For mock data implementation
-      setAgencies(prevAgencies => 
-        prevAgencies.map(agency => 
-          agency.id === agencyId ? { ...agency, status: 'rejected' } : agency
-        )
-      );
-      
-      // Uncomment for real API implementation
-      /*
       const response = await fetch(`/api/admin/agencies/${agencyId}/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -164,7 +111,6 @@ export default function AdminAgencies() {
       if (response.ok) {
         fetchAgencies();
       }
-      */
     } catch (error) {
       console.error('Error rejecting agency:', error);
     }
@@ -195,8 +141,19 @@ export default function AdminAgencies() {
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
     setCurrentPage(1);
-    // We don't need to call fetchAgencies here as it's already called in the useEffect
   };
+
+  // If not admin, don't render the agencies list
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background-offwhite">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary-green border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 font-inter">Checking admin access...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background-offwhite">
@@ -314,7 +271,7 @@ export default function AdminAgencies() {
                         {agency.status ? agency.status.charAt(0).toUpperCase() + agency.status.slice(1) : 'Pending'}
                       </Badge>
                       <Button size="sm" variant="outline" className="font-inter" asChild>
-                        <Link href={`/admin/agencies/${agency.id}`}>
+                        <Link href={`/agency/${agency.id}`}>
                           <Eye className="w-4 h-4 mr-1" />
                           View
                         </Link>
