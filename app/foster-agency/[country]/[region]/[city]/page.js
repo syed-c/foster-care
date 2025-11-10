@@ -1,5 +1,4 @@
 import { generateCityPaths, formatSlugToTitle, loadAllLocations } from '@/lib/locationData';
-import { ensureContentExists } from '@/lib/cms';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, ArrowRight, ChevronRight, Heart, Shield, Users, Star, ExternalLink, BookOpen, Award } from 'lucide-react';
+import { getLocationContentByCanonicalSlug } from '@/services/locationService';
 
 export async function generateStaticParams() {
   const paths = await generateCityPaths();
@@ -18,13 +18,11 @@ export async function generateMetadata({ params }) {
   const { country, region, city } = resolvedParams;
   const countryName = formatSlugToTitle(country);
   const regionName = formatSlugToTitle(region);
-  const slug = `${country}/${region}/${city}`;
-  const content = ensureContentExists(slug);
-
-  // Get city name from structure
-  const structure = await loadAllLocations();
-  const cityName = structure[country] && structure[country].regions[region] && structure[country].regions[region].cities[city] ? 
-    structure[country].regions[region].cities[city].name : formatSlugToTitle(city);
+  const cityName = formatSlugToTitle(city);
+  const canonicalSlug = `/foster-agency/${country}/${region}/${city}`;
+  
+  // Try to get content from the new location content system using canonical slug
+  const content = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
 
   return {
     title: content?.meta_title || `Foster Agencies in ${cityName}, ${regionName} | UK Directory`,
@@ -104,8 +102,10 @@ export default async function CityPage({ params }) {
   const cityName = cityData ? cityData.name : formatSlugToTitle(city);
   const countryName = formatSlugToTitle(country);
   const regionName = formatSlugToTitle(region);
-  const slug = `${country}/${region}/${city}`;
-  const content = ensureContentExists(slug);
+  const canonicalSlug = `/foster-agency/${country}/${region}/${city}`;
+  
+  // Try to get content from the new location content system using canonical slug
+  const content = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
 
   if (!cityData) {
     notFound();
@@ -155,7 +155,7 @@ export default async function CityPage({ params }) {
   ];
 
   // Mock FAQs - in a real app, this would come from content management
-  const faqs = content?.faqs || [
+  const faqs = content?.faqs?.items || [
     {
       question: `How do I find foster agencies in ${cityName}?`,
       answer: `There are several ways to find foster agencies in ${cityName}. You can browse our directory above, contact your local authority (${getRegulatorForCountry(country)}) for recommendations, or search online for local fostering services. Most agencies offer initial consultations to discuss your interest in fostering.`
@@ -249,10 +249,10 @@ export default async function CityPage({ params }) {
               <span className="text-sm font-medium text-text-charcoal font-inter">{cityName}</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-text-charcoal mb-6 font-poppins">
-              {content?.h1 || `Foster Agencies in ${cityName}`}
+              {content?.title || content?.hero?.heading || `Foster Agencies in ${cityName}`}
             </h1>
             <p className="text-xl text-gray-600 mb-8 font-inter">
-              {content?.hero_text || `Find accredited foster agencies in ${cityName}, ${regionName}`}
+              {content?.meta_description || content?.hero?.subheading || `Find accredited foster agencies in ${cityName}, ${regionName}`}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Button
@@ -260,7 +260,7 @@ export default async function CityPage({ params }) {
                 className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic"
                 asChild
               >
-                <Link href="/contact">Talk to a Foster Advisor</Link>
+                <Link href="/contact">{content?.hero?.cta_primary?.text || "Talk to a Foster Advisor"}</Link>
               </Button>
               <Button
                 size="lg"
@@ -268,7 +268,7 @@ export default async function CityPage({ params }) {
                 className="glass font-inter px-8 py-6 text-lg"
                 asChild
               >
-                <Link href="#agencies">View Agencies</Link>
+                <Link href="#agencies">{content?.hero?.cta_secondary?.text || "View Agencies"}</Link>
               </Button>
             </div>
           </div>
@@ -285,14 +285,14 @@ export default async function CityPage({ params }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">About Fostering</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                About Fostering in {cityName}
+                {content?.about?.title || `About Fostering in ${cityName}`}
               </h2>
             </div>
             
             <Card className="section-card rounded-modern-xl p-6 md:p-8">
               <div className="prose max-w-none text-gray-600 font-inter">
-                {content?.intro_text ? (
-                  <div dangerouslySetInnerHTML={{ __html: content.intro_text }} />
+                {content?.about?.body ? (
+                  <div dangerouslySetInnerHTML={{ __html: content.about.body }} />
                 ) : (
                   <div className="space-y-4">
                     <p>
@@ -342,113 +342,52 @@ export default async function CityPage({ params }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">Fostering Types</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                Types of Fostering Available in {cityName}
+                {content?.types?.title || `Types of Fostering Available in ${cityName}`}
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                Various fostering opportunities are available to suit different circumstances and preferences
+                {content?.types?.description || `Various fostering opportunities are available to suit different circumstances and preferences`}
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="section-card rounded-modern-xl p-6">
-                <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
-                  <Heart className="w-5 h-5 text-primary-green mr-2" />
-                  Short-term Fostering
-                </h3>
-                <p className="text-gray-600 mb-4 font-inter">
-                  Providing temporary care for children while plans are made for their future. 
-                  This could last from a few days to several months.
-                </p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center">
-                    <div className="w-5 h-5 rounded-full bg-primary-green/10 flex items-center justify-center mr-2">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Emergency placements</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-5 h-5 rounded-full bg-primary-green/10 flex items-center justify-center mr-2">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Respite care for birth families</span>
-                  </li>
-                </ul>
-              </Card>
-              
-              <Card className="section-card rounded-modern-xl p-6">
-                <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
-                  <Shield className="w-5 h-5 text-primary-green mr-2" />
-                  Long-term Fostering
-                </h3>
-                <p className="text-gray-600 mb-4 font-inter">
-                  Providing stable, long-term care for children who cannot return to their birth families. 
-                  This often lasts until the child reaches adulthood.
-                </p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center">
-                    <div className="w-5 h-5 rounded-full bg-primary-green/10 flex items-center justify-center mr-2">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Permanent placements</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-5 h-5 rounded-full bg-primary-green/10 flex items-center justify-center mr-2">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Support through adolescence</span>
-                  </li>
-                </ul>
-              </Card>
-              
-              <Card className="section-card rounded-modern-xl p-6">
-                <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
-                  <Star className="w-5 h-5 text-primary-green mr-2" />
-                  Specialist Fostering
-                </h3>
-                <p className="text-gray-600 mb-4 font-inter">
-                  Caring for children with specific needs, including disabilities, behavioral challenges, 
-                  or those requiring therapeutic support.
-                </p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center">
-                    <div className="w-5 h-5 rounded-full bg-primary-green/10 flex items-center justify-center mr-2">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Therapeutic care</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-5 h-5 rounded-full bg-primary-green/10 flex items-center justify-center mr-2">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Parent and baby placements</span>
-                  </li>
-                </ul>
-              </Card>
-              
-              <Card className="section-card rounded-modern-xl p-6">
-                <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
-                  <Award className="w-5 h-5 text-primary-green mr-2" />
-                  Foster-to-Adopt
-                </h3>
-                <p className="text-gray-600 mb-4 font-inter">
-                  Initially fostering a child with the possibility of adoption if the court decides 
-                  it's in the child's best interests.
-                </p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center">
-                    <div className="w-5 h-5 rounded-full bg-primary-green/10 flex items-center justify-center mr-2">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Pathway to adoption</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-5 h-5 rounded-full bg-primary-green/10 flex items-center justify-center mr-2">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Legal support throughout process</span>
-                  </li>
-                </ul>
-              </Card>
+              {(content?.types?.items || [
+                {
+                  name: "Short-term Fostering",
+                  description: "Providing temporary care for children while plans are made for their future. This could last from a few days to several months."
+                },
+                {
+                  name: "Long-term Fostering",
+                  description: "Providing stable, long-term care for children who cannot return to their birth families. This often lasts until the child reaches adulthood."
+                },
+                {
+                  name: "Specialist Fostering",
+                  description: "Caring for children with specific needs, including disabilities, behavioral challenges, or those requiring therapeutic support."
+                }
+              ]).map((type, index) => (
+                <Card key={index} className="section-card rounded-modern-xl p-6">
+                  <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
+                    <Heart className="w-5 h-5 text-primary-green mr-2" />
+                    {type.name}
+                  </h3>
+                  <p className="text-gray-600 mb-4 font-inter">
+                    {type.description}
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center">
+                      <div className="w-5 h-5 rounded-full bg-primary-green/10 flex items-center justify-center mr-2">
+                        <span className="text-primary-green text-xs">✓</span>
+                      </div>
+                      <span>Emergency placements</span>
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-5 h-5 rounded-full bg-primary-green/10 flex items-center justify-center mr-2">
+                        <span className="text-primary-green text-xs">✓</span>
+                      </div>
+                      <span>Respite care for birth families</span>
+                    </li>
+                  </ul>
+                </Card>
+              ))}
             </div>
           </div>
         </div>

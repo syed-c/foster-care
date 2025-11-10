@@ -51,7 +51,18 @@ BEGIN
   END IF;
 END $$;
 
--- E. Ensure unique constraint for upsert:
+-- E. Add editable column to locations if it doesn't exist
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'locations' AND column_name = 'editable'
+  ) THEN
+    ALTER TABLE public.locations ADD COLUMN editable boolean DEFAULT true;
+  END IF;
+END $$;
+
+-- F. Ensure unique constraint for upsert:
 DO $$ 
 BEGIN
   IF NOT EXISTS (
@@ -64,16 +75,19 @@ BEGIN
   END IF;
 END $$;
 
--- F. Convert any stringified JSONB -> proper jsonb:
+-- G. Convert any stringified JSONB -> proper jsonb:
 UPDATE public.location_content
 SET content_json = (content_json::text)::jsonb
 WHERE jsonb_typeof(content_json) IS NULL;
 
--- G. Create indices for speed:
+-- H. Create indices for speed:
 CREATE INDEX IF NOT EXISTS idx_location_content_location_id ON public.location_content(location_id);
 CREATE INDEX IF NOT EXISTS idx_locations_slug ON public.locations(slug);
 CREATE INDEX IF NOT EXISTS idx_locations_canonical_slug ON public.locations(canonical_slug);
 CREATE INDEX IF NOT EXISTS idx_location_content_canonical_slug ON public.location_content(canonical_slug);
+
+-- I. Refresh schema cache
+NOTIFY pgrst, 'reload schema';
 
 -- Log results
 SELECT 'Database audit complete' as status;

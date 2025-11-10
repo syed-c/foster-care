@@ -36,7 +36,14 @@ async function buildCanonicalSlug(locationId, locationType) {
           .eq('id', currentId)
           .single();
         
-        if (error || !data) break;
+        if (error || !data) {
+          console.warn('Error fetching city data:', error?.message || 'No data returned');
+          // Try to use the slug from the data we have
+          if (data && data.slug) {
+            parts.unshift(data.slug);
+          }
+          break;
+        }
         node = data;
         currentId = node.region_id;
         currentType = 'region';
@@ -47,7 +54,14 @@ async function buildCanonicalSlug(locationId, locationType) {
           .eq('id', currentId)
           .single();
         
-        if (error || !data) break;
+        if (error || !data) {
+          console.warn('Error fetching region data:', error?.message || 'No data returned');
+          // Try to use the slug from the data we have
+          if (data && data.slug) {
+            parts.unshift(data.slug);
+          }
+          break;
+        }
         node = data;
         currentId = node.country_id;
         currentType = 'country';
@@ -58,7 +72,14 @@ async function buildCanonicalSlug(locationId, locationType) {
           .eq('id', currentId)
           .single();
         
-        if (error || !data) break;
+        if (error || !data) {
+          console.warn('Error fetching country data:', error?.message || 'No data returned');
+          // Try to use the slug from the data we have
+          if (data && data.slug) {
+            parts.unshift(data.slug);
+          }
+          break;
+        }
         node = data;
         currentId = null; // End of chain
       } else {
@@ -73,10 +94,17 @@ async function buildCanonicalSlug(locationId, locationType) {
       parts.unshift(slug);
     }
     
+    // Make sure we have at least one part
+    if (parts.length === 0) {
+      // Fallback to using the locationId as the slug
+      parts.unshift(locationId);
+    }
+    
     return '/foster-agency/' + parts.join('/');
   } catch (error) {
-    console.error('Error building canonical slug:', error);
-    throw error;
+    console.error('Error building canonical slug, using fallback:', error);
+    // Fallback to a basic canonical slug
+    return `/foster-agency/${locationId}`;
   }
 }
 
@@ -140,9 +168,11 @@ async function columnExists(tableName, columnName) {
       return false;
     }
     
-    // If there's any other error, re-throw it
+    // If there's any other error (like connection issues), assume column exists
+    // to avoid breaking the application
     if (error) {
-      throw error;
+      console.warn(`Connection error when checking column ${columnName} in ${tableName}, assuming it exists:`, error.message);
+      return true;
     }
     
     // If no error, the column exists
@@ -152,8 +182,9 @@ async function columnExists(tableName, columnName) {
     if (error.message && error.message.includes(`column "${columnName}" does not exist`)) {
       return false;
     }
-    // Re-throw any other errors
-    throw error;
+    // For other errors (like connection issues), assume column exists
+    console.warn(`Error checking column ${columnName} in ${tableName}, assuming it exists:`, error.message);
+    return true;
   }
 }
 
@@ -171,39 +202,56 @@ async function getLocationTree(includeContent = false) {
     try {
       hasCanonicalSlug = await columnExists('countries', 'canonical_slug');
     } catch (error) {
-      console.warn('Error checking for canonical_slug column:', error);
-      hasCanonicalSlug = false;
+      console.warn('Error checking for canonical_slug column, assuming it exists:', error.message);
+      hasCanonicalSlug = true; // Assume it exists to avoid breaking the app
     }
     
     if (hasCanonicalSlug) {
-      // Load all countries with canonical_slug
-      const { data: countryData, error: countriesError } = await supabaseAdmin
-        .from('countries')
-        .select('id, name, slug, canonical_slug')
-        .order('name');
-      
-      if (countriesError) throw countriesError;
-      countries = countryData;
-      
-      // Load all regions with canonical_slug
-      const { data: regionData, error: regionsError } = await supabaseAdmin
-        .from('regions')
-        .select('id, name, slug, canonical_slug, country_id')
-        .order('name');
-      
-      if (regionsError) throw regionsError;
-      regions = regionData;
-      
-      // Load all cities with canonical_slug
-      const { data: cityData, error: citiesError } = await supabaseAdmin
-        .from('cities')
-        .select('id, name, slug, canonical_slug, region_id')
-        .order('name');
-      
-      if (citiesError) throw citiesError;
-      cities = cityData;
-    } else {
-      console.warn('canonical_slug column not found, falling back to slug-based canonical slugs');
+      try {
+        // Load all countries with canonical_slug
+        const { data: countryData, error: countriesError } = await supabaseAdmin
+          .from('countries')
+          .select('id, name, slug, canonical_slug')
+          .order('name');
+        
+        if (countriesError) {
+          console.warn('Error loading countries, falling back to slug-based canonical slugs:', countriesError.message);
+          throw countriesError; // This will trigger the fallback
+        }
+        countries = countryData;
+        
+        // Load all regions with canonical_slug
+        const { data: regionData, error: regionsError } = await supabaseAdmin
+          .from('regions')
+          .select('id, name, slug, canonical_slug, country_id')
+          .order('name');
+        
+        if (regionsError) {
+          console.warn('Error loading regions, falling back to slug-based canonical slugs:', regionsError.message);
+          throw regionsError; // This will trigger the fallback
+        }
+        regions = regionData;
+        
+        // Load all cities with canonical_slug
+        const { data: cityData, error: citiesError } = await supabaseAdmin
+          .from('cities')
+          .select('id, name, slug, canonical_slug, region_id')
+          .order('name');
+        
+        if (citiesError) {
+          console.warn('Error loading cities, falling back to slug-based canonical slugs:', citiesError.message);
+          throw citiesError; // This will trigger the fallback
+        }
+        cities = cityData;
+      } catch (error) {
+        // If any query fails, fall back to the slug-based approach
+        console.warn('Falling back to slug-based canonical slugs due to query errors');
+        hasCanonicalSlug = false;
+      }
+    }
+    
+    if (!hasCanonicalSlug) {
+      console.warn('canonical_slug column not found or query failed, falling back to slug-based canonical slugs');
       
       // Load all countries without canonical_slug
       const { data: countryData, error: countriesError } = await supabaseAdmin
@@ -211,7 +259,10 @@ async function getLocationTree(includeContent = false) {
         .select('id, name, slug')
         .order('name');
       
-      if (countriesError) throw countriesError;
+      if (countriesError) {
+        console.error('Critical error loading countries:', countriesError);
+        throw countriesError;
+      }
       countries = countryData.map(country => ({
         ...country,
         canonical_slug: `/foster-agency/${country.slug}`
@@ -223,7 +274,10 @@ async function getLocationTree(includeContent = false) {
         .select('id, name, slug, country_id')
         .order('name');
       
-      if (regionsError) throw regionsError;
+      if (regionsError) {
+        console.error('Critical error loading regions:', regionsError);
+        throw regionsError;
+      }
       
       // We need to join with countries to get the country slug for building canonical_slug
       const { data: countryResult, error: countryError } = await supabaseAdmin
@@ -231,7 +285,10 @@ async function getLocationTree(includeContent = false) {
         .select('id, slug')
         .order('name');
       
-      if (countryError) throw countryError;
+      if (countryError) {
+        console.error('Critical error loading countries for region mapping:', countryError);
+        throw countryError;
+      }
       
       const countryMap = {};
       countryResult.forEach(country => {
@@ -249,20 +306,29 @@ async function getLocationTree(includeContent = false) {
         .select('id, name, slug, region_id')
         .order('name');
       
-      if (citiesError) throw citiesError;
+      if (citiesError) {
+        console.error('Critical error loading cities:', citiesError);
+        throw citiesError;
+      }
       
       // We need to join with regions and countries to get the slugs for building canonical_slug
       const { data: regionResult, error: regionError } = await supabaseAdmin
         .from('regions')
         .select('id, slug, country_id');
       
-      if (regionError) throw regionError;
+      if (regionError) {
+        console.error('Critical error loading regions for city mapping:', regionError);
+        throw regionError;
+      }
       
       const { data: countryResult2, error: countryError2 } = await supabaseAdmin
         .from('countries')
         .select('id, slug');
       
-      if (countryError2) throw countryError2;
+      if (countryError2) {
+        console.error('Critical error loading countries for city mapping:', countryError2);
+        throw countryError2;
+      }
       
       const regionMap = {};
       regionResult.forEach(region => {
@@ -356,7 +422,8 @@ async function getLocationTree(includeContent = false) {
     return tree;
   } catch (error) {
     console.error('Error getting location tree:', error);
-    throw error;
+    // Return an empty tree as a fallback
+    return [];
   }
 }
 
@@ -392,29 +459,84 @@ async function getLocationContentBySlug(slug) {
  */
 async function getLocationContentByCanonicalSlug(canonicalSlug) {
   try {
-    // First try to get content directly from location_content table using canonical_slug
+    console.log('Fetching content for canonical slug:', canonicalSlug);
+    
+    // Validate that we have a canonical slug
+    if (!canonicalSlug) {
+      console.warn('No canonical slug provided');
+      return null;
+    }
+    
+    // Ensure the canonical slug starts with /foster-agency/
+    let formattedCanonicalSlug = canonicalSlug;
+    if (!canonicalSlug.startsWith('/foster-agency/')) {
+      formattedCanonicalSlug = `/foster-agency/${canonicalSlug.replace(/^\/+/, '')}`;
+      console.log('Formatted canonical slug:', formattedCanonicalSlug);
+    }
+    
+    // First, try to query location_content directly using the canonical_slug column
     const { data: directData, error: directError } = await supabaseAdmin
       .from('location_content')
       .select('content_json')
-      .eq('canonical_slug', canonicalSlug)
+      .eq('canonical_slug', formattedCanonicalSlug)
       .maybeSingle();
 
-    if (!directError && directData) {
-      return directData.content_json || null;
+    if (directData && !directError) {
+      console.log('Data fetched directly for canonical slug:', formattedCanonicalSlug, directData);
+      return directData?.content_json || null;
     }
 
-    // If that fails, try joining with locations table
+    // If direct query fails or returns no data, try the join approach
+    // This is similar to how getLocationContentBySlug works
     const { data, error } = await supabaseAdmin
       .from('location_content')
-      .select('content_json')
-      .eq('locations.canonical_slug', canonicalSlug)
+      .select('content_json, locations!inner(canonical_slug)')
+      .eq('locations.canonical_slug', formattedCanonicalSlug)
       .maybeSingle();
 
     if (error) {
       console.error('Error fetching location content by canonical slug:', error);
+      // If we get a PostgREST error about locations not being embedded, 
+      // it means we're trying to access a relationship incorrectly
+      if (error.code === 'PGRST108') {
+        console.log('PostgREST embedded resource error, trying alternative approach');
+        
+        // Try to get the location first, then get its content
+        const { data: locationData, error: locationError } = await supabaseAdmin
+          .from('locations')
+          .select('id')
+          .eq('canonical_slug', formattedCanonicalSlug)
+          .maybeSingle();
+
+        if (locationError) {
+          console.error('Error finding location by canonical slug:', locationError);
+          return null;
+        }
+
+        if (!locationData) {
+          console.log('No location found for canonical slug:', formattedCanonicalSlug);
+          return null;
+        }
+
+        // Now get the content using the location_id
+        const { data: contentData, error: contentError } = await supabaseAdmin
+          .from('location_content')
+          .select('content_json')
+          .eq('location_id', locationData.id)
+          .maybeSingle();
+
+        if (contentError) {
+          console.error('Error fetching location content by location_id:', contentError);
+          return null;
+        }
+
+        return contentData?.content_json || null;
+      }
+      
       return null;
     }
 
+    console.log('Data fetched for canonical slug:', formattedCanonicalSlug, data);
     return data?.content_json || null;
   } catch (error) {
     console.error('Error getting location content by canonical slug:', error);

@@ -86,17 +86,20 @@ export default function LocationTree({
                     {getLocationTypeLabel(node.type)}
                   </span>
                 </div>
-                {node.editable && (
-                  <span
-                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-6 px-2 text-xs cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleNodeClick(node);
-                    }}
-                  >
-                    Edit
-                  </span>
-                )}
+                <div className="flex items-center">
+                  {node.editable && (
+                    <span
+                      className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-6 px-2 text-xs cursor-pointer mr-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleNodeClick(node);
+                      }}
+                    >
+                      Edit
+                    </span>
+                  )}
+                  <span className="text-xs text-muted-foreground truncate max-w-[150px]">{node.canonical_slug}</span>
+                </div>
               </div>
             </AccordionTrigger>
             <AccordionContent>
@@ -127,17 +130,20 @@ export default function LocationTree({
                     {getLocationTypeLabel(node.type)}
                   </span>
                 </div>
-                {node.editable && (
-                  <span
-                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-6 px-2 text-xs cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleNodeClick(node);
-                    }}
-                  >
-                    Edit
-                  </span>
-                )}
+                <div className="flex items-center">
+                  {node.editable && (
+                    <span
+                      className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-6 px-2 text-xs cursor-pointer mr-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleNodeClick(node);
+                      }}
+                    >
+                      Edit
+                    </span>
+                  )}
+                  <span className="text-xs text-muted-foreground truncate max-w-[150px]">{node.canonical_slug}</span>
+                </div>
               </div>
             </AccordionTrigger>
             <AccordionContent>

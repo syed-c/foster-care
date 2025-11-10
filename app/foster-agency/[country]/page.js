@@ -1,5 +1,5 @@
 import { generateCountryPaths, loadRegionsForCountry, formatSlugToTitle, buildLocationStructure, getRegionsForCountry, loadAllLocations } from '@/lib/locationData';
-import { ensureContentExists } from '@/lib/cms';
+import { getLocationContentByCanonicalSlug } from '@/services/locationService';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,10 +26,13 @@ export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const country = resolvedParams.country;
   const countryName = formatSlugToTitle(country);
-  const content = ensureContentExists(country);
+  const canonicalSlug = `/foster-agency/${country}`;
+  
+  // Try to get content from the new location content system using canonical slug
+  const content = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
 
   return {
-    title: content?.meta_title || `Foster Agencies in ${countryName} | UK Directory`,
+    title: content?.meta_title || content?.title || `Foster Agencies in ${countryName} | UK Directory`,
     description: content?.meta_description || `Find foster agencies in ${countryName}. Browse regions and cities to discover fostering services near you.`,
   };
 }
@@ -48,7 +51,10 @@ export default async function CountryPage({ params }) {
   })) : [];
   
   const countryName = formatSlugToTitle(country);
-  const content = ensureContentExists(country);
+  const canonicalSlug = `/foster-agency/${country}`;
+  
+  // Try to get content from the new location content system using canonical slug
+  const content = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
 
   if (regions.length === 0) {
     // Fallback to individual loading if structure is empty
@@ -126,7 +132,7 @@ export default async function CountryPage({ params }) {
   const currentPopularRegions = popularRegions[country] || popularRegions.england;
 
   // FAQs for each country
-  const faqs = content?.faqs || [
+  const faqs = content?.faqs?.items || content?.faqs || [
     {
       question: "Do you get paid to foster in " + countryName + "?",
       answer: "Yes, foster carers in " + countryName + " receive a fostering allowance to cover the costs of caring for a child. The amount varies depending on the agency and the child's needs, typically ranging from £400-£600 per week per child."
@@ -222,10 +228,10 @@ export default async function CountryPage({ params }) {
               <span className="text-sm font-medium text-text-charcoal font-inter">{countryName}</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-text-charcoal mb-6 font-poppins">
-              {content?.h1 || `Foster Agencies in ${countryName}`}
+              {content?.title || `Foster Agencies in ${countryName}`}
             </h1>
             <p className="text-xl text-gray-600 mb-8 font-inter">
-              {content?.hero_text || `Find accredited foster agencies in ${countryName}`}
+              {content?.meta_description || `Find accredited foster agencies in ${countryName}`}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Button
@@ -276,8 +282,10 @@ export default async function CountryPage({ params }) {
             
             <Card className="section-card rounded-modern-xl p-6 md:p-8">
               <div className="prose max-w-none text-gray-600 font-inter">
-                {content?.intro_text ? (
-                  <div dangerouslySetInnerHTML={{ __html: content.intro_text }} />
+                {content?.overview?.body ? (
+                  <div dangerouslySetInnerHTML={{ __html: content.overview.body }} />
+                ) : content?.about?.body ? (
+                  <div dangerouslySetInnerHTML={{ __html: content.about.body }} />
                 ) : (
                   <div className="space-y-4">
                     <p>
@@ -346,7 +354,7 @@ export default async function CountryPage({ params }) {
               Foster Agency Finder by Region
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-              Browse foster agencies across {countryName} by region
+              {content?.agencyFinder?.intro || `Browse foster agencies across ${countryName} by region`}
             </p>
           </div>
 
@@ -376,34 +384,6 @@ export default async function CountryPage({ params }) {
               </div>
             </div>
           </Card>
-
-          {/* Popular Regions
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold text-text-charcoal mb-6 font-poppins text-center">
-              Popular Regions in {countryName}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {currentPopularRegions.map((region, index) => (
-                <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all">
-                  <div className="flex justify-between items-start">
-                    <h4 className="text-lg font-bold text-text-charcoal font-poppins">{region.name}</h4>
-                    <span className="bg-primary-green/10 text-primary-green text-xs px-2 py-1 rounded-full">
-                      {region.demand}
-                    </span>
-                  </div>
-                  <div className="flex justify-between mt-4">
-                    <span className="text-gray-600 text-sm">Agencies: {region.agencies}</span>
-                    <Link 
-                      href={`/foster-agency/${country}/${region.name.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="text-primary-green text-sm font-medium hover:underline"
-                    >
-                      View Agencies
-                    </Link>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div> */}
 
           {/* All Regions with Pagination */}
           <div className="max-w-6xl mx-auto">
@@ -477,24 +457,28 @@ export default async function CountryPage({ params }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">Popular Locations</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                Featured Popular Locations in {countryName}
+                {content?.popularLocations?.title || `Featured Popular Locations in ${countryName}`}
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                Discover top cities and towns in {countryName} with high demand for foster carers
+                {content?.popularLocations?.description || `Discover top cities and towns in ${countryName} with high demand for foster carers`}
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {currentPopularRegions.map((region, index) => (
+              {content?.popularLocations?.locations || currentPopularRegions.map((region, index) => (
                 <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all">
                   <div className="flex justify-between items-start">
-                    <h4 className="text-lg font-bold text-text-charcoal font-poppins">{region.name}</h4>
+                    <h4 className="text-lg font-bold text-text-charcoal font-poppins">
+                      {region.name}
+                    </h4>
                     <span className="bg-primary-green/10 text-primary-green text-xs px-2 py-1 rounded-full">
                       {region.demand}
                     </span>
                   </div>
                   <div className="flex justify-between mt-4">
-                    <span className="text-gray-600 text-sm">Agencies: {region.agencies}</span>
+                    <span className="text-gray-600 text-sm">
+                      Agencies: {region.agencies}
+                    </span>
                     <Link 
                       href={`/foster-agency/${country}/${region.name.toLowerCase().replace(/\s+/g, '-')}`}
                       className="text-primary-green text-sm font-medium hover:underline"
@@ -523,15 +507,15 @@ export default async function CountryPage({ params }) {
               <span className="text-sm font-medium text-text-charcoal font-inter">Top Agencies</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-              Top Foster Agencies in {countryName}
+              {content?.topAgencies?.title || `Top Foster Agencies in ${countryName}`}
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-              Connect with trusted fostering services across {countryName}
+              {content?.topAgencies?.description || `Connect with trusted fostering services across ${countryName}`}
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {featuredAgencies.map((agency) => (
+            {content?.topAgencies?.items || featuredAgencies.map((agency) => (
               <Card key={agency.id} className="section-card rounded-modern-xl hover-lift transition-all">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-4">
@@ -544,15 +528,17 @@ export default async function CountryPage({ params }) {
                       </Badge>
                     )}
                   </div>
-                  <CardTitle className="text-xl font-poppins">{agency.name}</CardTitle>
+                  <CardTitle className="text-xl font-poppins">
+                    {agency.name}
+                  </CardTitle>
                   <CardDescription className="flex items-center gap-1 mt-2 font-inter">
                     <MapPin className="w-4 h-4" />
-                    {agency.location.country}
+                    {agency.location?.country}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-4 font-inter">
-                    {agency.description}
+                    {agency.description || agency.summary}
                   </p>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-1">
@@ -560,7 +546,7 @@ export default async function CountryPage({ params }) {
                         <Star
                           key={i}
                           className={`w-4 h-4 ${
-                            i < Math.floor(agency.rating)
+                            i < Math.floor(agency.rating || 4.5)
                               ? "fill-yellow-400 text-yellow-400"
                               : "text-gray-300"
                           }`}
@@ -570,7 +556,9 @@ export default async function CountryPage({ params }) {
                         {agency.rating} ({agency.reviewCount} reviews)
                       </span>
                     </div>
-                    <Badge variant="outline" className="font-inter">{agency.type}</Badge>
+                    <Badge variant="outline" className="font-inter">
+                      {agency.type}
+                    </Badge>
                   </div>
                   <div className="flex flex-wrap gap-2 mb-4">
                     <a 
@@ -620,7 +608,7 @@ export default async function CountryPage({ params }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">Foster Care System</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                What is the Foster Care System Like in {countryName}?
+                {content?.fosterSystem?.title || `What is the Foster Care System Like in ${countryName}?`}
               </h2>
             </div>
             
@@ -628,96 +616,66 @@ export default async function CountryPage({ params }) {
               <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Heart className="w-5 h-5 text-primary-green mr-2" />
-                  Allowances & Support
+                  {content?.allowances?.title || "Allowances & Support"}
                 </h3>
                 <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Weekly fostering allowances to cover child care costs</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>24/7 support helpline for emergency assistance</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Regular supervision and mentoring</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Access to training and professional development</span>
-                  </li>
+                  {content?.allowances?.items || [
+                    { title: "Weekly fostering allowances to cover child care costs" },
+                    { title: "24/7 support helpline for emergency assistance" },
+                    { title: "Regular supervision and mentoring" },
+                    { title: "Access to training and professional development" }
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                        <span className="text-primary-green text-xs">✓</span>
+                      </div>
+                      <span>{item.title || item.description}</span>
+                    </li>
+                  ))}
                 </ul>
               </Card>
               
               <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <BookOpen className="w-5 h-5 text-primary-green mr-2" />
-                  Matching Process
+                  {content?.matchingProcess?.title || "Matching Process"}
                 </h3>
                 <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Initial enquiry and information session</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Formal application and documentation</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Home study and assessment</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Approval panel review</span>
-                  </li>
+                  {content?.matchingProcess?.items || [
+                    { title: "Initial enquiry and information session" },
+                    { title: "Formal application and documentation" },
+                    { title: "Home study and assessment" },
+                    { title: "Approval panel review" }
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                        <span className="text-primary-green text-xs">✓</span>
+                      </div>
+                      <span>{item.title || item.description}</span>
+                    </li>
+                  ))}
                 </ul>
               </Card>
               
               <Card className="section-card rounded-modern-xl p-6 md:col-span-2">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Award className="w-5 h-5 text-primary-green mr-2" />
-                  Training Requirements
+                  {content?.training?.title || "Training Requirements"}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4">
-                    <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mx-auto mb-3">
-                      <span className="text-primary-green font-bold">1</span>
+                  {content?.training?.programs || [
+                    { name: "Pre-approval Training", description: "Initial preparation courses before approval" },
+                    { name: "Induction Program", description: "Post-approval training for new carers" },
+                    { name: "Continuing Education", description: "Ongoing professional development" }
+                  ].map((program, index) => (
+                    <div key={index} className="text-center p-4">
+                      <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mx-auto mb-3">
+                        <span className="text-primary-green font-bold">{index + 1}</span>
+                      </div>
+                      <h4 className="font-bold mb-2">{program.name || program.title}</h4>
+                      <p className="text-sm text-gray-600">{program.description}</p>
                     </div>
-                    <h4 className="font-bold mb-2">Pre-approval Training</h4>
-                    <p className="text-sm text-gray-600">Initial preparation courses before approval</p>
-                  </div>
-                  <div className="text-center p-4">
-                    <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mx-auto mb-3">
-                      <span className="text-primary-green font-bold">2</span>
-                    </div>
-                    <h4 className="font-bold mb-2">Induction Program</h4>
-                    <p className="text-sm text-gray-600">Post-approval training for new carers</p>
-                  </div>
-                  <div className="text-center p-4">
-                    <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mx-auto mb-3">
-                      <span className="text-primary-green font-bold">3</span>
-                    </div>
-                    <h4 className="font-bold mb-2">Continuing Education</h4>
-                    <p className="text-sm text-gray-600">Ongoing professional development</p>
-                  </div>
+                  ))}
                 </div>
               </Card>
             </div>
@@ -734,42 +692,32 @@ export default async function CountryPage({ params }) {
               <span className="text-sm font-medium text-text-charcoal font-inter">Why Foster</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-              Why Choose to Foster in {countryName}?
+              {content?.whyFoster?.title || `Why Choose to Foster in ${countryName}?`}
             </h2>
             <p className="text-gray-600 mb-12 font-inter">
-              Make a meaningful difference in the lives of children in your community
+              {content?.whyFoster?.description || `Make a meaningful difference in the lives of children in your community`}
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-primary-green" />
+              {content?.whyFoster?.points || [
+                { text: "Help Children Locally", description: "Provide stable, loving homes for children in your own community who need care and support." },
+                { text: "Professional Support", description: "Access comprehensive training, 24/7 support, and ongoing guidance from experienced professionals." },
+                { text: "Make a Lasting Impact", description: "Contribute to positive outcomes for vulnerable children and strengthen your local community." }
+              ].map((point, index) => (
+                <div key={index} className="text-center">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mx-auto mb-4">
+                    {index === 0 && <Users className="w-8 h-8 text-primary-green" />}
+                    {index === 1 && <Shield className="w-8 h-8 text-primary-green" />}
+                    {index === 2 && <Heart className="w-8 h-8 text-primary-green" />}
+                  </div>
+                  <h3 className="text-xl font-bold text-text-charcoal mb-3 font-poppins">
+                    {point.text}
+                  </h3>
+                  <p className="text-gray-600 font-inter">
+                    {point.description}
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold text-text-charcoal mb-3 font-poppins">Help Children Locally</h3>
-                <p className="text-gray-600 font-inter">
-                  Provide stable, loving homes for children in your own community who need care and support.
-                </p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-8 h-8 text-primary-green" />
-                </div>
-                <h3 className="text-xl font-bold text-text-charcoal mb-3 font-poppins">Professional Support</h3>
-                <p className="text-gray-600 font-inter">
-                  Access comprehensive training, 24/7 support, and ongoing guidance from experienced professionals.
-                </p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-8 h-8 text-primary-green" />
-                </div>
-                <h3 className="text-xl font-bold text-text-charcoal mb-3 font-poppins">Make a Lasting Impact</h3>
-                <p className="text-gray-600 font-inter">
-                  Contribute to positive outcomes for vulnerable children and strengthen your local community.
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -785,15 +733,15 @@ export default async function CountryPage({ params }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">FAQs</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                FAQs About Fostering in {countryName}
+                {content?.faqs?.title || `FAQs About Fostering in ${countryName}`}
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                Common questions about becoming a foster carer in {countryName}
+                {content?.faqs?.description || `Common questions about becoming a foster carer in ${countryName}`}
               </p>
             </div>
             
             <Accordion type="single" collapsible className="space-y-4">
-              {faqs.map((faq, index) => (
+              {content?.faqs?.items || faqs.map((faq, index) => (
                 <AccordionItem key={index} value={`item-${index}`} className="section-card rounded-modern-xl px-6">
                   <AccordionTrigger className="text-left text-text-charcoal font-poppins hover:no-underline py-4">
                     {faq.question}

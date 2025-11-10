@@ -1,5 +1,5 @@
 import { generateRegionPaths, loadCitiesForRegion, formatSlugToTitle, loadAllLocations } from '@/lib/locationData';
-import { ensureContentExists } from '@/lib/cms';
+import { getLocationContentByCanonicalSlug } from '@/services/locationService';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,8 +18,10 @@ export async function generateMetadata({ params }) {
   const { country, region } = resolvedParams;
   const countryName = formatSlugToTitle(country);
   const regionName = formatSlugToTitle(region);
-  const slug = `${country}/${region}`;
-  const content = ensureContentExists(slug);
+  const canonicalSlug = `/foster-agency/${country}/${region}`;
+  
+  // Try to get content from the new location content system using canonical slug
+  const content = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
 
   return {
     title: content?.meta_title || `Foster Agencies in ${regionName}, ${countryName} | UK Directory`,
@@ -43,8 +45,10 @@ export default async function RegionPage({ params }) {
   
   const countryName = formatSlugToTitle(country);
   const regionName = formatSlugToTitle(region);
-  const slug = `${country}/${region}`;
-  const content = ensureContentExists(slug);
+  const canonicalSlug = `/foster-agency/${country}/${region}`;
+  
+  // Try to get content from the new location content system using canonical slug
+  const content = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
 
   if (cities.length === 0) {
     // Fallback to individual loading if structure is empty
@@ -105,7 +109,7 @@ export default async function RegionPage({ params }) {
   ];
 
   // FAQs for each region
-  const faqs = content?.faqs || [
+  const faqs = content?.faqs?.items || [
     {
       question: `How many foster families are needed in ${regionName}?`,
       answer: `${regionName} has a continuous need for foster families to provide care for children and young people. The exact number varies based on local demand, but there is always a need for dedicated carers who can provide stable, loving homes.`
@@ -199,10 +203,10 @@ export default async function RegionPage({ params }) {
               <span className="text-sm font-medium text-text-charcoal font-inter">{regionName}</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-text-charcoal mb-6 font-poppins">
-              {content?.h1 || `Foster Agencies in ${regionName}`}
+              {content?.title || `Foster Agencies in ${regionName}`}
             </h1>
             <p className="text-xl text-gray-600 mb-8 font-inter">
-              {content?.hero_text || `Find accredited foster agencies in ${regionName}, ${countryName}`}
+              {content?.meta_description || `Find accredited foster agencies in ${regionName}, ${countryName}`}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Button
@@ -235,14 +239,14 @@ export default async function RegionPage({ params }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">About Fostering</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                About Fostering in {regionName}
+                {content?.about?.title || `About Fostering in ${regionName}`}
               </h2>
             </div>
             
             <Card className="section-card rounded-modern-xl p-6 md:p-8">
               <div className="prose max-w-none text-gray-600 font-inter">
-                {content?.intro_text ? (
-                  <div dangerouslySetInnerHTML={{ __html: content.intro_text }} />
+                {content?.about?.body ? (
+                  <div dangerouslySetInnerHTML={{ __html: content.about.body }} />
                 ) : (
                   <div className="space-y-4">
                     <p>
@@ -293,10 +297,10 @@ export default async function RegionPage({ params }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">Benefits & Support</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                Benefits and Support for Foster Carers in {regionName}
+                {content?.benefits?.title || `Benefits and Support for Foster Carers in ${regionName}`}
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                Comprehensive support system for foster carers in {regionName}
+                {content?.benefits?.description || `Comprehensive support system for foster carers in ${regionName}`}
               </p>
             </div>
             
@@ -304,96 +308,66 @@ export default async function RegionPage({ params }) {
               <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Heart className="w-5 h-5 text-primary-green mr-2" />
-                  Financial Support
+                  {content?.benefits?.title || "Financial Support"}
                 </h3>
                 <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Weekly fostering allowances to cover child care costs</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Additional payments for special circumstances</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Birthday and holiday gift allowances</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Clothing and activity allowances</span>
-                  </li>
+                  {content?.benefits?.items || [
+                    { title: "Weekly fostering allowances to cover child care costs" },
+                    { title: "Additional payments for special circumstances" },
+                    { title: "Birthday and holiday gift allowances" },
+                    { title: "Clothing and activity allowances" }
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                        <span className="text-primary-green text-xs">✓</span>
+                      </div>
+                      <span>{item.title || item.description}</span>
+                    </li>
+                  ))}
                 </ul>
               </Card>
               
               <Card className="section-card rounded-modern-xl p-6">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Shield className="w-5 h-5 text-primary-green mr-2" />
-                  Professional Support
+                  {content?.support?.title || "Professional Support"}
                 </h3>
                 <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>24/7 support helpline for emergency assistance</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Regular supervision and mentoring</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Access to training and professional development</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                      <span className="text-primary-green text-xs">✓</span>
-                    </div>
-                    <span>Respite care when needed</span>
-                  </li>
+                  {content?.support?.items || [
+                    { title: "24/7 support helpline for emergency assistance" },
+                    { title: "Regular supervision and mentoring" },
+                    { title: "Access to training and professional development" },
+                    { title: "Respite care when needed" }
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                        <span className="text-primary-green text-xs">✓</span>
+                      </div>
+                      <span>{item.title || item.description}</span>
+                    </li>
+                  ))}
                 </ul>
               </Card>
               
               <Card className="section-card rounded-modern-xl p-6 md:col-span-2">
                 <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                   <Award className="w-5 h-5 text-primary-green mr-2" />
-                  Training and Development
+                  {content?.training?.title || "Training and Development"}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4">
-                    <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mx-auto mb-3">
-                      <span className="text-primary-green font-bold">1</span>
+                  {content?.training?.programs || [
+                    { name: "Pre-approval Training", description: "Initial preparation courses before approval" },
+                    { name: "Induction Program", description: "Post-approval training for new carers" },
+                    { name: "Continuing Education", description: "Ongoing professional development" }
+                  ].map((program, index) => (
+                    <div key={index} className="text-center p-4">
+                      <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mx-auto mb-3">
+                        <span className="text-primary-green font-bold">{index + 1}</span>
+                      </div>
+                      <h4 className="font-bold mb-2">{program.name || program.title}</h4>
+                      <p className="text-sm text-gray-600">{program.description}</p>
                     </div>
-                    <h4 className="font-bold mb-2">Pre-approval Training</h4>
-                    <p className="text-sm text-gray-600">Initial preparation courses before approval</p>
-                  </div>
-                  <div className="text-center p-4">
-                    <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mx-auto mb-3">
-                      <span className="text-primary-green font-bold">2</span>
-                    </div>
-                    <h4 className="font-bold mb-2">Induction Program</h4>
-                    <p className="text-sm text-gray-600">Post-approval training for new carers</p>
-                  </div>
-                  <div className="text-center p-4">
-                    <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mx-auto mb-3">
-                      <span className="text-primary-green font-bold">3</span>
-                    </div>
-                    <h4 className="font-bold mb-2">Continuing Education</h4>
-                    <p className="text-sm text-gray-600">Ongoing professional development</p>
-                  </div>
+                  ))}
                 </div>
               </Card>
             </div>
@@ -415,15 +389,15 @@ export default async function RegionPage({ params }) {
               <span className="text-sm font-medium text-text-charcoal font-inter">Popular Cities</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-              Popular Cities in {regionName}
+              {content?.popularCities?.title || `Popular Cities in ${regionName}`}
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-              Explore fostering opportunities in key cities across {regionName}
+              {content?.popularCities?.description || `Explore fostering opportunities in key cities across ${regionName}`}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {popularCities.map((city, index) => (
+            {content?.popularCities?.cities || popularCities.map((city, index) => (
               <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all">
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-lg font-bold text-text-charcoal font-poppins">{city.name}</h3>
@@ -442,220 +416,34 @@ export default async function RegionPage({ params }) {
                 </Link>
               </Card>
             ))}
-            
-            {/* Actual cities from data */}
-            {citiesToShow.slice(0, 3).map((city) => (
-              <Link key={city.slug} href={`/foster-agency/${country}/${region}/${city.slug}`}>
-                <Card className="section-card rounded-modern-xl hover-lift transition-all cursor-pointer group">
-                  <CardHeader>
-                    <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                      <MapPin className="w-7 h-7 text-primary-green" />
-                    </div>
-                    <CardTitle className="text-lg font-poppins group-hover:text-primary-green transition-colors">
-                      {city.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="font-inter mb-4">
-                      View foster agencies in this city
-                    </CardDescription>
-                    <div className="flex items-center text-primary-green font-medium group-hover:translate-x-1 transition-transform">
-                      Explore Agencies <ArrowRight className="ml-2 w-4 h-4" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials / Trust Signals */}
-      <section className="py-16 section-alt">
+      {/* FAQ Section */}
+      <section className="py-16 md:py-24 section-alt">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                <Heart className="w-4 h-4 text-primary-green" />
-                <span className="text-sm font-medium text-text-charcoal font-inter">Local Voices</span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                Testimonials from {regionName} Foster Carers
-              </h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="section-card rounded-modern-xl p-6">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mr-4">
-                    <span className="text-primary-green font-bold">S</span>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-text-charcoal">Sarah T.</h3>
-                    <p className="text-sm text-gray-600">Foster Carer for 3 years</p>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic font-inter">
-                  "Fostering in {regionName} has been one of the most rewarding experiences of my life. 
-                  The support from the local authority and my fostering agency has been exceptional."
-                </p>
-                <div className="flex mt-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-              </Card>
-              
-              <Card className="section-card rounded-modern-xl p-6">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mr-4">
-                    <span className="text-primary-green font-bold">M</span>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-text-charcoal">Michael R.</h3>
-                    <p className="text-sm text-gray-600">Foster Carer for 5 years</p>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic font-inter">
-                  "The training and ongoing support I've received as a foster carer in {regionName} 
-                  has helped me make a real difference in the lives of vulnerable children."
-                </p>
-                <div className="flex mt-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Top Agencies in Region */}
-      <section id="agencies" className="py-16 md:py-24 relative overflow-hidden section-muted">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
-          <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-              <Heart className="w-4 h-4 text-primary-green" />
-              <span className="text-sm font-medium text-text-charcoal font-inter">Top Agencies</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-              Top Foster Agencies in {regionName}
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-              Connect with trusted fostering services in your local area
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {featuredAgencies.map((agency) => (
-              <Card key={agency.id} className="section-card rounded-modern-xl hover-lift transition-all">
-                <CardHeader>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center">
-                      <Heart className="w-8 h-8 text-primary-green" />
-                    </div>
-                    {agency.featured && (
-                      <Badge className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal border-0 font-inter">
-                        Featured
-                      </Badge>
-                    )}
-                  </div>
-                  <CardTitle className="text-xl font-poppins">{agency.name}</CardTitle>
-                  <CardDescription className="flex items-center gap-1 mt-2 font-inter">
-                    <MapPin className="w-4 h-4" />
-                    {agency.location.region}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 mb-4 font-inter">
-                    {agency.description}
-                  </p>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: 5 }, (_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < Math.floor(agency.rating)
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                      <span className="text-sm text-gray-600 ml-2 font-inter">
-                        {agency.rating} ({agency.reviewCount} reviews)
-                      </span>
-                    </div>
-                    <Badge variant="outline" className="font-inter">{agency.type}</Badge>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <a 
-                      href={`tel:${agency.phone}`} 
-                      className="text-primary-green text-sm font-medium hover:underline flex items-center"
-                    >
-                      <span className="mr-1">📞</span> Call
-                    </a>
-                    <a 
-                      href={`mailto:${agency.email}`} 
-                      className="text-primary-green text-sm font-medium hover:underline flex items-center"
-                    >
-                      <span className="mr-1">✉️</span> Email
-                    </a>
-                    <a 
-                      href={agency.website} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-primary-green text-sm font-medium hover:underline flex items-center"
-                    >
-                      <ExternalLink className="w-3 h-3 mr-1" /> Website
-                    </a>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter"
-                    asChild
-                  >
-                    <Link href={`/agency/${agency.id}`}>
-                      View Agency Profile <ArrowRight className="ml-2 w-4 h-4" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Region-Specific FAQs */}
-      <section className="py-16 md:py-24 section-highlight">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                <BookOpen className="w-4 h-4 text-primary-green" />
+                <Users className="w-4 h-4 text-primary-green" />
                 <span className="text-sm font-medium text-text-charcoal font-inter">FAQs</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                FAQs About Fostering in {regionName}
+                {content?.faqs?.title || `Frequently Asked Questions About Fostering in ${regionName}`}
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                Common questions about becoming a foster carer in {regionName}
+                {content?.faqs?.description || `Get answers to common questions about becoming a foster carer in ${regionName}`}
               </p>
             </div>
             
             <Accordion type="single" collapsible className="space-y-4">
               {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`} className="section-card rounded-modern-xl px-6">
-                  <AccordionTrigger className="text-left text-text-charcoal font-poppins hover:no-underline py-4">
+                <AccordionItem key={index} value={`item-${index}`} className="section-card rounded-modern-lg border border-gray-200">
+                  <AccordionTrigger className="px-6 py-4 text-left font-poppins text-lg font-medium text-text-charcoal hover:bg-gray-50 rounded-t-modern-lg">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-gray-600 font-inter pb-4">
+                  <AccordionContent className="px-6 py-4 text-gray-600 font-inter bg-white rounded-b-modern-lg">
                     {faq.answer}
                   </AccordionContent>
                 </AccordionItem>
@@ -665,72 +453,111 @@ export default async function RegionPage({ params }) {
         </div>
       </section>
 
-      {/* Local Authorities & Regulation Trust Bar */}
-      <section className="py-12 bg-gradient-to-r from-primary-green to-secondary-blue">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-              <div className="text-center md:text-left">
-                <h3 className="text-xl font-bold text-white mb-2 font-poppins">Regulated by {currentRegionData.regulator}</h3>
-                <p className="text-white/90 text-sm font-inter">
-                  All agencies meet strict regulatory standards
-                </p>
-              </div>
-              <div className="flex justify-center space-x-8">
-                <div className="text-center">
-                  <Shield className="w-10 h-10 text-white mx-auto mb-2" />
-                  <span className="text-white text-sm font-inter">Safeguarding</span>
-                </div>
-                <div className="text-center">
-                  <Award className="w-10 h-10 text-white mx-auto mb-2" />
-                  <span className="text-white text-sm font-inter">Accredited</span>
-                </div>
-              </div>
-              <div className="text-center md:text-right">
-                <Link 
-                  href={`https://www.gov.uk/fostering-${country}`}
-                  className="text-white font-medium hover:underline font-inter"
-                >
-                  Official Government Guidance
-                </Link>
-              </div>
+      {/* Featured Agencies */}
+      <section className="py-16 md:py-24 relative overflow-hidden section-highlight">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/3 left-1/4 w-80 h-80 bg-primary-green/5 rounded-full blur-3xl float-animation" />
+          <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "2.5s" }} />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+              <Star className="w-4 h-4 text-primary-green" />
+              <span className="text-sm font-medium text-text-charcoal font-inter">Featured Agencies</span>
             </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+              {content?.topAgencies?.title || `Top Foster Agencies in ${regionName}`}
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+              {content?.topAgencies?.description || `Discover the leading foster agencies in ${regionName} with excellent ratings and comprehensive support`}
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {(content?.topAgencies?.items || featuredAgencies).map((agency, index) => (
+              <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all h-full flex flex-col">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-xl font-bold text-text-charcoal font-poppins">{agency.name}</h3>
+                  {agency.featured && (
+                    <Badge variant="secondary" className="bg-primary-green/10 text-primary-green border-0">
+                      Featured
+                    </Badge>
+                  )}
+                </div>
+                
+                <p className="text-gray-600 mb-4 flex-grow font-inter">
+                  {agency.summary || agency.description}
+                </p>
+                
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                    <span className="ml-1 text-sm font-medium">{agency.rating || "N/A"}</span>
+                    <span className="mx-1 text-gray-400">•</span>
+                    <span className="text-sm text-gray-500">{agency.reviewCount || 0} reviews</span>
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    {agency.type || "Agency"}
+                  </Badge>
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button size="sm" variant="outline" className="flex-grow font-inter" asChild>
+                    <Link href={agency.website || "#"}>
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Visit Website
+                    </Link>
+                  </Button>
+                  <Button size="sm" className="font-inter" asChild>
+                    <Link href="/contact">
+                      Contact
+                    </Link>
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+          
+          <div className="text-center mt-12">
+            <Button size="lg" className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic" asChild>
+              <Link href="/contact">
+                Find More Agencies in {regionName}
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Final CTA Section */}
-      <section className="py-16 md:py-24 section-contrast">
-        <div className="container mx-auto px-4">
-          <Card className="section-card-contrast rounded-modern-xl p-8 md:p-12 max-w-4xl mx-auto text-center">
-            <CardHeader>
-              <CardTitle className="text-2xl md:text-3xl font-bold text-text-charcoal mb-4 font-poppins">
-                Ready to Start Fostering in {regionName}?
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-lg mb-8 font-inter">
-                Speak with a foster care advisor today to learn more about opportunities in {regionName}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic"
-                  asChild
-                >
-                  <Link href="/contact">Talk to a Foster Support Advisor</Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="glass font-inter px-8 py-6 text-lg"
-                  asChild
-                >
-                  <Link href="#cities">Find Agencies Near You</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      {/* CTA Section */}
+      <section className="py-16 md:py-24 bg-gradient-to-r from-primary-green to-secondary-blue text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-white/10 to-transparent" />
+          <div className="absolute bottom-0 left-0 w-1/3 h-full bg-gradient-to-r from-white/10 to-transparent" />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 font-poppins">
+              {content?.cta?.title || "Ready to Start Your Fostering Journey?"}
+            </h2>
+            <p className="text-xl mb-8 font-inter text-white/90">
+              {content?.cta?.description || `Take the first step towards making a difference in a child's life in ${regionName}`}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" variant="secondary" className="bg-white text-text-charcoal hover:bg-gray-100 px-8 py-6 text-lg font-semibold rounded-xl font-inter" asChild>
+                <Link href="/contact">
+                  {content?.cta?.primaryButtonText || "Talk to a Foster Advisor"}
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" className="glass text-white border-white hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-xl font-inter" asChild>
+                <Link href="#">
+                  {content?.cta?.secondaryButtonText || "Download Information Pack"}
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
     </div>

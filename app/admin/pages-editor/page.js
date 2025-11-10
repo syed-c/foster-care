@@ -264,10 +264,18 @@ export default function PageEditor() {
     try {
       console.log('Saving', selectedLocation.id, locationFormData);
       
+      // Prepare the data to send including the canonical slug
+      const saveData = {
+        ...locationFormData,
+        canonical_slug: selectedLocation.canonical_slug || `/foster-agency/${selectedLocation.slug || selectedLocation.id}`,
+        id: selectedLocation.id,
+        type: selectedLocation.type || 'city'
+      };
+      
       const res = await fetch(`/api/admin/locations/${selectedLocation.id}/content`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(locationFormData)
+        body: JSON.stringify(saveData)
       });
       
       const json = await res.json();
@@ -318,24 +326,39 @@ export default function PageEditor() {
       const response = await fetch(`/api/admin/locations/${node.id}/content`);
       if (response.ok) {
         const data = await response.json();
-        setSelectedLocation(node);
-        setLocationFormData(data);
+        // Ensure the node data includes the canonical_slug for saving
+        const locationWithSlug = {
+          ...node,
+          canonical_slug: node.canonical_slug || data.canonical_slug || `/foster-agency/${node.slug || node.id}`
+        };
+        setSelectedLocation(locationWithSlug);
+        setLocationFormData(data.content || {});
       } else {
         console.error('Failed to fetch location content:', response.status);
         // Fallback to node data with default content based on location type
-        setSelectedLocation(node);
+        // Ensure the node data includes the canonical_slug for saving
+        const locationWithSlug = {
+          ...node,
+          canonical_slug: node.canonical_slug || `/foster-agency/${node.slug || node.id}`
+        };
+        setSelectedLocation(locationWithSlug);
         setLocationFormData({
-          ...getDefaultContent(node),
-          ...node
+          ...getDefaultContent(locationWithSlug),
+          ...locationWithSlug
         });
       }
     } catch (error) {
       console.error('Error fetching location content:', error);
       // Fallback to node data with default content based on location type
-      setSelectedLocation(node);
+      // Ensure the node data includes the canonical_slug for saving
+      const locationWithSlug = {
+        ...node,
+        canonical_slug: node.canonical_slug || `/foster-agency/${node.slug || node.id}`
+      };
+      setSelectedLocation(locationWithSlug);
       setLocationFormData({
-        ...getDefaultContent(node),
-        ...node
+        ...getDefaultContent(locationWithSlug),
+        ...locationWithSlug
       });
     } finally {
       setLoading(false);
@@ -1388,17 +1411,24 @@ export default function PageEditor() {
                                     {expandedCountries[countryId] ? <FolderOpen className="w-4 h-4 mr-2" /> : <Folder className="w-4 h-4 mr-2" />}
                                     <span className="font-medium">{data.country?.name || formatSlugToTitle(countryId)}</span>
                                   </div>
-                                  {data.country && data.country.editable && (
-                                    <span
-                                      className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-6 px-2 text-xs cursor-pointer"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleCountryEdit(data.country);
-                                      }}
-                                    >
-                                      Edit
-                                    </span>
-                                  )}
+                                  <div className="flex items-center">
+                                    {data.country && data.country.editable && (
+                                      <span
+                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-6 px-2 text-xs cursor-pointer mr-2"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleCountryEdit(data.country);
+                                        }}
+                                      >
+                                        Edit
+                                      </span>
+                                    )}
+                                    {data.country && (
+                                      <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+                                        {data.country.canonical_slug || `/foster-agency/${countryId}`}
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                               </AccordionTrigger>
                               <AccordionContent>
@@ -1414,17 +1444,24 @@ export default function PageEditor() {
                                             {expandedRegions[regionId] ? <FolderOpen className="w-4 h-4 mr-2" /> : <Folder className="w-4 h-4 mr-2" />}
                                             <span>{regionData.region?.name || formatSlugToTitle(regionId)}</span>
                                           </div>
-                                          {regionData.region && regionData.region.editable && (
-                                            <span
-                                              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-6 px-2 text-xs cursor-pointer"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleRegionEdit(regionData.region);
-                                              }}
-                                            >
-                                              Edit
-                                            </span>
-                                          )}
+                                          <div className="flex items-center">
+                                            {regionData.region && regionData.region.editable && (
+                                              <span
+                                                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-6 px-2 text-xs cursor-pointer mr-2"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handleRegionEdit(regionData.region);
+                                                }}
+                                              >
+                                                Edit
+                                              </span>
+                                            )}
+                                            {regionData.region && (
+                                              <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+                                                {regionData.region.canonical_slug || `/foster-agency/${countryId}/${regionId}`}
+                                              </span>
+                                            )}
+                                          </div>
                                         </div>
                                       </AccordionTrigger>
                                       <AccordionContent>
