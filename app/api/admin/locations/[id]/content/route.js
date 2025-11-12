@@ -89,10 +89,29 @@ export async function PUT(req, { params }) {
                        (body.slug ? (body.slug.startsWith('/foster-agency/') ? body.slug : `/foster-agency/${body.slug}`) : 
                         null);
 
+  // Create a clean content object by removing location-specific fields
+  const { 
+    id, name, slug, type, children, editable, canonical_slug, 
+    template_type, updated_at, content_json, ...cleanContent 
+  } = body;
+
+  // Also remove any other location-specific fields that might be present
+  const locationSpecificFields = [
+    'id', 'name', 'slug', 'type', 'children', 'editable', 
+    'canonical_slug', 'template_type', 'updated_at', 'content_json'
+  ];
+  
+  const contentToSave = {};
+  Object.keys(body).forEach(key => {
+    if (!locationSpecificFields.includes(key)) {
+      contentToSave[key] = body[key];
+    }
+  });
+
   const upsertObj = {
     location_id: locationId,
-    template_type: body.template_type || 'city',
-    content_json: body,
+    template_type: body.template_type || type || 'city',
+    content_json: contentToSave,
     canonical_slug: canonicalSlug,
     updated_at: new Date().toISOString()
   };

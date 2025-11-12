@@ -265,8 +265,14 @@ export default function PageEditor() {
       console.log('Saving', selectedLocation.id, locationFormData);
       
       // Prepare the data to send including the canonical slug
+      // Remove location-specific fields from the content data
+      const { 
+        id, name, slug, type, children, editable, canonical_slug, 
+        template_type, updated_at, content_json, ...cleanContent 
+      } = locationFormData;
+      
       const saveData = {
-        ...locationFormData,
+        ...cleanContent,
         canonical_slug: selectedLocation.canonical_slug || `/foster-agency/${selectedLocation.slug || selectedLocation.id}`,
         id: selectedLocation.id,
         type: selectedLocation.type || 'city'
