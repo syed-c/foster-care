@@ -37,9 +37,11 @@ import {
   ArrowDown,
   ArrowLeft,
   RefreshCw,
-  Info
+  Info,
+  AlertCircle
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast, Toaster } from 'sonner';
 import { formatSlugToTitle } from '@/lib/locationData';
 import FAQEditor from '@/components/FAQEditor';
 import ResourceEditor from '@/components/ResourceEditor';
@@ -47,6 +49,11 @@ import LocationTree from '@/components/LocationTree';
 import DynamicSectionEditor from '@/components/DynamicSectionEditor';
 import { locationSchemas, getDefaultContent } from '@/lib/locationSchemas';
 import TemplateGuide from '@/components/TemplateGuide';
+import SectionEditor from '@/components/SectionEditor';
+import ButtonGroup from '@/components/ButtonGroup';
+import InputField from '@/components/InputField';
+import { DEFAULT_PAGE_CONTENT, validatePageContent } from '@/lib/cmsTypes';
+import CMSInput from '@/components/CMSInput';
 
 export default function PageEditor() {
   const router = useRouter();
@@ -58,6 +65,8 @@ export default function PageEditor() {
   const [pageSections, setPageSections] = useState([]);
   const [formData, setFormData] = useState({
     title: '',
+    meta_title: '',
+    h1_title: '',
     meta_description: '',
     slug: ''
   });
@@ -70,6 +79,8 @@ export default function PageEditor() {
   const [locationSearchQuery, setLocationSearchQuery] = useState('');
   const [expandedCountries, setExpandedCountries] = useState({});
   const [expandedRegions, setExpandedRegions] = useState({});
+  const [formErrors, setFormErrors] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     // TEMPORARILY DISABLED ADMIN CHECK FOR TESTING
@@ -237,8 +248,10 @@ export default function PageEditor() {
   // Add useEffect to load content when selectedLocation changes
   useEffect(() => {
     if (!selectedLocation?.id) return;
-    loadLocationContent(selectedLocation.id);
-  }, [selectedLocation?.id]);
+    if (!isEditing) {
+      loadLocationContent(selectedLocation.id);
+    }
+  }, [selectedLocation?.id, isEditing]);
 
   async function loadLocationContent(locationId) {
     try {
@@ -256,6 +269,16 @@ export default function PageEditor() {
       console.error('loadLocationContent error', err);
       setLocationFormData({});
     }
+  }
+
+  // Generic handler for nested list items
+  function handleListFieldChange(listKey, index, fieldKey, value) {
+    setLocationFormData(prev => {
+      const list = Array.isArray(prev[listKey]) ? [...prev[listKey]] : [];
+      // immutable update of the single item
+      list[index] = { ...(list[index] || {}), [fieldKey]: value };
+      return { ...prev, [listKey]: list };
+    });
   }
 
   async function handleSave() {
@@ -289,7 +312,7 @@ export default function PageEditor() {
       
       if (!json.success) {
         console.error('Save failed', json.error);
-        alert('Save failed: ' + (json.error || 'unknown'));
+        toast.error('Save failed: ' + (json.error || 'unknown'));
         return;
       }
       
@@ -306,10 +329,11 @@ export default function PageEditor() {
       // Persist local autosave draft optionally to localStorage
       localStorage.removeItem('cms-draft:' + selectedLocation.id);
       
-      alert('Location content saved successfully!');
+      toast.success('Location content saved successfully!');
+      setIsEditing(false);
     } catch (error) {
       console.error('handleSave err', error);
-      alert('Error saving location content: ' + error.message);
+      toast.error('Error saving location content: ' + error.message);
     }
   }
 
@@ -339,6 +363,7 @@ export default function PageEditor() {
         };
         setSelectedLocation(locationWithSlug);
         setLocationFormData(data.content || {});
+        setIsEditing(false);
       } else {
         console.error('Failed to fetch location content:', response.status);
         // Fallback to node data with default content based on location type
@@ -352,6 +377,7 @@ export default function PageEditor() {
           ...getDefaultContent(locationWithSlug),
           ...locationWithSlug
         });
+        setIsEditing(false);
       }
     } catch (error) {
       console.error('Error fetching location content:', error);
@@ -366,6 +392,7 @@ export default function PageEditor() {
         ...getDefaultContent(locationWithSlug),
         ...locationWithSlug
       });
+      setIsEditing(false);
     } finally {
       setLoading(false);
     }
@@ -488,7 +515,7 @@ export default function PageEditor() {
               heading: data.page.hero.heading || '',
               subheading: data.page.hero.subheading || '',
               content: data.page.hero.content || '',
-              heading_type: 'h1',
+              headingType: 'h1',
               order: 1,
               type: 'hero',
               image: data.page.hero.image || null
@@ -504,7 +531,7 @@ export default function PageEditor() {
                 title: content.title || `Section ${index + 2}`,
                 heading: content.heading || '',
                 content: content.text || content.content || '',
-                heading_type: content.heading_type || 'h2',
+                headingType: content.heading_type || 'h2',
                 order: index + 2,
                 type: content._type || 'default',
                 ...content
@@ -546,7 +573,7 @@ export default function PageEditor() {
           "title": "Hero Section", 
           "heading": "Find Your Perfect Fostering Agency", 
           "content": "Connecting caring hearts with fostering opportunities across the UK. Browse verified agencies, read reviews, and start your fostering journey today.", 
-          "heading_type": "h1",
+          "headingType": "h1",
           "order": 1,
           "type": "hero",
           "subtitle": "Foster Care Directory",
@@ -562,7 +589,7 @@ export default function PageEditor() {
           "title": "How It Works Section", 
           "heading": "How It Works", 
           "content": "Finding the right fostering agency is easy with our simple three-step process", 
-          "heading_type": "h2",
+          "headingType": "h2",
           "order": 2,
           "type": "how_it_works",
           "subtitle": "Simple Process",
@@ -590,7 +617,7 @@ export default function PageEditor() {
           "title": "Featured Agencies Section", 
           "heading": "Featured Agencies", 
           "content": "Trusted fostering agencies across the UK", 
-          "heading_type": "h2",
+          "headingType": "h2",
           "order": 3,
           "type": "featured_agencies",
           "subtitle": "Verified Agencies",
@@ -603,7 +630,7 @@ export default function PageEditor() {
           "title": "Testimonials Section", 
           "heading": "Success Stories", 
           "content": "Hear from families who found their perfect match through our directory", 
-          "heading_type": "h2",
+          "headingType": "h2",
           "order": 4,
           "type": "testimonials",
           "subtitle": "Testimonials",
@@ -634,7 +661,7 @@ export default function PageEditor() {
           "title": "Resources Section", 
           "heading": "Resources & Guides", 
           "content": "Everything you need to know about fostering in the UK. From legal requirements to heartwarming success stories, we've got you covered.", 
-          "heading_type": "h2",
+          "headingType": "h2",
           "order": 5,
           "type": "resources",
           "subtitle": "Knowledge Hub",
@@ -662,7 +689,7 @@ export default function PageEditor() {
           "title": "CTA Section", 
           "heading": "Are You a Fostering Agency?", 
           "content": "Join our trusted directory and connect with families looking for the perfect fostering partnership. Get started with a free basic listing today.", 
-          "heading_type": "h2",
+          "headingType": "h2",
           "order": 6,
           "type": "cta",
           "primary_button_text": "Register Your Agency",
@@ -682,7 +709,7 @@ export default function PageEditor() {
           "title": "Hero Section", 
           "heading": "About Foster Care UK", 
           "content": "Connecting families with caring hearts since 2010", 
-          "heading_type": "h1",
+          "headingType": "h1",
           "order": 1,
           "type": "hero",
           "subtitle": "Our Mission",
@@ -698,7 +725,7 @@ export default function PageEditor() {
           "title": "Our Story Section", 
           "heading": "Our Story", 
           "content": "Founded in 2010, Foster Care UK began with a simple mission: to connect caring hearts with children in need. What started as a small initiative has grown into one of the UK's most trusted fostering directories.", 
-          "heading_type": "h2",
+          "headingType": "h2",
           "order": 2,
           "type": "story",
           "subtitle": "The Beginning"
@@ -709,7 +736,7 @@ export default function PageEditor() {
           "title": "Our Mission Section", 
           "heading": "Our Mission", 
           "content": "Our mission is to simplify the fostering journey by providing a comprehensive, trustworthy platform that connects prospective foster carers with verified agencies.", 
-          "heading_type": "h2",
+          "headingType": "h2",
           "order": 3,
           "type": "mission",
           "subtitle": "Core Values"
@@ -726,7 +753,7 @@ export default function PageEditor() {
           "title": "Hero Section", 
           "heading": "Get in Touch", 
           "content": "We're here to help you start your fostering journey", 
-          "heading_type": "h1",
+          "headingType": "h1",
           "order": 1,
           "type": "hero",
           "subtitle": "Contact Us",
@@ -742,7 +769,7 @@ export default function PageEditor() {
           "title": "Contact Information", 
           "heading": "Contact Information", 
           "content": "Find all the ways to reach our team", 
-          "heading_type": "h2",
+          "headingType": "h2",
           "order": 2,
           "type": "contact_info",
           "subtitle": "Get In Touch"
@@ -759,7 +786,7 @@ export default function PageEditor() {
           "title": "Hero Section", 
           "heading": "Welcome", 
           "content": "Page content goes here", 
-          "heading_type": "h1",
+          "headingType": "h1",
           "order": 1,
           "type": "hero"
         },
@@ -769,7 +796,7 @@ export default function PageEditor() {
           "title": "Main Content", 
           "heading": "Main Content", 
           "content": "Add your content here", 
-          "heading_type": "h2",
+          "headingType": "h2",
           "order": 2,
           "type": "content"
         }
@@ -784,43 +811,54 @@ export default function PageEditor() {
       title: 'New Section',
       heading: '',
       content: '',
-      heading_type: 'paragraph',
+      headingType: 'h2',
       order: pageSections.length + 1,
-      type: 'default'
+      type: 'default',
+      subheading: '',
+      buttons: []
     };
     setPageSections([...pageSections, newSection]);
   };
 
-  const handleSectionChange = (sectionId, field, value) => {
-    setPageSections(prevSections => 
-      prevSections.map(section => 
-        section.id === sectionId ? { ...section, [field]: value } : section
-      )
-    );
+  const handleSectionChange = (sectionIndex, field, value) => {
+    const updatedSections = [...pageSections];
+    updatedSections[sectionIndex] = { ...updatedSections[sectionIndex], [field]: value };
+    setPageSections(updatedSections);
   };
 
-  const handleDeleteSection = (sectionId) => {
-    setPageSections(prevSections => 
-      prevSections.filter(section => section.id !== sectionId)
-    );
+  const handleDeleteSection = (sectionIndex) => {
+    const updatedSections = [...pageSections];
+    updatedSections.splice(sectionIndex, 1);
+    // Update order of remaining sections
+    const reorderedSections = updatedSections.map((section, index) => ({
+      ...section,
+      order: index + 1
+    }));
+    setPageSections(reorderedSections);
   };
 
-  const handleMoveSectionUp = (sectionId) => {
-    const index = pageSections.findIndex(s => s.id === sectionId);
-    if (index > 0) {
-      const newSections = [...pageSections];
-      [newSections[index-1], newSections[index]] = [newSections[index], newSections[index-1]];
-      setPageSections(newSections);
-    }
+  const handleMoveSectionUp = (sectionIndex) => {
+    if (sectionIndex <= 0) return;
+    const updatedSections = [...pageSections];
+    [updatedSections[sectionIndex-1], updatedSections[sectionIndex]] = [updatedSections[sectionIndex], updatedSections[sectionIndex-1]];
+    // Update order
+    const reorderedSections = updatedSections.map((section, index) => ({
+      ...section,
+      order: index + 1
+    }));
+    setPageSections(reorderedSections);
   };
 
-  const handleMoveSectionDown = (sectionId) => {
-    const index = pageSections.findIndex(s => s.id === sectionId);
-    if (index < pageSections.length - 1) {
-      const newSections = [...pageSections];
-      [newSections[index], newSections[index+1]] = [newSections[index+1], newSections[index]];
-      setPageSections(newSections);
-    }
+  const handleMoveSectionDown = (sectionIndex) => {
+    if (sectionIndex >= pageSections.length - 1) return;
+    const updatedSections = [...pageSections];
+    [updatedSections[sectionIndex], updatedSections[sectionIndex+1]] = [updatedSections[sectionIndex+1], updatedSections[sectionIndex]];
+    // Update order
+    const reorderedSections = updatedSections.map((section, index) => ({
+      ...section,
+      order: index + 1
+    }));
+    setPageSections(reorderedSections);
   };
 
   const handleSaveSections = async () => {
@@ -832,10 +870,10 @@ export default function PageEditor() {
       // Save sections to localStorage
       const storageKey = `foster_care_page_sections_${selectedPage}`;
       localStorage.setItem(storageKey, JSON.stringify(pageSections));
-      alert('Sections saved successfully!');
+      toast.success('Sections saved successfully!');
     } catch (error) {
       console.error('Error saving sections:', error);
-      alert('Error saving sections');
+      toast.error('Error saving sections');
     }
     
     setSaving(false);
@@ -844,6 +882,14 @@ export default function PageEditor() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedPage) return;
+    
+    // Validate form data
+    const validation = validatePageContent(formData);
+    if (!validation.isValid) {
+      setFormErrors(validation.errors);
+      toast.error('Please fix the validation errors');
+      return;
+    }
     
     setSaving(true);
     
@@ -857,8 +903,8 @@ export default function PageEditor() {
         body: JSON.stringify({
           title: formData.title,
           seo: {
-            title: formData.meta_title || formData.seo?.title || `${formData.title} | Foster Care UK`,
-            description: formData.meta_description || formData.seo?.description || ''
+            title: formData.meta_title || `${formData.title} | Foster Care UK`,
+            description: formData.meta_description || ''
           },
           slug: {
             current: formData.slug?.current || formData.slug || ''
@@ -882,16 +928,18 @@ export default function PageEditor() {
               : page
           );
           setPages(updatedPages);
-          alert('Page saved successfully!');
+          toast.success('Page saved successfully!');
+          setFormErrors({});
+          setIsEditing(false);
         } else {
-          alert('Error saving page: ' + data.error);
+          toast.error('Error saving page: ' + data.error);
         }
       } else {
-        alert('Error saving page');
+        toast.error('Error saving page');
       }
     } catch (error) {
       console.error('Error saving page:', error);
-      alert('Error saving page');
+      toast.error('Error saving page');
     }
     
     setSaving(false);
@@ -907,11 +955,13 @@ export default function PageEditor() {
         title: selected.title || '',
         slug: selected.slug || { current: '' },
         meta_title: selected.seo?.title || '',
+        h1_title: selected.title || '',
         meta_description: selected.seo?.description || ''
       });
       
       // Fetch sections for this page
       await fetchPageSections(pageId);
+      setIsEditing(false);
     }
   };
 
@@ -921,6 +971,20 @@ export default function PageEditor() {
       ...prev,
       [name]: value
     }));
+    
+    // Clear error when user starts typing
+    if (formErrors[name]) {
+      setFormErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+    
+    // Mark as editing when user starts typing
+    if (!isEditing) {
+      setIsEditing(true);
+    }
   };
 
   const findFirstEditable = (nodes) => {
@@ -941,6 +1005,60 @@ export default function PageEditor() {
 
   const handleReloadTree = () => {
     fetchLocationContent();
+  };
+
+  // Fix for location form data updates - ensure proper immutable updates
+  const updateLocationFormData = (field, value) => {
+    setLocationFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    // Mark as editing when user starts typing
+    if (!isEditing) {
+      setIsEditing(true);
+    }
+  };
+
+  // Fix for nested location form data updates
+  const updateLocationFormDataNested = (sectionKey, field, value) => {
+    setLocationFormData(prev => ({
+      ...prev,
+      [sectionKey]: {
+        ...prev[sectionKey],
+        [field]: value
+      }
+    }));
+    
+    // Mark as editing when user starts typing
+    if (!isEditing) {
+      setIsEditing(true);
+    }
+  };
+
+  // Fix for deeply nested location form data updates
+  const updateLocationFormDataDeepNested = (sectionKey, fieldName, nestedField, value) => {
+    setLocationFormData(prev => ({
+      ...prev,
+      [sectionKey]: {
+        ...prev[sectionKey],
+        [fieldName]: {
+          ...prev[sectionKey]?.[fieldName],
+          [nestedField]: value
+        }
+      }
+    }));
+    
+    // Mark as editing when user starts typing
+    if (!isEditing) {
+      setIsEditing(true);
+    }
+  };
+
+  // Auto-template detection based on location type
+  const getTemplateSections = (locationType) => {
+    const template = locationSchemas[locationType] || locationSchemas.city;
+    return template.sections || [];
   };
 
   if (!isAdmin) {
@@ -964,6 +1082,7 @@ export default function PageEditor() {
 
   return (
     <div className="min-h-screen bg-background-offwhite">
+      <Toaster position="top-right" />
       <div className="border-b bg-white">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -1033,41 +1152,78 @@ export default function PageEditor() {
                         <CardDescription>Modify the content for {pages.find(p => p._id === selectedPage)?.title}</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="title">Page Title</Label>
-                          <Input
-                            id="title"
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <InputField
+                            id="page-title"
+                            label="Page Title"
                             name="title"
                             value={formData.title}
                             onChange={handleChange}
                             placeholder="Enter page title"
                             required
+                            error={formErrors.title}
                           />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="slug">URL Slug</Label>
-                          <Input
-                            id="slug"
+                          
+                          <InputField
+                            id="page-slug"
+                            label="URL Slug"
                             name="slug"
                             value={formData.slug?.current || formData.slug || ''}
-                            onChange={(e) => setFormData({ ...formData, slug: { current: e.target.value } })}
+                            onChange={(e) => {
+                              setFormData({ ...formData, slug: { current: e.target.value } });
+                              if (formErrors.slug) {
+                                setFormErrors(prev => {
+                                  const newErrors = { ...prev };
+                                  delete newErrors.slug;
+                                  return newErrors;
+                                });
+                              }
+                              // Mark as editing when user starts typing
+                              if (!isEditing) {
+                                setIsEditing(true);
+                              }
+                            }}
                             placeholder="page-url-slug"
                             required
+                            error={formErrors.slug}
                           />
                         </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="meta_description">Meta Description</Label>
-                          <Textarea
-                            id="meta_description"
-                            name="meta_description"
-                            value={formData.meta_description || formData.seo?.description || ''}
-                            onChange={(e) => setFormData({ ...formData, meta_description: e.target.value, seo: { ...formData.seo, description: e.target.value } })}
-                            placeholder="Enter meta description for SEO"
-                            rows={3}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <InputField
+                            id="page-meta-title"
+                            label="Meta Title (SEO)"
+                            name="meta_title"
+                            value={formData.meta_title}
+                            onChange={handleChange}
+                            placeholder="Enter meta title for SEO"
+                            description="Used for search engine optimization (60 characters max)"
+                            error={formErrors.meta_title}
+                          />
+                          
+                          <InputField
+                            id="page-h1-title"
+                            label="H1 Title (Display)"
+                            name="h1_title"
+                            value={formData.h1_title}
+                            onChange={handleChange}
+                            placeholder="Enter H1 title for display"
+                            description="Displayed as the main heading on the page"
                           />
                         </div>
+
+                        <InputField
+                          id="page-meta-description"
+                          label="Meta Description"
+                          type="textarea"
+                          name="meta_description"
+                          value={formData.meta_description}
+                          onChange={handleChange}
+                          placeholder="Enter meta description for SEO"
+                          rows={3}
+                          description="Used for search engine optimization (160 characters max)"
+                          error={formErrors.meta_description}
+                        />
 
                         <div className="space-y-2">
                           <div className="flex justify-between items-center mb-4">
@@ -1094,260 +1250,38 @@ export default function PageEditor() {
                             </div>
                           </div>
                           
-                          {pageSections.map((section) => (
-                            <div key={section.id} className="mb-6 border rounded-lg p-4">
-                              <div className="flex justify-between items-center mb-2">
-                                <Input
-                                  value={section.title}
-                                  onChange={(e) => handleSectionChange(section.id, 'title', e.target.value)}
-                                  className="font-medium text-md"
-                                  placeholder="Section Title"
+                          {!previewMode ? (
+                            <div className="space-y-4">
+                              {pageSections.map((section, index) => (
+                                <SectionEditor
+                                  key={section.id}
+                                  section={section}
+                                  sectionIndex={index}
+                                  onUpdate={handleSectionChange}
+                                  onMoveUp={handleMoveSectionUp}
+                                  onMoveDown={handleMoveSectionDown}
+                                  onDelete={handleDeleteSection}
+                                  isFirst={index === 0}
+                                  isLast={index === pageSections.length - 1}
                                 />
-                                <div className="flex space-x-1">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => handleMoveSectionUp(section.id)}
-                                    disabled={section.order === 1}
-                                  >
-                                    <ArrowUp className="h-4 w-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => handleMoveSectionDown(section.id)}
-                                    disabled={section.order === pageSections.length}
-                                  >
-                                    <ArrowDown className="h-4 w-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => handleDeleteSection(section.id)}
-                                    className="text-red-600 hover:text-red-800"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                              
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                  <Label htmlFor={`section-heading-${section.id}`}>Heading</Label>
-                                  <Input
-                                    id={`section-heading-${section.id}`}
-                                    value={section.heading || ''}
-                                    onChange={(e) => handleSectionChange(section.id, 'heading', e.target.value)}
-                                    placeholder="Section heading"
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor={`section-heading-type-${section.id}`}>Heading Type</Label>
-                                  <Select 
-                                    value={section.heading_type || "paragraph"}
-                                    onValueChange={(value) => handleSectionChange(section.id, 'heading_type', value)}
-                                  >
-                                    <SelectTrigger id={`section-heading-type-${section.id}`}>
-                                      <SelectValue placeholder="Paragraph" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="paragraph">Paragraph</SelectItem>
-                                      <SelectItem value="h1">Heading 1</SelectItem>
-                                      <SelectItem value="h2">Heading 2</SelectItem>
-                                      <SelectItem value="h3">Heading 3</SelectItem>
-                                      <SelectItem value="h4">Heading 4</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                              
-                              <div className="mb-4">
-                                <Label htmlFor={`section-content-${section.id}`}>Content</Label>
-                                <Textarea
-                                  id={`section-content-${section.id}`}
-                                  value={section.content || ''}
-                                  onChange={(e) => handleSectionChange(section.id, 'content', e.target.value)}
-                                  placeholder="Section content"
-                                  rows={4}
-                                />
-                              </div>
-                              
-                              {/* Conditional fields based on section type */}
-                              {section.type === 'hero' && (
-                                <>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                    <div>
-                                      <Label htmlFor={`section-subheading-${section.id}`}>Subheading</Label>
-                                      <Input
-                                        id={`section-subheading-${section.id}`}
-                                        value={section.subheading || ''}
-                                        onChange={(e) => handleSectionChange(section.id, 'subheading', e.target.value)}
-                                        placeholder="Section subheading"
-                                      />
-                                    </div>
-                                    <div>
-                                      <Label htmlFor={`section-subtitle-${section.id}`}>Subtitle</Label>
-                                      <Input
-                                        id={`section-subtitle-${section.id}`}
-                                        value={section.subtitle || ''}
-                                        onChange={(e) => handleSectionChange(section.id, 'subtitle', e.target.value)}
-                                        placeholder="Section subtitle"
-                                      />
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                    <div>
-                                      <Label htmlFor={`section-primary-button-text-${section.id}`}>Primary Button Text</Label>
-                                      <Input
-                                        id={`section-primary-button-text-${section.id}`}
-                                        value={section.primary_button_text || ''}
-                                        onChange={(e) => handleSectionChange(section.id, 'primary_button_text', e.target.value)}
-                                        placeholder="Button text"
-                                      />
-                                    </div>
-                                    <div>
-                                      <Label htmlFor={`section-primary-button-link-${section.id}`}>Primary Button Link</Label>
-                                      <Input
-                                        id={`section-primary-button-link-${section.id}`}
-                                        value={section.primary_button_link || ''}
-                                        onChange={(e) => handleSectionChange(section.id, 'primary_button_link', e.target.value)}
-                                        placeholder="Button link"
-                                      />
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                      <Label htmlFor={`section-secondary-button-text-${section.id}`}>Secondary Button Text</Label>
-                                      <Input
-                                        id={`section-secondary-button-text-${section.id}`}
-                                        value={section.secondary_button_text || ''}
-                                        onChange={(e) => handleSectionChange(section.id, 'secondary_button_text', e.target.value)}
-                                        placeholder="Button text"
-                                      />
-                                    </div>
-                                    <div>
-                                      <Label htmlFor={`section-secondary-button-link-${section.id}`}>Secondary Button Link</Label>
-                                      <Input
-                                        id={`section-secondary-button-link-${section.id}`}
-                                        value={section.secondary_button_link || ''}
-                                        onChange={(e) => handleSectionChange(section.id, 'secondary_button_link', e.target.value)}
-                                        placeholder="Button link"
-                                      />
-                                    </div>
-                                  </div>
-                                </>
-                              )}
-                              
-                              {section.type === 'how_it_works' && section.cards && (
-                                <div className="mb-4">
-                                  <Label htmlFor={`section-cards-${section.id}`}>Cards (JSON)</Label>
-                                  <Textarea
-                                    id={`section-cards-${section.id}`}
-                                    value={typeof section.cards === 'string' ? section.cards : JSON.stringify(section.cards, null, 2)}
-                                    onChange={(e) => handleSectionChange(section.id, 'cards', e.target.value)}
-                                    placeholder='[{"title": "Card Title", "description": "Card description", "icon": "IconName"}]'
-                                    rows={4}
-                                    className="font-mono text-sm"
-                                  />
-                                  <p className="text-xs text-gray-500 mt-1">Format: JSON array of {`{title, description, icon}`} objects</p>
-                                </div>
-                              )}
-                              
-                              {section.type === 'testimonials' && section.testimonials && (
-                                <div className="mb-4">
-                                  <Label htmlFor={`section-testimonials-${section.id}`}>Testimonials (JSON)</Label>
-                                  <Textarea
-                                    id={`section-testimonials-${section.id}`}
-                                    value={typeof section.testimonials === 'string' ? section.testimonials : JSON.stringify(section.testimonials, null, 2)}
-                                    onChange={(e) => handleSectionChange(section.id, 'testimonials', e.target.value)}
-                                    placeholder='[{"name": "John Doe", "location": "City", "quote": "Testimonial quote", "rating": 5}]'
-                                    rows={4}
-                                    className="font-mono text-sm"
-                                  />
-                                  <p className="text-xs text-gray-500 mt-1">Format: JSON array of {`{name, location, quote, rating}`} objects</p>
-                                </div>
-                              )}
-                              
-                              {section.type === 'resources' && section.highlights && (
-                                <div className="mb-4">
-                                  <Label htmlFor={`section-highlights-${section.id}`}>Highlights (JSON)</Label>
-                                  <Textarea
-                                    id={`section-highlights-${section.id}`}
-                                    value={typeof section.highlights === 'string' ? section.highlights : JSON.stringify(section.highlights, null, 2)}
-                                    onChange={(e) => handleSectionChange(section.id, 'highlights', e.target.value)}
-                                    placeholder='[{"title": "Highlight Title", "description": "Highlight description", "icon": "IconName"}]'
-                                    rows={4}
-                                    className="font-mono text-sm"
-                                  />
-                                  <p className="text-xs text-gray-500 mt-1">Format: JSON array of {`{title, description, icon}`} objects</p>
-                                </div>
-                              )}
-                              
-                              {/* Common button fields for various section types */}
-                              {(section.type === 'featured_agencies' || section.type === 'resources' || section.type === 'cta') && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                  <div>
-                                    <Label htmlFor={`section-button-text-${section.id}`}>Button Text</Label>
-                                    <Input
-                                      id={`section-button-text-${section.id}`}
-                                      value={section.button_text || ''}
-                                      onChange={(e) => handleSectionChange(section.id, 'button_text', e.target.value)}
-                                      placeholder="Button text"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor={`section-button-link-${section.id}`}>Button Link</Label>
-                                    <Input
-                                      id={`section-button-link-${section.id}`}
-                                      value={section.button_link || ''}
-                                      onChange={(e) => handleSectionChange(section.id, 'button_link', e.target.value)}
-                                      placeholder="Button link"
-                                    />
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {/* Secondary button for resources section */}
-                              {section.type === 'resources' && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <div>
-                                    <Label htmlFor={`section-secondary-button-text-${section.id}`}>Secondary Button Text</Label>
-                                    <Input
-                                      id={`section-secondary-button-text-${section.id}`}
-                                      value={section.secondary_button_text || ''}
-                                      onChange={(e) => handleSectionChange(section.id, 'secondary_button_text', e.target.value)}
-                                      placeholder="Button text"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor={`section-secondary-button-link-${section.id}`}>Secondary Button Link</Label>
-                                    <Input
-                                      id={`section-secondary-button-link-${section.id}`}
-                                      value={section.secondary_button_link || ''}
-                                      onChange={(e) => handleSectionChange(section.id, 'secondary_button_link', e.target.value)}
-                                      placeholder="Button link"
-                                    />
-                                  </div>
-                                </div>
-                              )}
+                              ))}
                             </div>
-                          ))}
+                          ) : (
+                            <div className="border rounded-lg p-4 bg-gray-50">
+                              <h3 className="text-lg font-medium mb-2">Page Preview</h3>
+                              <p className="text-gray-500">This would show a preview of the page with the current content.</p>
+                            </div>
+                          )}
+                        </div>
 
-                          <div className="flex justify-end space-x-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={handleAddSection}
-                            >
-                              <Plus className="h-4 w-4 mr-2" />
-                              Add Section
-                            </Button>
-                            <Button type="submit" disabled={saving}>
-                              {saving ? 'Saving...' : 'Save Page'}
-                            </Button>
-                          </div>
+                        <div className="flex justify-end">
+                          <ButtonGroup
+                            onSave={handleSubmit}
+                            onAddSection={handleAddSection}
+                            onPreviewToggle={() => setPreviewMode(!previewMode)}
+                            previewMode={previewMode}
+                            saving={saving}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1534,49 +1468,67 @@ export default function PageEditor() {
                         <CardDescription>Modify content for {selectedLocation.name}</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="location-title">Title</Label>
-                          <Input
-                            id="location-title"
-                            value={locationFormData.title || ''}
-                            onChange={(e) => setLocationFormData({ ...locationFormData, title: e.target.value })}
-                            placeholder="Enter location title"
-                            required
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="location-canonical-slug">Canonical Slug</Label>
-                          <div className="text-sm text-muted-foreground mb-1">
-                            Full path: {locationFormData.canonical_slug || 'Not set'}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="location-title">Page Title</Label>
+                            <CMSInput
+                              id="location-title"
+                              value={locationFormData.title || ''}
+                              onChange={(newValue) => updateLocationFormData('title', newValue)}
+                              placeholder="Enter location title"
+                              required
+                            />
                           </div>
-                          <Input
-                            id="location-canonical-slug"
-                            value={locationFormData.canonical_slug || ''}
-                            readOnly
-                            className="bg-muted"
-                          />
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="location-h1-title">H1 Title (Display)</Label>
+                            <CMSInput
+                              id="location-h1-title"
+                              value={locationFormData.h1_title || locationFormData.title || ''}
+                              onChange={(newValue) => updateLocationFormData('h1_title', newValue)}
+                              placeholder="Enter H1 title for display"
+                            />
+                            <p className="text-xs text-muted-foreground">Displayed as the main heading on the page</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="location-meta-title">Meta Title (SEO)</Label>
+                            <CMSInput
+                              id="location-meta-title"
+                              value={locationFormData.meta_title || locationFormData.seo?.title || ''}
+                              onChange={(newValue) => updateLocationFormData('meta_title', newValue)}
+                              placeholder="Enter meta title for SEO"
+                            />
+                            <p className="text-xs text-muted-foreground">Used for search engine optimization (60 characters max)</p>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="location-canonical-slug">Canonical Slug</Label>
+                            <div className="text-sm text-muted-foreground mb-1">
+                              Full path: {locationFormData.canonical_slug || 'Not set'}
+                            </div>
+                            <Input
+                              id="location-canonical-slug"
+                              value={locationFormData.canonical_slug || ''}
+                              readOnly
+                              className="bg-muted"
+                            />
+                          </div>
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="location-meta_title">Meta Title</Label>
-                          <Input
-                            id="location-meta_title"
-                            value={locationFormData.meta_title || locationFormData.seo?.title || ''}
-                            onChange={(e) => setLocationFormData({ ...locationFormData, meta_title: e.target.value, seo: { ...locationFormData.seo, title: e.target.value } })}
-                            placeholder="Enter meta title for SEO"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="location-meta_description">Meta Description</Label>
-                          <Textarea
-                            id="location-meta_description"
+                          <Label htmlFor="location-meta-description">Meta Description</Label>
+                          <CMSInput
+                            id="location-meta-description"
                             value={locationFormData.meta_description || locationFormData.seo?.description || ''}
-                            onChange={(e) => setLocationFormData({ ...locationFormData, meta_description: e.target.value, seo: { ...locationFormData.seo, description: e.target.value } })}
+                            onChange={(newValue) => updateLocationFormData('meta_description', newValue)}
                             placeholder="Enter meta description for SEO"
+                            type="textarea"
                             rows={3}
                           />
+                          <p className="text-xs text-muted-foreground">Used for search engine optimization (160 characters max)</p>
                         </div>
 
                         {/* Dynamic Sections Editor based on location type */}
@@ -1584,7 +1536,13 @@ export default function PageEditor() {
                           <DynamicSectionEditor 
                             locationType={selectedLocation.type}
                             content={locationFormData}
-                            onChange={(updatedContent) => setLocationFormData(updatedContent)}
+                            onChange={(updatedContent) => {
+                              setLocationFormData(updatedContent);
+                              // Mark as editing when user starts typing
+                              if (!isEditing) {
+                                setIsEditing(true);
+                              }
+                            }}
                           />
                         )}
 
@@ -1601,7 +1559,7 @@ export default function PageEditor() {
                               This location uses the {locationSchemas[selectedLocation.type]?.label || 'default'} template which includes the following sections:
                             </p>
                             <ul className="mt-2 text-xs text-blue-600 list-disc list-inside space-y-1">
-                              {locationSchemas[selectedLocation.type]?.sections?.map((section) => (
+                              {getTemplateSections(selectedLocation.type).map((section) => (
                                 <li key={section.key}>
                                   <strong>{section.label}</strong> - {section.description}
                                 </li>
@@ -1612,11 +1570,29 @@ export default function PageEditor() {
 
                         <FAQEditor 
                           faqs={locationFormData.faqs?.items || locationFormData.faqs || []}
-                          onChange={(faqs) => setLocationFormData({ ...locationFormData, faqs: { items: faqs } })}
+                          onChange={(faqs) => {
+                            updateLocationFormData('faqs', { items: faqs });
+                            // Mark as editing when user starts typing
+                            if (!isEditing) {
+                              setIsEditing(true);
+                            }
+                          }}
                         />
 
                         <div className="flex justify-end">
-                          <Button type="submit">Save Location Content</Button>
+                          <Button type="submit" disabled={saving}>
+                            {saving ? (
+                              <>
+                                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <Save className="w-4 h-4 mr-2" />
+                                Save Location Content
+                              </>
+                            )}
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>

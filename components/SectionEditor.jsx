@@ -9,8 +9,6 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import {
   Accordion,
@@ -22,512 +20,260 @@ import {
   Plus, 
   Trash2, 
   ArrowUp, 
-  ArrowDown 
+  ArrowDown,
+  Info,
+  AlertCircle
 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { validateSection } from '@/lib/cmsTypes';
+import CMSInput from '@/components/CMSInput';
 
-export default function SectionEditor({ sections, onChange }) {
-  const updateSection = (sectionName, updates) => {
-    onChange({
-      ...sections,
-      [sectionName]: { ...sections[sectionName], ...updates }
-    });
+export default function SectionEditor({ 
+  section, 
+  sectionIndex, 
+  onUpdate, 
+  onMoveUp, 
+  onMoveDown, 
+  onDelete,
+  isLast,
+  isFirst
+}) {
+  const [errors, setErrors] = useState({});
+
+  const updateField = (field, value) => {
+    const updatedSection = { ...section, [field]: value };
+    onUpdate(sectionIndex, field, value);
+    
+    // Validate the section when fields change
+    const validation = validateSection(updatedSection);
+    setErrors(validation.errors);
   };
 
-  const updateArraySection = (sectionName, index, updates) => {
-    const newArray = [...sections[sectionName]];
+  const updateArrayItem = (field, index, updates) => {
+    const newArray = [...(section[field] || [])];
     newArray[index] = { ...newArray[index], ...updates };
-    onChange({
-      ...sections,
-      [sectionName]: newArray
-    });
+    onUpdate(sectionIndex, field, newArray);
   };
 
-  const addArrayItem = (sectionName, defaultItem) => {
-    const newArray = sections[sectionName] ? [...sections[sectionName]] : [];
+  const addArrayItem = (field, defaultItem) => {
+    const newArray = section[field] ? [...section[field]] : [];
     newArray.push(defaultItem);
-    onChange({
-      ...sections,
-      [sectionName]: newArray
-    });
+    onUpdate(sectionIndex, field, newArray);
   };
 
-  const removeArrayItem = (sectionName, index) => {
-    const newArray = [...sections[sectionName]];
+  const removeArrayItem = (field, index) => {
+    const newArray = [...(section[field] || [])];
     newArray.splice(index, 1);
-    onChange({
-      ...sections,
-      [sectionName]: newArray
-    });
+    onUpdate(sectionIndex, field, newArray);
   };
 
-  const moveArrayItem = (sectionName, fromIndex, toIndex) => {
-    const newArray = [...sections[sectionName]];
+  const moveArrayItem = (field, fromIndex, toIndex) => {
+    const newArray = [...(section[field] || [])];
     const [movedItem] = newArray.splice(fromIndex, 1);
     newArray.splice(toIndex, 0, movedItem);
-    onChange({
-      ...sections,
-      [sectionName]: newArray
-    });
+    onUpdate(sectionIndex, field, newArray);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Hero Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Hero Section</CardTitle>
-          <CardDescription>Edit the main hero section content</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="hero-heading">Heading</Label>
-            <Input
-              id="hero-heading"
-              value={sections?.hero?.heading || ''}
-              onChange={(e) => updateSection('hero', { heading: e.target.value })}
-              placeholder="Enter hero heading"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="hero-subheading">Subheading</Label>
-            <Textarea
-              id="hero-subheading"
-              value={sections?.hero?.subheading || ''}
-              onChange={(e) => updateSection('hero', { subheading: e.target.value })}
-              placeholder="Enter hero subheading"
-              rows={2}
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="hero-cta-primary-text">Primary CTA Text</Label>
-              <Input
-                id="hero-cta-primary-text"
-                value={sections?.hero?.cta_primary?.text || ''}
-                onChange={(e) => updateSection('hero', { 
-                  cta_primary: { ...sections?.hero?.cta_primary, text: e.target.value } 
-                })}
-                placeholder="Enter primary CTA text"
+    <Card className="mb-4">
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <CMSInput
+                value={section.title || ''}
+                onChange={(newValue) => updateField('title', newValue)}
+                className="font-bold text-lg w-auto"
+                placeholder="Section Title"
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="hero-cta-primary-link">Primary CTA Link</Label>
-              <Input
-                id="hero-cta-primary-link"
-                value={sections?.hero?.cta_primary?.link || ''}
-                onChange={(e) => updateSection('hero', { 
-                  cta_primary: { ...sections?.hero?.cta_primary, link: e.target.value } 
-                })}
-                placeholder="Enter primary CTA link"
-              />
-            </div>
+              {section.type && (
+                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  {section.type}
+                </span>
+              )}
+              {errors.title && (
+                <span className="text-red-500 text-sm flex items-center">
+                  <AlertCircle className="w-4 h-4 mr-1" />
+                  {errors.title}
+                </span>
+              )}
+            </CardTitle>
+            {section.description && (
+              <CardDescription>{section.description}</CardDescription>
+            )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="hero-cta-secondary-text">Secondary CTA Text</Label>
-              <Input
-                id="hero-cta-secondary-text"
-                value={sections?.hero?.cta_secondary?.text || ''}
-                onChange={(e) => updateSection('hero', { 
-                  cta_secondary: { ...sections?.hero?.cta_secondary, text: e.target.value } 
-                })}
-                placeholder="Enter secondary CTA text"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="hero-cta-secondary-link">Secondary CTA Link</Label>
-              <Input
-                id="hero-cta-secondary-link"
-                value={sections?.hero?.cta_secondary?.link || ''}
-                onChange={(e) => updateSection('hero', { 
-                  cta_secondary: { ...sections?.hero?.cta_secondary, link: e.target.value } 
-                })}
-                placeholder="Enter secondary CTA link"
-              />
-            </div>
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onMoveUp(sectionIndex)}
+              disabled={isFirst}
+            >
+              <ArrowUp className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onMoveDown(sectionIndex)}
+              disabled={isLast}
+            >
+              <ArrowDown className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onDelete(sectionIndex)}
+              className="text-red-600 hover:text-red-800"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* About Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>About Section</CardTitle>
-          <CardDescription>Edit the about section content</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Standardized section fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="about-title">Title</Label>
-            <Input
-              id="about-title"
-              value={sections?.about?.title || ''}
-              onChange={(e) => updateSection('about', { title: e.target.value })}
-              placeholder="Enter about section title"
+            <Label htmlFor={`section-heading-${sectionIndex}`}>H1 Title</Label>
+            <CMSInput
+              id={`section-heading-${sectionIndex}`}
+              value={section.heading || ''}
+              onChange={(newValue) => updateField('heading', newValue)}
+              placeholder="Section heading"
             />
+            {errors.heading && (
+              <p className="text-sm text-red-500">{errors.heading}</p>
+            )}
           </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="about-body">Body Content</Label>
-            <Textarea
-              id="about-body"
-              value={sections?.about?.body || ''}
-              onChange={(e) => updateSection('about', { body: e.target.value })}
-              placeholder="Enter about section body content"
-              rows={6}
-            />
+            <Label htmlFor={`section-heading-type-${sectionIndex}`}>Heading Type</Label>
+            <Select 
+              value={section.headingType || 'h2'}
+              onValueChange={(value) => updateField('headingType', value)}
+            >
+              <SelectTrigger id={`section-heading-type-${sectionIndex}`}>
+                <SelectValue placeholder="Select heading type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="h1">
+                  <span className="font-bold">H1</span> - Main page title
+                </SelectItem>
+                <SelectItem value="h2">
+                  <span className="font-semibold">H2</span> - Section heading
+                </SelectItem>
+                <SelectItem value="h3">
+                  <span className="font-medium">H3</span> - Subsection heading
+                </SelectItem>
+                <SelectItem value="h4">
+                  <span>H4</span> - Sub-subsection heading
+                </SelectItem>
+                <SelectItem value="paragraph">
+                  <span>Paragraph</span> - Regular text
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.headingType && (
+              <p className="text-sm text-red-500">{errors.headingType}</p>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Types of Fostering Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Types of Fostering</CardTitle>
-          <CardDescription>Manage the types of fostering available</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {(sections?.types_of_fostering || []).map((type, index) => (
-            <div key={index} className="border rounded-lg p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium">Type #{index + 1}</h4>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => moveArrayItem('types_of_fostering', index, index - 1)}
-                    disabled={index === 0}
-                  >
-                    <ArrowUp className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => moveArrayItem('types_of_fostering', index, index + 1)}
-                    disabled={index === sections?.types_of_fostering?.length - 1}
-                  >
-                    <ArrowDown className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeArrayItem('types_of_fostering', index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`type-name-${index}`}>Name</Label>
-                <Input
-                  id={`type-name-${index}`}
-                  value={type.name || ''}
-                  onChange={(e) => updateArraySection('types_of_fostering', index, { name: e.target.value })}
-                  placeholder="Enter type name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`type-description-${index}`}>Description</Label>
-                <Textarea
-                  id={`type-description-${index}`}
-                  value={type.description || ''}
-                  onChange={(e) => updateArraySection('types_of_fostering', index, { description: e.target.value })}
-                  placeholder="Enter type description"
-                  rows={3}
-                />
-              </div>
-            </div>
-          ))}
-          <Button
-            variant="outline"
-            onClick={() => addArrayItem('types_of_fostering', {
-              name: '',
-              description: ''
-            })}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Type
-          </Button>
-        </CardContent>
-      </Card>
+        <div className="space-y-2">
+          <Label htmlFor={`section-subheading-${sectionIndex}`}>Subheading</Label>
+          <CMSInput
+            id={`section-subheading-${sectionIndex}`}
+            value={section.subheading || ''}
+            onChange={(newValue) => updateField('subheading', newValue)}
+            placeholder="Section subheading"
+            type="textarea"
+            rows={2}
+          />
+        </div>
 
-      {/* Top Agencies Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Agencies</CardTitle>
-          <CardDescription>Manage the featured agencies</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {(sections?.top_agencies || []).map((agency, index) => (
-            <div key={index} className="border rounded-lg p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium">Agency #{index + 1}</h4>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => moveArrayItem('top_agencies', index, index - 1)}
-                    disabled={index === 0}
-                  >
-                    <ArrowUp className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => moveArrayItem('top_agencies', index, index + 1)}
-                    disabled={index === sections?.top_agencies?.length - 1}
-                  >
-                    <ArrowDown className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeArrayItem('top_agencies', index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`agency-name-${index}`}>Name</Label>
-                <Input
-                  id={`agency-name-${index}`}
-                  value={agency.name || ''}
-                  onChange={(e) => updateArraySection('top_agencies', index, { name: e.target.value })}
-                  placeholder="Enter agency name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`agency-summary-${index}`}>Summary</Label>
-                <Textarea
-                  id={`agency-summary-${index}`}
-                  value={agency.summary || ''}
-                  onChange={(e) => updateArraySection('top_agencies', index, { summary: e.target.value })}
-                  placeholder="Enter agency summary"
-                  rows={2}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`agency-link-${index}`}>Link</Label>
-                <Input
-                  id={`agency-link-${index}`}
-                  value={agency.link || ''}
-                  onChange={(e) => updateArraySection('top_agencies', index, { link: e.target.value })}
-                  placeholder="Enter agency link"
-                />
-              </div>
-            </div>
-          ))}
-          <Button
-            variant="outline"
-            onClick={() => addArrayItem('top_agencies', {
-              name: '',
-              summary: '',
-              link: ''
-            })}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Agency
-          </Button>
-        </CardContent>
-      </Card>
+        <div className="space-y-2">
+          <Label htmlFor={`section-content-${sectionIndex}`}>Content</Label>
+          <CMSInput
+            id={`section-content-${sectionIndex}`}
+            value={section.content || ''}
+            onChange={(newValue) => updateField('content', newValue)}
+            placeholder="Section content"
+            type="textarea"
+            rows={4}
+          />
+        </div>
 
-      {/* Why Foster Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Why Foster</CardTitle>
-          <CardDescription>Edit the reasons to foster</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Key Points</Label>
-            {(sections?.why_foster?.points || []).map((point, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  value={point || ''}
-                  onChange={(e) => {
-                    const newPoints = [...(sections?.why_foster?.points || [])];
-                    newPoints[index] = e.target.value;
-                    updateSection('why_foster', { points: newPoints });
-                  }}
-                  placeholder="Enter reason to foster"
+        {/* Buttons array */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label>Buttons</Label>
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={() => addArrayItem('buttons', { text: '', link: '' })}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Button
+            </Button>
+          </div>
+          
+          {section.buttons && section.buttons.map((button, index) => (
+            <div key={index} className="flex gap-2 items-end">
+              <div className="flex-1">
+                <Label htmlFor={`button-text-${sectionIndex}-${index}`}>Button Text</Label>
+                <CMSInput
+                  id={`button-text-${sectionIndex}-${index}`}
+                  value={button.text || ''}
+                  onChange={(newValue) => updateArrayItem('buttons', index, { text: newValue })}
+                  placeholder="Button text"
                 />
+                {errors[`button_${index}_text`] && (
+                  <p className="text-sm text-red-500">{errors[`button_${index}_text`]}</p>
+                )}
+              </div>
+              <div className="flex-1">
+                <Label htmlFor={`button-link-${sectionIndex}-${index}`}>Button Link</Label>
+                <CMSInput
+                  id={`button-link-${sectionIndex}-${index}`}
+                  value={button.link || ''}
+                  onChange={(newValue) => updateArrayItem('buttons', index, { link: newValue })}
+                  placeholder="Button link"
+                />
+                {errors[`button_${index}_link`] && (
+                  <p className="text-sm text-red-500">{errors[`button_${index}_link`]}</p>
+                )}
+              </div>
+              <div className="flex gap-1">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    const newPoints = [...(sections?.why_foster?.points || [])];
-                    newPoints.splice(index, 1);
-                    updateSection('why_foster', { points: newPoints });
-                  }}
+                  onClick={() => moveArrayItem('buttons', index, index - 1)}
+                  disabled={index === 0}
+                >
+                  <ArrowUp className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => moveArrayItem('buttons', index, index + 1)}
+                  disabled={index === (section.buttons?.length || 0) - 1}
+                >
+                  <ArrowDown className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeArrayItem('buttons', index)}
+                  className="text-red-600 hover:text-red-800"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
-            ))}
-            <Button
-              variant="outline"
-              onClick={() => {
-                const newPoints = [...(sections?.why_foster?.points || []), ''];
-                updateSection('why_foster', { points: newPoints });
-              }}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Point
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Allowances and Support Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Allowances and Support</CardTitle>
-          <CardDescription>Manage the allowances and support information</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {(sections?.allowances_and_support || []).map((item, index) => (
-            <div key={index} className="border rounded-lg p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium">Item #{index + 1}</h4>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => moveArrayItem('allowances_and_support', index, index - 1)}
-                    disabled={index === 0}
-                  >
-                    <ArrowUp className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => moveArrayItem('allowances_and_support', index, index + 1)}
-                    disabled={index === sections?.allowances_and_support?.length - 1}
-                  >
-                    <ArrowDown className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeArrayItem('allowances_and_support', index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`allowance-title-${index}`}>Title</Label>
-                <Input
-                  id={`allowance-title-${index}`}
-                  value={item.title || ''}
-                  onChange={(e) => updateArraySection('allowances_and_support', index, { title: e.target.value })}
-                  placeholder="Enter allowance title"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`allowance-details-${index}`}>Details</Label>
-                <Textarea
-                  id={`allowance-details-${index}`}
-                  value={item.details || ''}
-                  onChange={(e) => updateArraySection('allowances_and_support', index, { details: e.target.value })}
-                  placeholder="Enter allowance details"
-                  rows={3}
-                />
-              </div>
             </div>
           ))}
-          <Button
-            variant="outline"
-            onClick={() => addArrayItem('allowances_and_support', {
-              title: '',
-              details: ''
-            })}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Item
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Local Resources Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Local Resources</CardTitle>
-          <CardDescription>Manage the local resources</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {(sections?.local_resources || []).map((resource, index) => (
-            <div key={index} className="border rounded-lg p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium">Resource #{index + 1}</h4>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => moveArrayItem('local_resources', index, index - 1)}
-                    disabled={index === 0}
-                  >
-                    <ArrowUp className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => moveArrayItem('local_resources', index, index + 1)}
-                    disabled={index === sections?.local_resources?.length - 1}
-                  >
-                    <ArrowDown className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeArrayItem('local_resources', index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`resource-title-${index}`}>Title</Label>
-                <Input
-                  id={`resource-title-${index}`}
-                  value={resource.title || ''}
-                  onChange={(e) => updateArraySection('local_resources', index, { title: e.target.value })}
-                  placeholder="Enter resource title"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`resource-description-${index}`}>Description</Label>
-                <Textarea
-                  id={`resource-description-${index}`}
-                  value={resource.description || ''}
-                  onChange={(e) => updateArraySection('local_resources', index, { description: e.target.value })}
-                  placeholder="Enter resource description"
-                  rows={2}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`resource-link-${index}`}>Link</Label>
-                <Input
-                  id={`resource-link-${index}`}
-                  value={resource.link || ''}
-                  onChange={(e) => updateArraySection('local_resources', index, { link: e.target.value })}
-                  placeholder="Enter resource link"
-                />
-              </div>
-            </div>
-          ))}
-          <Button
-            variant="outline"
-            onClick={() => addArrayItem('local_resources', {
-              title: '',
-              description: '',
-              link: ''
-            })}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Resource
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

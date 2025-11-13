@@ -1,19 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2, Plus, ArrowUp, ArrowDown, Info } from 'lucide-react';
+import CMSInput from '@/components/CMSInput';
 
 export default function FAQEditor({ faqs = [], onChange }) {
   const [faqsState, setFaqsState] = useState(faqs);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Update local state when props change
+  useEffect(() => {
+    if (!isEditing) {
+      setFaqsState(faqs);
+    }
+  }, [faqs, isEditing]);
 
   const updateFaqs = (newFaqs) => {
     setFaqsState(newFaqs);
     onChange(newFaqs);
+    setIsEditing(true);
   };
 
   const addFAQ = () => {
@@ -63,7 +71,7 @@ export default function FAQEditor({ faqs = [], onChange }) {
       </div>
       
       <div className="space-y-4">
-        {faqsState.map((faq, index) => (
+        {Array.isArray(faqsState) && faqsState.map((faq, index) => (
           <Card key={index} className="relative">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-center">
@@ -102,20 +110,21 @@ export default function FAQEditor({ faqs = [], onChange }) {
             <CardContent className="space-y-3">
               <div className="space-y-2">
                 <Label htmlFor={`faq-question-${index}`}>Question</Label>
-                <Input
+                <CMSInput
                   id={`faq-question-${index}`}
                   value={faq.question || ''}
-                  onChange={(e) => updateFAQ(index, 'question', e.target.value)}
+                  onChange={(newValue) => updateFAQ(index, 'question', newValue)}
                   placeholder="Enter question"
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`faq-answer-${index}`}>Answer</Label>
-                <Textarea
+                <CMSInput
                   id={`faq-answer-${index}`}
                   value={faq.answer || ''}
-                  onChange={(e) => updateFAQ(index, 'answer', e.target.value)}
+                  onChange={(newValue) => updateFAQ(index, 'answer', newValue)}
                   placeholder="Enter answer"
+                  type="textarea"
                   rows={3}
                 />
               </div>
@@ -123,7 +132,7 @@ export default function FAQEditor({ faqs = [], onChange }) {
           </Card>
         ))}
         
-        {faqsState.length === 0 && (
+        {(!Array.isArray(faqsState) || faqsState.length === 0) && (
           <div className="text-center py-8 text-muted-foreground bg-blue-50 rounded-lg border border-blue-200 p-4">
             <Info className="w-12 h-12 text-blue-500 mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">No FAQs Added</h3>

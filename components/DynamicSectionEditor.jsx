@@ -26,96 +26,119 @@ import {
   Info
 } from 'lucide-react';
 import { locationSchemas } from '@/lib/locationSchemas';
+import HeadingTypeSelector from '@/components/HeadingTypeSelector';
+import CMSInput from '@/components/CMSInput';
 
 export default function DynamicSectionEditor({ locationType, content, onChange }) {
   // Get the schema for this location type
   const schema = locationSchemas[locationType] || locationSchemas.city;
   
   const updateField = (sectionKey, fieldName, value) => {
-    onChange({
+    // Ensure we're creating a proper immutable update
+    const updatedContent = {
       ...content,
       [sectionKey]: {
         ...content[sectionKey],
         [fieldName]: value
       }
-    });
+    };
+    onChange(updatedContent);
   };
 
   const updateNestedField = (sectionKey, fieldName, nestedField, value) => {
-    onChange({
+    // Ensure we're creating a proper immutable update for nested objects
+    const updatedContent = {
       ...content,
       [sectionKey]: {
         ...content[sectionKey],
         [fieldName]: {
-          ...content[sectionKey][fieldName],
+          ...content[sectionKey]?.[fieldName],
           [nestedField]: value
         }
       }
-    });
+    };
+    onChange(updatedContent);
   };
 
   const updateArrayField = (sectionKey, fieldName, index, updates) => {
-    const newArray = [...(content[sectionKey][fieldName] || [])];
+    // Ensure we're creating a proper immutable update for arrays
+    const newArray = Array.isArray(content[sectionKey]?.[fieldName]) 
+      ? [...content[sectionKey][fieldName]] 
+      : [];
     newArray[index] = { ...newArray[index], ...updates };
-    onChange({
+    const updatedContent = {
       ...content,
       [sectionKey]: {
         ...content[sectionKey],
         [fieldName]: newArray
       }
-    });
+    };
+    onChange(updatedContent);
   };
 
-  const updateArrayItemField = (sectionKey, fieldName, index, itemIndex, field, value) => {
-    const newArray = [...(content[sectionKey][fieldName] || [])];
+  const updateArrayItemField = (sectionKey, fieldName, index, itemField, value) => {
+    // Ensure we're creating a proper immutable update for nested arrays
+    const newArray = Array.isArray(content[sectionKey]?.[fieldName]) 
+      ? [...content[sectionKey][fieldName]] 
+      : [];
     newArray[index] = {
       ...newArray[index],
-      [field]: value
+      [itemField]: value
     };
-    onChange({
+    const updatedContent = {
       ...content,
       [sectionKey]: {
         ...content[sectionKey],
         [fieldName]: newArray
       }
-    });
+    };
+    onChange(updatedContent);
   };
 
   const addArrayItem = (sectionKey, fieldName, defaultItem) => {
-    const newArray = content[sectionKey] && content[sectionKey][fieldName] ? [...content[sectionKey][fieldName]] : [];
+    const newArray = Array.isArray(content[sectionKey]?.[fieldName]) 
+      ? [...content[sectionKey][fieldName]] 
+      : [];
     newArray.push(defaultItem);
-    onChange({
+    const updatedContent = {
       ...content,
       [sectionKey]: {
         ...content[sectionKey],
         [fieldName]: newArray
       }
-    });
+    };
+    onChange(updatedContent);
   };
 
   const removeArrayItem = (sectionKey, fieldName, index) => {
-    const newArray = [...(content[sectionKey][fieldName] || [])];
+    const newArray = Array.isArray(content[sectionKey]?.[fieldName]) 
+      ? [...content[sectionKey][fieldName]] 
+      : [];
     newArray.splice(index, 1);
-    onChange({
+    const updatedContent = {
       ...content,
       [sectionKey]: {
         ...content[sectionKey],
         [fieldName]: newArray
       }
-    });
+    };
+    onChange(updatedContent);
   };
 
   const moveArrayItem = (sectionKey, fieldName, fromIndex, toIndex) => {
-    const newArray = [...(content[sectionKey][fieldName] || [])];
+    const newArray = Array.isArray(content[sectionKey]?.[fieldName]) 
+      ? [...content[sectionKey][fieldName]] 
+      : [];
     const [movedItem] = newArray.splice(fromIndex, 1);
     newArray.splice(toIndex, 0, movedItem);
-    onChange({
+    const updatedContent = {
       ...content,
       [sectionKey]: {
         ...content[sectionKey],
         [fieldName]: newArray
       }
-    });
+    };
+    onChange(updatedContent);
   };
 
   const renderField = (sectionKey, field, value) => {
@@ -126,11 +149,12 @@ export default function DynamicSectionEditor({ locationType, content, onChange }
           {field.placeholder && (
             <div className="text-xs text-muted-foreground">{field.placeholder}</div>
           )}
-          <Textarea
+          <CMSInput
             id={`${sectionKey}-${field.name}`}
             value={value || ''}
-            onChange={(e) => updateField(sectionKey, field.name, e.target.value)}
+            onChange={(newValue) => updateField(sectionKey, field.name, newValue)}
             placeholder={field.placeholder}
+            type="textarea"
             rows={field.rows || 4}
           />
         </div>
@@ -145,10 +169,10 @@ export default function DynamicSectionEditor({ locationType, content, onChange }
               {nestedField.placeholder && (
                 <div className="text-xs text-muted-foreground">{nestedField.placeholder}</div>
               )}
-              <Input
+              <CMSInput
                 id={`${sectionKey}-${field.name}-${nestedField.name}`}
                 value={value?.[nestedField.name] || ''}
-                onChange={(e) => updateNestedField(sectionKey, field.name, nestedField.name, e.target.value)}
+                onChange={(newValue) => updateNestedField(sectionKey, field.name, nestedField.name, newValue)}
                 placeholder={nestedField.placeholder}
               />
             </div>
@@ -159,8 +183,8 @@ export default function DynamicSectionEditor({ locationType, content, onChange }
       return (
         <div className="space-y-4">
           <Label>{field.label}</Label>
-          {(value || []).map((item, index) => (
-            <div key={index} className="border rounded-lg p-4 space-y-3">
+          {Array.isArray(value) && value.map((item, index) => (
+            <Card key={index} className="border rounded-lg p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <h4 className="font-medium">{field.label.replace(/s$/, '').replace(/\[\]$/, '')} #{index + 1}</h4>
                 <div className="flex gap-2">
@@ -195,25 +219,17 @@ export default function DynamicSectionEditor({ locationType, content, onChange }
                   {itemField.placeholder && (
                     <div className="text-xs text-muted-foreground">{itemField.placeholder}</div>
                   )}
-                  {itemField.type === 'textarea' ? (
-                    <Textarea
-                      id={`${sectionKey}-${field.name}-${index}-${itemField.name}`}
-                      value={item[itemField.name] || ''}
-                      onChange={(e) => updateArrayItemField(sectionKey, field.name, index, itemField.name, e.target.value)}
-                      placeholder={itemField.placeholder}
-                      rows={itemField.rows || 3}
-                    />
-                  ) : (
-                    <Input
-                      id={`${sectionKey}-${field.name}-${index}-${itemField.name}`}
-                      value={item[itemField.name] || ''}
-                      onChange={(e) => updateArrayItemField(sectionKey, field.name, index, itemField.name, e.target.value)}
-                      placeholder={itemField.placeholder}
-                    />
-                  )}
+                  <CMSInput
+                    id={`${sectionKey}-${field.name}-${index}-${itemField.name}`}
+                    value={item[itemField.name] || ''}
+                    onChange={(newValue) => updateArrayItemField(sectionKey, field.name, index, itemField.name, newValue)}
+                    placeholder={itemField.placeholder}
+                    type={itemField.type === 'textarea' ? 'textarea' : 'text'}
+                    rows={itemField.rows || 3}
+                  />
                 </div>
               ))}
-            </div>
+            </Card>
           ))}
           <Button
             variant="outline"
@@ -230,6 +246,40 @@ export default function DynamicSectionEditor({ locationType, content, onChange }
           </Button>
         </div>
       );
+    } else if (field.type === 'boolean') {
+      return (
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id={`${sectionKey}-${field.name}`}
+              checked={value || false}
+              onChange={(e) => updateField(sectionKey, field.name, e.target.checked)}
+              className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+            />
+            <Label htmlFor={`${sectionKey}-${field.name}`}>{field.label}</Label>
+          </div>
+          {field.placeholder && (
+            <div className="text-xs text-muted-foreground">{field.placeholder}</div>
+          )}
+        </div>
+      );
+    } else if (field.type === 'number') {
+      return (
+        <div className="space-y-2">
+          <Label htmlFor={`${sectionKey}-${field.name}`}>{field.label}</Label>
+          {field.placeholder && (
+            <div className="text-xs text-muted-foreground">{field.placeholder}</div>
+          )}
+          <CMSInput
+            id={`${sectionKey}-${field.name}`}
+            type="number"
+            value={value || ''}
+            onChange={(newValue) => updateField(sectionKey, field.name, newValue)}
+            placeholder={field.placeholder}
+          />
+        </div>
+      );
     } else {
       return (
         <div className="space-y-2">
@@ -237,10 +287,10 @@ export default function DynamicSectionEditor({ locationType, content, onChange }
           {field.placeholder && (
             <div className="text-xs text-muted-foreground">{field.placeholder}</div>
           )}
-          <Input
+          <CMSInput
             id={`${sectionKey}-${field.name}`}
             value={value || ''}
-            onChange={(e) => updateField(sectionKey, field.name, e.target.value)}
+            onChange={(newValue) => updateField(sectionKey, field.name, newValue)}
             placeholder={field.placeholder}
           />
         </div>
@@ -258,7 +308,7 @@ export default function DynamicSectionEditor({ locationType, content, onChange }
       </div>
       
       {schema.sections.map((section) => (
-        <Card key={section.key}>
+        <Card key={section.key} className="collapsible-section">
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
@@ -286,6 +336,64 @@ export default function DynamicSectionEditor({ locationType, content, onChange }
                 <p className="text-xs text-blue-700">{section.contentGuidance}</p>
               </div>
             )}
+            
+            {/* Standardized section fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor={`${section.key}-heading`}>H1 Title</Label>
+                <CMSInput
+                  id={`${section.key}-heading`}
+                  value={content?.[section.key]?.heading || content?.[section.key]?.title || ''}
+                  onChange={(newValue) => updateField(section.key, 'heading', newValue)}
+                  placeholder="Enter section heading"
+                />
+              </div>
+              
+              <HeadingTypeSelector
+                id={`${section.key}-heading-type`}
+                value={content?.[section.key]?.headingType || 'h2'}
+                onValueChange={(value) => updateField(section.key, 'headingType', value)}
+                label="Heading Type"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor={`${section.key}-subheading`}>Subheading</Label>
+              <CMSInput
+                id={`${section.key}-subheading`}
+                value={content?.[section.key]?.subheading || ''}
+                onChange={(newValue) => updateField(section.key, 'subheading', newValue)}
+                placeholder="Enter section subheading"
+                type="textarea"
+                rows={2}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor={`${section.key}-description`}>Description</Label>
+              <CMSInput
+                id={`${section.key}-description`}
+                value={content?.[section.key]?.description || ''}
+                onChange={(newValue) => updateField(section.key, 'description', newValue)}
+                placeholder="Enter section description"
+                type="textarea"
+                rows={4}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor={`${section.key}-content`}>Content</Label>
+              <CMSInput
+                id={`${section.key}-content`}
+                value={content?.[section.key]?.content || content?.[section.key]?.body || ''}
+                onChange={(newValue) => updateField(section.key, 'content', newValue)}
+                placeholder="Enter section content"
+                type="textarea"
+                rows={4}
+              />
+            </div>
+            
+            {/* Custom fields from schema */}
             {section.fields.map((field) => (
               <div key={field.name}>
                 {renderField(section.key, field, content?.[section.key]?.[field.name] || content?.[section.key]?.[field.name.replace('[]', '')])}
