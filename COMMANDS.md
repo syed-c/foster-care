@@ -282,6 +282,31 @@ Update environment variable:
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
 ```
 
+### Google Cloud Console Setup
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Enable these APIs:
+   - Maps JavaScript API
+   - Maps Static API
+   - Geocoding API
+3. Create an API key
+4. Restrict the API key to HTTP referrers:
+   - `http://localhost:3000/*`
+   - `http://localhost:3001/*`
+   - `https://yourdomain.com/*`
+5. Add your API key to `.env.local`:
+   ```bash
+   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_actual_api_key_here
+   ```
+
+### Troubleshooting
+If you see `RefererNotAllowedMapError`:
+1. Check that your HTTP referrer restrictions include your domain
+2. Wait 5-10 minutes for changes to propagate
+3. Verify you're using the correct API key
+4. Ensure required APIs are enabled
+
+For detailed instructions, see [GOOGLE_MAPS_SETUP.md](GOOGLE_MAPS_SETUP.md)
+
 ## 📚 Content Management
 
 ### Add New Content Type

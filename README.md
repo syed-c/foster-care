@@ -44,6 +44,9 @@ app/
 2. **Set up environment variables**:
    Copy `.env.example` to `.env` and fill in your credentials
 
+3. **Google Maps Setup (Important)**:
+   Follow the instructions in [GOOGLE_MAPS_SETUP.md](GOOGLE_MAPS_SETUP.md) to configure Google Maps API properly
+
 3. **Run the development server**:
    ```bash
    npm run dev

@@ -37,10 +37,34 @@ export default function InteractiveMap({
     // Use the singleton loader to ensure API is only loaded once
     googleMapsLoader.load((err) => {
       if (err) {
+        console.error('Google Maps loading error:', err);
+        
+        // Check for specific error types
+        let solution = "Check your API key and internet connection";
+        let message = "Failed to load Google Maps";
+        
+        // Handle RefererNotAllowedMapError specifically
+        if (err.message && err.message.includes('RefererNotAllowedMapError')) {
+          message = "Referer Not Allowed Error";
+          solution = "Your Google Maps API key is restricted. Configure HTTP referrer restrictions in Google Cloud Console to allow:\n\n" +
+            "1. http://localhost:3000/*\n" +
+            "2. http://localhost:3001/*\n" +
+            "3. https://yourdomain.com/* (for production)\n\n" +
+            "Also ensure these APIs are enabled:\n" +
+            "- Maps JavaScript API\n" +
+            "- Geocoding API\n\n" +
+            "See Google Cloud Console > APIs & Services > Credentials";
+        } else if (err.message && err.message.includes('InvalidKeyMapError')) {
+          message = "Invalid API Key Error";
+          solution = "Your Google Maps API key is invalid. Please check that you've copied the key correctly from Google Cloud Console.";
+        } else if (err.message) {
+          message = err.message;
+        }
+        
         setError({
           title: "Map Loading Failed",
-          message: "Failed to load Google Maps",
-          solution: "Check your API key and internet connection",
+          message: message,
+          solution: solution,
         });
         setLoading(false);
         return;

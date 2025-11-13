@@ -95,6 +95,7 @@ export async function GET(request) {
       JSON.stringify({ 
         agencies: mappedAgencies, 
         totalPages,
+        total: count,
         currentPage: page
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }

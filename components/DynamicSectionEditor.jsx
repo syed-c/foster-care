@@ -28,116 +28,71 @@ import {
 import { locationSchemas } from '@/lib/locationSchemas';
 import HeadingTypeSelector from '@/components/HeadingTypeSelector';
 import CMSInput from '@/components/CMSInput';
+import { updateNested } from '@/lib/updateNested';
 
 export default function DynamicSectionEditor({ locationType, content, onChange }) {
   // Get the schema for this location type
   const schema = locationSchemas[locationType] || locationSchemas.city;
   
   const updateField = (sectionKey, fieldName, value) => {
-    // Ensure we're creating a proper immutable update
-    const updatedContent = {
-      ...content,
-      [sectionKey]: {
-        ...content[sectionKey],
-        [fieldName]: value
-      }
-    };
+    // Use the updateNested utility for proper nested updates
+    const path = `${sectionKey}.${fieldName}`;
+    const updatedContent = updateNested(content, path, value);
     onChange(updatedContent);
   };
 
   const updateNestedField = (sectionKey, fieldName, nestedField, value) => {
-    // Ensure we're creating a proper immutable update for nested objects
-    const updatedContent = {
-      ...content,
-      [sectionKey]: {
-        ...content[sectionKey],
-        [fieldName]: {
-          ...content[sectionKey]?.[fieldName],
-          [nestedField]: value
-        }
-      }
-    };
+    // Use the updateNested utility for proper nested updates
+    const path = `${sectionKey}.${fieldName}.${nestedField}`;
+    const updatedContent = updateNested(content, path, value);
     onChange(updatedContent);
   };
 
   const updateArrayField = (sectionKey, fieldName, index, updates) => {
-    // Ensure we're creating a proper immutable update for arrays
-    const newArray = Array.isArray(content[sectionKey]?.[fieldName]) 
-      ? [...content[sectionKey][fieldName]] 
-      : [];
-    newArray[index] = { ...newArray[index], ...updates };
-    const updatedContent = {
-      ...content,
-      [sectionKey]: {
-        ...content[sectionKey],
-        [fieldName]: newArray
-      }
-    };
+    // Use the updateNested utility for proper nested updates
+    const path = `${sectionKey}.${fieldName}.${index}`;
+    const updatedContent = updateNested(content, path, { ...content[sectionKey]?.[fieldName]?.[index], ...updates });
     onChange(updatedContent);
   };
 
   const updateArrayItemField = (sectionKey, fieldName, index, itemField, value) => {
-    // Ensure we're creating a proper immutable update for nested arrays
-    const newArray = Array.isArray(content[sectionKey]?.[fieldName]) 
-      ? [...content[sectionKey][fieldName]] 
-      : [];
-    newArray[index] = {
-      ...newArray[index],
-      [itemField]: value
-    };
-    const updatedContent = {
-      ...content,
-      [sectionKey]: {
-        ...content[sectionKey],
-        [fieldName]: newArray
-      }
-    };
+    // Use the updateNested utility for proper nested updates
+    const path = `${sectionKey}.${fieldName}.${index}.${itemField}`;
+    const updatedContent = updateNested(content, path, value);
     onChange(updatedContent);
   };
 
   const addArrayItem = (sectionKey, fieldName, defaultItem) => {
+    // Use the updateNested utility for proper nested updates
     const newArray = Array.isArray(content[sectionKey]?.[fieldName]) 
       ? [...content[sectionKey][fieldName]] 
       : [];
     newArray.push(defaultItem);
-    const updatedContent = {
-      ...content,
-      [sectionKey]: {
-        ...content[sectionKey],
-        [fieldName]: newArray
-      }
-    };
+    const path = `${sectionKey}.${fieldName}`;
+    const updatedContent = updateNested(content, path, newArray);
     onChange(updatedContent);
   };
 
   const removeArrayItem = (sectionKey, fieldName, index) => {
+    // Use the updateNested utility for proper nested updates
     const newArray = Array.isArray(content[sectionKey]?.[fieldName]) 
       ? [...content[sectionKey][fieldName]] 
       : [];
     newArray.splice(index, 1);
-    const updatedContent = {
-      ...content,
-      [sectionKey]: {
-        ...content[sectionKey],
-        [fieldName]: newArray
-      }
-    };
+    const path = `${sectionKey}.${fieldName}`;
+    const updatedContent = updateNested(content, path, newArray);
     onChange(updatedContent);
   };
 
   const moveArrayItem = (sectionKey, fieldName, fromIndex, toIndex) => {
+    // Use the updateNested utility for proper nested updates
     const newArray = Array.isArray(content[sectionKey]?.[fieldName]) 
       ? [...content[sectionKey][fieldName]] 
       : [];
     const [movedItem] = newArray.splice(fromIndex, 1);
     newArray.splice(toIndex, 0, movedItem);
-    const updatedContent = {
-      ...content,
-      [sectionKey]: {
-        ...content[sectionKey],
-        [fieldName]: newArray
-      }
-    };
+    const path = `${sectionKey}.${fieldName}`;
+    const updatedContent = updateNested(content, path, newArray);
     onChange(updatedContent);
   };
 
@@ -184,7 +139,7 @@ export default function DynamicSectionEditor({ locationType, content, onChange }
         <div className="space-y-4">
           <Label>{field.label}</Label>
           {Array.isArray(value) && value.map((item, index) => (
-            <Card key={index} className="border rounded-lg p-4 space-y-3">
+            <Card key={`${sectionKey}-${field.name}-${index}`} className="border rounded-lg p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <h4 className="font-medium">{field.label.replace(/s$/, '').replace(/\[\]$/, '')} #{index + 1}</h4>
                 <div className="flex gap-2">

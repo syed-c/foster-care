@@ -45,7 +45,7 @@ import { toast, Toaster } from 'sonner';
 import { formatSlugToTitle } from '@/lib/locationData';
 import FAQEditor from '@/components/FAQEditor';
 import ResourceEditor from '@/components/ResourceEditor';
-import LocationTree from '@/components/LocationTree';
+import LocationSidebar from '@/components/admin/LocationSidebar';
 import DynamicSectionEditor from '@/components/DynamicSectionEditor';
 import { locationSchemas, getDefaultContent } from '@/lib/locationSchemas';
 import TemplateGuide from '@/components/TemplateGuide';
@@ -77,8 +77,6 @@ export default function PageEditor() {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [locationFormData, setLocationFormData] = useState({});
   const [locationSearchQuery, setLocationSearchQuery] = useState('');
-  const [expandedCountries, setExpandedCountries] = useState({});
-  const [expandedRegions, setExpandedRegions] = useState({});
   const [formErrors, setFormErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
 
@@ -237,177 +235,6 @@ export default function PageEditor() {
       }
     });
     return organized;
-  };
-
-  const handleLocationEdit = (content) => {
-    setSelectedLocation(content);
-    // Load the actual content from the API instead of using node data directly
-    loadLocationContent(content.id);
-  };
-
-  // Add useEffect to load content when selectedLocation changes
-  useEffect(() => {
-    if (!selectedLocation?.id) return;
-    if (!isEditing) {
-      loadLocationContent(selectedLocation.id);
-    }
-  }, [selectedLocation?.id, isEditing]);
-
-  async function loadLocationContent(locationId) {
-    try {
-      const res = await fetch(`/api/admin/locations/${locationId}/content`);
-      const json = await res.json();
-      if (!json.success) {
-        console.warn('loadLocationContent failed', json.error);
-        setLocationFormData({}); // or keep previous
-        return;
-      }
-      const content = json.content || {};
-      // If the API returns nested content_json as string for old rows, handle fallback:
-      setLocationFormData(content);
-    } catch (err) {
-      console.error('loadLocationContent error', err);
-      setLocationFormData({});
-    }
-  }
-
-  // Generic handler for nested list items
-  function handleListFieldChange(listKey, index, fieldKey, value) {
-    setLocationFormData(prev => {
-      const list = Array.isArray(prev[listKey]) ? [...prev[listKey]] : [];
-      // immutable update of the single item
-      list[index] = { ...(list[index] || {}), [fieldKey]: value };
-      return { ...prev, [listKey]: list };
-    });
-  }
-
-  async function handleSave() {
-    if (!selectedLocation?.id) return;
-    
-    try {
-      console.log('Saving', selectedLocation.id, locationFormData);
-      
-      // Prepare the data to send including the canonical slug
-      // Remove location-specific fields from the content data
-      const { 
-        id, name, slug, type, children, editable, canonical_slug, 
-        template_type, updated_at, content_json, ...cleanContent 
-      } = locationFormData;
-      
-      const saveData = {
-        ...cleanContent,
-        canonical_slug: selectedLocation.canonical_slug || `/foster-agency/${selectedLocation.slug || selectedLocation.id}`,
-        id: selectedLocation.id,
-        type: selectedLocation.type || 'city'
-      };
-      
-      const res = await fetch(`/api/admin/locations/${selectedLocation.id}/content`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(saveData)
-      });
-      
-      const json = await res.json();
-      console.log('Server saved response', json);
-      
-      if (!json.success) {
-        console.error('Save failed', json.error);
-        toast.error('Save failed: ' + (json.error || 'unknown'));
-        return;
-      }
-      
-      // Prefer returned saved object for hydration (and for new created rows)
-      if (json.saved?.content_json) {
-        setLocationFormData(json.saved.content_json);
-      } else {
-        // fallback re-fetch
-        const reload = await fetch(`/api/admin/locations/${selectedLocation.id}/content`);
-        const reloadJson = await reload.json();
-        setLocationFormData(reloadJson.content || {});
-      }
-      
-      // Persist local autosave draft optionally to localStorage
-      localStorage.removeItem('cms-draft:' + selectedLocation.id);
-      
-      toast.success('Location content saved successfully!');
-      setIsEditing(false);
-    } catch (error) {
-      console.error('handleSave err', error);
-      toast.error('Error saving location content: ' + error.message);
-    }
-  }
-
-  const handleLocationSave = async (e) => {
-    e.preventDefault();
-    if (!selectedLocation) return;
-    
-    // Save draft to localStorage before attempting to save
-    localStorage.setItem('cms-draft:' + selectedLocation.id, JSON.stringify(locationFormData));
-    
-    await handleSave();
-  };
-
-  const handleLocationSelect = async (node) => {
-    if (!node.editable) return;
-    
-    try {
-      setLoading(true);
-      // Use the new endpoint to fetch location content
-      const response = await fetch(`/api/admin/locations/${node.id}/content`);
-      if (response.ok) {
-        const data = await response.json();
-        // Ensure the node data includes the canonical_slug for saving
-        const locationWithSlug = {
-          ...node,
-          canonical_slug: node.canonical_slug || data.canonical_slug || `/foster-agency/${node.slug || node.id}`
-        };
-        setSelectedLocation(locationWithSlug);
-        setLocationFormData(data.content || {});
-        setIsEditing(false);
-      } else {
-        console.error('Failed to fetch location content:', response.status);
-        // Fallback to node data with default content based on location type
-        // Ensure the node data includes the canonical_slug for saving
-        const locationWithSlug = {
-          ...node,
-          canonical_slug: node.canonical_slug || `/foster-agency/${node.slug || node.id}`
-        };
-        setSelectedLocation(locationWithSlug);
-        setLocationFormData({
-          ...getDefaultContent(locationWithSlug),
-          ...locationWithSlug
-        });
-        setIsEditing(false);
-      }
-    } catch (error) {
-      console.error('Error fetching location content:', error);
-      // Fallback to node data with default content based on location type
-      // Ensure the node data includes the canonical_slug for saving
-      const locationWithSlug = {
-        ...node,
-        canonical_slug: node.canonical_slug || `/foster-agency/${node.slug || node.id}`
-      };
-      setSelectedLocation(locationWithSlug);
-      setLocationFormData({
-        ...getDefaultContent(locationWithSlug),
-        ...locationWithSlug
-      });
-      setIsEditing(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCountryEdit = (countryContent) => {
-    if (countryContent) {
-      handleLocationEdit(countryContent);
-    }
-  };
-
-  const handleRegionEdit = (regionContent) => {
-    if (regionContent) {
-      handleLocationEdit(regionContent);
-    }
   };
 
   const fetchPages = async () => {
@@ -987,73 +814,323 @@ export default function PageEditor() {
     }
   };
 
-  const findFirstEditable = (nodes) => {
-    for (const n of nodes) {
-      if (n.editable) return n;
-      const child = findFirstEditable(n.children || []);
-      if (child) return child;
-    }
-    return null;
-  };
-
-  const handleSelectFirstPage = () => {
-    const firstEditable = findFirstEditable(locationContent);
-    if (firstEditable) {
-      handleLocationSelect(firstEditable);
-    }
-  };
-
-  const handleReloadTree = () => {
-    fetchLocationContent();
-  };
-
-  // Fix for location form data updates - ensure proper immutable updates
+  // Enhanced update function with better error handling
   const updateLocationFormData = (field, value) => {
-    setLocationFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // Mark as editing when user starts typing
-    if (!isEditing) {
-      setIsEditing(true);
-    }
-  };
-
-  // Fix for nested location form data updates
-  const updateLocationFormDataNested = (sectionKey, field, value) => {
-    setLocationFormData(prev => ({
-      ...prev,
-      [sectionKey]: {
-        ...prev[sectionKey],
+    try {
+      setLocationFormData(prev => ({
+        ...prev,
         [field]: value
+      }));
+      
+      // Mark as editing when user starts typing
+      if (!isEditing) {
+        setIsEditing(true);
       }
-    }));
-    
-    // Mark as editing when user starts typing
-    if (!isEditing) {
-      setIsEditing(true);
+    } catch (error) {
+      console.error('Error updating location form data:', error);
     }
   };
 
-  // Fix for deeply nested location form data updates
-  const updateLocationFormDataDeepNested = (sectionKey, fieldName, nestedField, value) => {
-    setLocationFormData(prev => ({
-      ...prev,
-      [sectionKey]: {
-        ...prev[sectionKey],
-        [fieldName]: {
-          ...prev[sectionKey]?.[fieldName],
-          [nestedField]: value
+  // Enhanced nested update function
+  const updateLocationFormDataNested = (sectionKey, field, value) => {
+    try {
+      setLocationFormData(prev => ({
+        ...prev,
+        [sectionKey]: {
+          ...prev[sectionKey],
+          [field]: value
         }
+      }));
+      
+      // Mark as editing when user starts typing
+      if (!isEditing) {
+        setIsEditing(true);
       }
-    }));
-    
-    // Mark as editing when user starts typing
-    if (!isEditing) {
-      setIsEditing(true);
+    } catch (error) {
+      console.error('Error updating nested location form data:', error);
     }
   };
+
+  // Enhanced deeply nested update function
+  const updateLocationFormDataDeepNested = (sectionKey, fieldName, nestedField, value) => {
+    try {
+      setLocationFormData(prev => ({
+        ...prev,
+        [sectionKey]: {
+          ...prev[sectionKey],
+          [fieldName]: {
+            ...prev[sectionKey]?.[fieldName],
+            [nestedField]: value
+          }
+        }
+      }));
+      
+      // Mark as editing when user starts typing
+      if (!isEditing) {
+        setIsEditing(true);
+      }
+    } catch (error) {
+      console.error('Error updating deeply nested location form data:', error);
+    }
+  };
+
+  // Enhanced array update function
+  const updateLocationFormDataArray = (sectionKey, fieldName, index, updates) => {
+    try {
+      const newArray = Array.isArray(locationFormData[sectionKey]?.[fieldName]) 
+        ? [...locationFormData[sectionKey][fieldName]] 
+        : [];
+      newArray[index] = { ...newArray[index], ...updates };
+      setLocationFormData(prev => ({
+        ...prev,
+        [sectionKey]: {
+          ...prev[sectionKey],
+          [fieldName]: newArray
+        }
+      }));
+      
+      // Mark as editing when user starts typing
+      if (!isEditing) {
+        setIsEditing(true);
+      }
+    } catch (error) {
+      console.error('Error updating array location form data:', error);
+    }
+  };
+
+  // Enhanced array item field update function
+  const updateLocationFormDataArrayItemField = (sectionKey, fieldName, index, itemField, value) => {
+    try {
+      const newArray = Array.isArray(locationFormData[sectionKey]?.[fieldName]) 
+        ? [...locationFormData[sectionKey][fieldName]] 
+        : [];
+      newArray[index] = {
+        ...newArray[index],
+        [itemField]: value
+      };
+      setLocationFormData(prev => ({
+        ...prev,
+        [sectionKey]: {
+          ...prev[sectionKey],
+          [fieldName]: newArray
+        }
+      }));
+      
+      // Mark as editing when user starts typing
+      if (!isEditing) {
+        setIsEditing(true);
+      }
+    } catch (error) {
+      console.error('Error updating array item field location form data:', error);
+    }
+  };
+
+  // Enhanced array add function
+  const addLocationFormDataArrayItem = (sectionKey, fieldName, defaultItem) => {
+    try {
+      const newArray = Array.isArray(locationFormData[sectionKey]?.[fieldName]) 
+        ? [...locationFormData[sectionKey][fieldName]] 
+        : [];
+      newArray.push(defaultItem);
+      setLocationFormData(prev => ({
+        ...prev,
+        [sectionKey]: {
+          ...prev[sectionKey],
+          [fieldName]: newArray
+        }
+      }));
+      
+      // Mark as editing when user starts typing
+      if (!isEditing) {
+        setIsEditing(true);
+      }
+    } catch (error) {
+      console.error('Error adding array item to location form data:', error);
+    }
+  };
+
+  // Enhanced array remove function
+  const removeLocationFormDataArrayItem = (sectionKey, fieldName, index) => {
+    try {
+      const newArray = Array.isArray(locationFormData[sectionKey]?.[fieldName]) 
+        ? [...locationFormData[sectionKey][fieldName]] 
+        : [];
+      newArray.splice(index, 1);
+      setLocationFormData(prev => ({
+        ...prev,
+        [sectionKey]: {
+          ...prev[sectionKey],
+          [fieldName]: newArray
+        }
+      }));
+      
+      // Mark as editing when user starts typing
+      if (!isEditing) {
+        setIsEditing(true);
+      }
+    } catch (error) {
+      console.error('Error removing array item from location form data:', error);
+    }
+  };
+
+  // Enhanced array move function
+  const moveLocationFormDataArrayItem = (sectionKey, fieldName, fromIndex, toIndex) => {
+    try {
+      const newArray = Array.isArray(locationFormData[sectionKey]?.[fieldName]) 
+        ? [...locationFormData[sectionKey][fieldName]] 
+        : [];
+      const [movedItem] = newArray.splice(fromIndex, 1);
+      newArray.splice(toIndex, 0, movedItem);
+      setLocationFormData(prev => ({
+        ...prev,
+        [sectionKey]: {
+          ...prev[sectionKey],
+          [fieldName]: newArray
+        }
+      }));
+      
+      // Mark as editing when user starts typing
+      if (!isEditing) {
+        setIsEditing(true);
+      }
+    } catch (error) {
+      console.error('Error moving array item in location form data:', error);
+    }
+  };
+
+  // Enhanced FAQ update function
+  const updateLocationFormDataFAQs = (faqs) => {
+    try {
+      setLocationFormData(prev => ({
+        ...prev,
+        faqs: { items: faqs }
+      }));
+      
+      // Mark as editing when user starts typing
+      if (!isEditing) {
+        setIsEditing(true);
+      }
+    } catch (error) {
+      console.error('Error updating FAQs in location form data:', error);
+    }
+  };
+
+  // Enhanced load function with better error handling
+  const loadLocationContent = async (locationId) => {
+    try {
+      const res = await fetch(`/api/admin/locations/${locationId}/content`);
+      const json = await res.json();
+      if (!json.success) {
+        console.warn('loadLocationContent failed', json.error);
+        setLocationFormData({}); // or keep previous
+        return;
+      }
+      const content = json.content || {};
+      // If the API returns nested content_json as string for old rows, handle fallback:
+      setLocationFormData(content);
+    } catch (err) {
+      console.error('loadLocationContent error', err);
+      setLocationFormData({});
+    }
+  };
+
+  // Enhanced save function with better error handling
+  const handleSave = async () => {
+    if (!selectedLocation?.id) return;
+    
+    try {
+      console.log('Saving', selectedLocation.id, locationFormData);
+      
+      // Prepare the data to send including the canonical slug
+      // Remove location-specific fields from the content data
+      const { 
+        id, name, slug, type, children, editable, canonical_slug, 
+        template_type, updated_at, content_json, ...cleanContent 
+      } = locationFormData;
+      
+      const saveData = {
+        ...cleanContent,
+        canonical_slug: selectedLocation.canonical_slug || `/foster-agency/${selectedLocation.slug || selectedLocation.id}`,
+        id: selectedLocation.id,
+        type: selectedLocation.type || 'city'
+      };
+      
+      const res = await fetch(`/api/admin/locations/${selectedLocation.id}/content`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(saveData)
+      });
+      
+      const json = await res.json();
+      console.log('Server saved response', json);
+      
+      if (!json.success) {
+        console.error('Save failed', json.error);
+        toast.error('Save failed: ' + (json.error || 'unknown'));
+        return;
+      }
+      
+      // Prefer returned saved object for hydration (and for new created rows)
+      if (json.saved?.content_json) {
+        setLocationFormData(json.saved.content_json);
+      } else {
+        // fallback re-fetch
+        const reload = await fetch(`/api/admin/locations/${selectedLocation.id}/content`);
+        const reloadJson = await reload.json();
+        setLocationFormData(reloadJson.content || {});
+      }
+      
+      // Persist local autosave draft optionally to localStorage
+      localStorage.removeItem('cms-draft:' + selectedLocation.id);
+      
+      toast.success('Location content saved successfully!');
+      setIsEditing(false);
+    } catch (error) {
+      console.error('handleSave err', error);
+      toast.error('Error saving location content: ' + error.message);
+    }
+  };
+
+  // Enhanced location save handler
+  const handleLocationSave = async (e) => {
+    e.preventDefault();
+    if (!selectedLocation) return;
+    
+    // Save draft to localStorage before attempting to save
+    localStorage.setItem('cms-draft:' + selectedLocation.id, JSON.stringify(locationFormData));
+    
+    await handleSave();
+  };
+
+  // Enhanced location edit handler
+  const handleLocationEdit = (content) => {
+    try {
+      setSelectedLocation(content);
+      // Load the actual content from the API instead of using node data directly
+      loadLocationContent(content.id);
+    } catch (error) {
+      console.error('Error handling location edit:', error);
+    }
+  };
+
+  // Enhanced reload tree handler
+  const handleReloadTree = async () => {
+    try {
+      await fetchLocationContent();
+    } catch (error) {
+      console.error('Error reloading tree:', error);
+    }
+  };
+
+  // Enhanced useEffect to load content when selectedLocation changes
+  useEffect(() => {
+    if (!selectedLocation?.id) return;
+    if (!isEditing) {
+      loadLocationContent(selectedLocation.id);
+    }
+  }, [selectedLocation?.id, isEditing]);
+
+
 
   // Auto-template detection based on location type
   const getTemplateSections = (locationType) => {
@@ -1307,155 +1384,12 @@ export default function PageEditor() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Location Tree */}
               <div className="lg:col-span-1">
-                <Card className="glass-card rounded-modern mb-4">
-                  <CardHeader>
-                    <CardTitle>Locations</CardTitle>
-                    <CardDescription>Browse and edit location content</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleLocationSearch} className="mb-4">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <Input
-                          type="text"
-                          placeholder="Search locations..."
-                          value={locationSearchQuery}
-                          onChange={(e) => setLocationSearchQuery(e.target.value)}
-                          className="pl-10"
-                        />
-                      </div>
-                    </form>
-                    
-                    <div className="max-h-96 overflow-y-auto">
-                      {locationContent && Array.isArray(locationContent) && locationContent.length > 0 && locationContent[0].children ? (
-                        // Render new tree structure
-                        <LocationTree 
-                          nodes={locationContent} 
-                          onSelect={handleLocationEdit}
-                          expandedCountries={expandedCountries}
-                          setExpandedCountries={setExpandedCountries}
-                          expandedRegions={expandedRegions}
-                          setExpandedRegions={setExpandedRegions}
-                        />
-                      ) : (
-                        // Fallback to old rendering if needed
-                        Object.entries(organizeLocations()).map(([countryId, data]) => (
-                          <Accordion key={countryId} type="single" collapsible className="w-full">
-                            <AccordionItem value={countryId} className="border-b-0">
-                              <AccordionTrigger 
-                                className="py-2 hover:no-underline"
-                                onClick={() => setExpandedCountries(prev => ({ ...prev, [countryId]: !prev[countryId] }))}
-                              >
-                                <div className="flex items-center justify-between w-full">
-                                  <div className="flex items-center">
-                                    {expandedCountries[countryId] ? <FolderOpen className="w-4 h-4 mr-2" /> : <Folder className="w-4 h-4 mr-2" />}
-                                    <span className="font-medium">{data.country?.name || formatSlugToTitle(countryId)}</span>
-                                  </div>
-                                  <div className="flex items-center">
-                                    {data.country && data.country.editable && (
-                                      <span
-                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-6 px-2 text-xs cursor-pointer mr-2"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleCountryEdit(data.country);
-                                        }}
-                                      >
-                                        Edit
-                                      </span>
-                                    )}
-                                    {data.country && (
-                                      <span className="text-xs text-muted-foreground truncate max-w-[150px]">
-                                        {data.country.canonical_slug || `/foster-agency/${countryId}`}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </AccordionTrigger>
-                              <AccordionContent>
-                                {Object.entries(data.regions).map(([regionId, regionData]) => (
-                                  <Accordion key={regionId} type="single" collapsible className="w-full ml-4">
-                                    <AccordionItem value={regionId} className="border-b-0">
-                                      <AccordionTrigger 
-                                        className="py-2 hover:no-underline text-sm"
-                                        onClick={() => setExpandedRegions(prev => ({ ...prev, [regionId]: !prev[regionId] }))}
-                                      >
-                                        <div className="flex items-center justify-between w-full">
-                                          <div className="flex items-center">
-                                            {expandedRegions[regionId] ? <FolderOpen className="w-4 h-4 mr-2" /> : <Folder className="w-4 h-4 mr-2" />}
-                                            <span>{regionData.region?.name || formatSlugToTitle(regionId)}</span>
-                                          </div>
-                                          <div className="flex items-center">
-                                            {regionData.region && regionData.region.editable && (
-                                              <span
-                                                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-6 px-2 text-xs cursor-pointer mr-2"
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  handleRegionEdit(regionData.region);
-                                                }}
-                                              >
-                                                Edit
-                                              </span>
-                                            )}
-                                            {regionData.region && (
-                                              <span className="text-xs text-muted-foreground truncate max-w-[150px]">
-                                                {regionData.region.canonical_slug || `/foster-agency/${countryId}/${regionId}`}
-                                              </span>
-                                            )}
-                                          </div>
-                                        </div>
-                                      </AccordionTrigger>
-                                      <AccordionContent>
-                                        <div className="ml-4 space-y-1">
-                                          {regionData.cities.map((city) => (
-                                            <div
-                                              key={city.slug || city.id}
-                                              className="w-full justify-between text-sm inline-flex items-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 px-2 cursor-pointer"
-                                              onClick={() => {
-                                                if (city.editable) {
-                                                  handleLocationEdit(city);
-                                                }
-                                              }}
-                                            >
-                                              <div className="flex items-center">
-                                                <Globe className="w-3 h-3 mr-2" />
-                                                <span>{city.name || formatSlugToTitle(city.slug?.split('/').pop() || city.id)}</span>
-                                              </div>
-                                              <div className="flex items-center">
-                                                {city.editable && (
-                                                  <span className="text-xs bg-primary text-primary-foreground px-1.5 py-0.5 rounded mr-2">Editable</span>
-                                                )}
-                                                <span className="text-xs text-muted-foreground">{city.canonical_slug}</span>
-                                              </div>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </AccordionContent>
-                                    </AccordionItem>
-                                  </Accordion>
-                                ))}
-                              </AccordionContent>
-                            </AccordionItem>
-                          </Accordion>
-                        ))
-                      )}
-                      {(!locationContent || locationContent.length === 0) && (
-                        <div className="text-center py-8 text-muted-foreground">
-                          No locations found. Check if canonical_slug migration ran successfully.
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-                <div className="flex justify-between">
-                  <Button onClick={handleSelectFirstPage}>
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Select First Location
-                  </Button>
-                  <Button onClick={handleReloadTree}>
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Reload Tree
-                  </Button>
-                </div>
+                <LocationSidebar 
+                  locations={locationContent} 
+                  onSelect={handleLocationEdit}
+                  onReload={handleReloadTree}
+                  selectedLocationId={selectedLocation?.id}
+                />
               </div>
 
               {/* Location Editor */}

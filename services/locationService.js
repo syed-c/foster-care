@@ -459,7 +459,7 @@ async function getLocationContentBySlug(slug) {
  */
 async function getLocationContentByCanonicalSlug(canonicalSlug) {
   try {
-    console.log('Fetching content for canonical slug:', canonicalSlug);
+    console.log('=== getLocationContentByCanonicalSlug called with:', canonicalSlug);
     
     // Validate that we have a canonical slug
     if (!canonicalSlug) {
@@ -483,8 +483,17 @@ async function getLocationContentByCanonicalSlug(canonicalSlug) {
 
     if (directData && !directError) {
       console.log('Data fetched directly for canonical slug:', formattedCanonicalSlug, directData);
-      return directData?.content_json || null;
+      // Ensure we return a proper object structure
+      const content = directData?.content_json || null;
+      console.log('Returning content:', !!content);
+      return content;
     }
+    
+    if (directError) {
+      console.log('Direct query error:', directError);
+    }
+    
+    console.log('No direct data found, trying join approach');
 
     // If direct query fails or returns no data, try the join approach
     // This is similar to how getLocationContentBySlug works
@@ -530,17 +539,77 @@ async function getLocationContentByCanonicalSlug(canonicalSlug) {
           return null;
         }
 
-        return contentData?.content_json || null;
+        console.log('Content fetched by location_id:', contentData);
+        // Ensure we return a proper object structure
+        const content = contentData?.content_json || null;
+        console.log('Returning content:', !!content);
+        return content;
       }
       
       return null;
     }
 
     console.log('Data fetched for canonical slug:', formattedCanonicalSlug, data);
-    return data?.content_json || null;
+    // Ensure we return a proper object structure
+    const content = data?.content_json || null;
+    console.log('Returning content:', !!content);
+    return content;
   } catch (error) {
     console.error('Error getting location content by canonical slug:', error);
     return null;
+  }
+}
+
+// Helper function to get agencies by region
+async function getAgenciesByRegion(regionSlug, limit = 10, filters = {}) {
+  try {
+    let query = supabaseAdmin
+      .from('agencies')
+      .select('*')
+      .eq('region_slug', regionSlug)
+      .limit(limit);
+
+    // Apply filters if provided
+    if (filters.featured) {
+      query = query.eq('featured', true);
+    }
+
+    if (filters.type) {
+      query = query.eq('type', filters.type);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching agencies by region:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error getting agencies by region:', error);
+    return [];
+  }
+}
+
+// Helper function to get cities by region
+async function getCitiesByRegion(regionSlug, limit = 10) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('cities')
+      .select('*')
+      .eq('region_slug', regionSlug)
+      .limit(limit);
+
+    if (error) {
+      console.error('Error fetching cities by region:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error getting cities by region:', error);
+    return [];
   }
 }
 
@@ -549,5 +618,7 @@ module.exports = {
   updateCanonicalSlug,
   getLocationTree,
   getLocationContentBySlug,
-  getLocationContentByCanonicalSlug
+  getLocationContentByCanonicalSlug,
+  getAgenciesByRegion,
+  getCitiesByRegion
 };

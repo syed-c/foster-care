@@ -25,6 +25,9 @@ export default function Navigation() {
     { href: '/foster-agency', label: 'Locations' },
     { href: '/resources', label: 'Resources' },
     { href: '/contact', label: 'Contact' },
+    // Developer links - only shown in development
+    ...(process.env.NODE_ENV === 'development' ? [{ href: '/api-test', label: 'API Test' }] : []),
+    ...(process.env.NODE_ENV === 'development' ? [{ href: '/google-maps-test', label: 'Maps Test' }] : []),
   ];
 
   return (
@@ -155,6 +158,25 @@ export default function Navigation() {
                   >
                     Admin Dashboard
                   </Link>
+                )}
+                {/* Developer links - only shown in development */}
+                {process.env.NODE_ENV === 'development' && (
+                  <>
+                    <Link
+                      href="/api-test"
+                      className="block py-2 text-sm font-medium text-text-charcoal font-inter hover:bg-white/30 transition-colors rounded-lg px-2"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      API Test
+                    </Link>
+                    <Link
+                      href="/google-maps-test"
+                      className="block py-2 text-sm font-medium text-text-charcoal font-inter hover:bg-white/30 transition-colors rounded-lg px-2"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Maps Test
+                    </Link>
+                  </>
                 )}
                 <Button
                   variant="outline"

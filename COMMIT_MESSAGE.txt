@@ -1,0 +1,11 @@
+fix(cms): normalize cms schema + dynamic SectionRenderer + loaders
+
+- Implemented normalizeLocation utility to handle CMS data normalization
+- Created SectionRenderer dynamic dispatch component with component mapping
+- Updated region, country, and city pages to render data.sections.map(...) rather than hard-coded blocks
+- Implemented server-side helpers for dynamic lists (getCitiesByRegion, getAgenciesByRegion)
+- Fixed bindings and state in admin editor with updateNested utility
+- Added proper keys and re-render protections
+- Verified route priority and confirmed region route is being used
+- Created tests and verification scripts
+- Added documentation in admin/README-cms-schema.md

@@ -65,7 +65,7 @@ export default function ResourceEditor({ resources = [], onChange }) {
       
       <div className="space-y-4">
         {Array.isArray(resourcesState) && resourcesState.map((resource, index) => (
-          <Card key={index} className="relative">
+          <Card key={`resource-${index}-${Date.now()}`} className="relative">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-base">Resource #{index + 1}</CardTitle>

@@ -80,6 +80,7 @@ Your site now uses the burgundy/beige/cream palette:
 3. **Google Maps**
    - Interactive maps
    - Location search
+   - **Requires API key configuration** - See [GOOGLE_MAPS_SETUP.md](GOOGLE_MAPS_SETUP.md)
 
 4. **Sanity CMS**
    - Blog posts

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Maps API Test</title>
+</head>
+<body>
+    <h1>Google Maps API Test</h1>
+    
+    <div id="map" style="height: 400px; width: 100%;"></div>
+    
+    <script>
+        // Get the API key from the environment
+        const apiKey = 'AIzaSyCO8bDPapaTUp2dkafnY5GrBLNf24sbmFA'; // Replace with your actual API key
+        
+        if (!apiKey || apiKey === 'your-google-maps-api-key') {
+            document.body.innerHTML = '<h1>Error: API Key Not Configured</h1><p>Please add your Google Maps API key to this file.</p>';
+        } else {
+            // Load the Google Maps API
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+            script.onload = function() {
+                // Initialize the map
+                const map = new google.maps.Map(document.getElementById('map'), {
+                    center: {lat: 51.5074, lng: -0.1278}, // London
+                    zoom: 10
+                });
+                
+                // Add a marker
+                new google.maps.Marker({
+                    position: {lat: 51.5074, lng: -0.1278},
+                    map: map,
+                    title: 'London'
+                });
+                
+                document.body.insertAdjacentHTML('beforeend', '<p style="color: green;">Map loaded successfully!</p>');
+            };
+            script.onerror = function(error) {
+                document.body.insertAdjacentHTML('beforeend', '<p style="color: red;">Failed to load Google Maps API: ' + error.message + '</p>');
+            };
+            
+            document.head.appendChild(script);
+        }
+    </script>
+</body>
+</html>

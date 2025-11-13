@@ -219,7 +219,7 @@ export default function SectionEditor({
           </div>
           
           {section.buttons && section.buttons.map((button, index) => (
-            <div key={index} className="flex gap-2 items-end">
+            <div key={`${section.id || sectionIndex}-button-${index}`} className="flex gap-2 items-end">
               <div className="flex-1">
                 <Label htmlFor={`button-text-${sectionIndex}-${index}`}>Button Text</Label>
                 <CMSInput

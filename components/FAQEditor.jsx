@@ -8,20 +8,20 @@ import { Trash2, Plus, ArrowUp, ArrowDown, Info } from 'lucide-react';
 import CMSInput from '@/components/CMSInput';
 
 export default function FAQEditor({ faqs = [], onChange }) {
-  const [faqsState, setFaqsState] = useState(faqs);
-  const [isEditing, setIsEditing] = useState(false);
+  const [faqsState, setFaqsState] = useState(faqs.map((faq, index) => ({ ...faq, id: faq.id || `faq-${index}-${Date.now()}` })));
+  const [isFaqEditing, setIsFaqEditing] = useState(false);
 
   // Update local state when props change
   useEffect(() => {
-    if (!isEditing) {
-      setFaqsState(faqs);
+    if (!isFaqEditing) {
+      setFaqsState(faqs.map((faq, index) => ({ ...faq, id: faq.id || `faq-${index}-${Date.now()}` })));
     }
-  }, [faqs, isEditing]);
+  }, [faqs, isFaqEditing]);
 
   const updateFaqs = (newFaqs) => {
     setFaqsState(newFaqs);
     onChange(newFaqs);
-    setIsEditing(true);
+    setIsFaqEditing(true);
   };
 
   const addFAQ = () => {
@@ -72,7 +72,7 @@ export default function FAQEditor({ faqs = [], onChange }) {
       
       <div className="space-y-4">
         {Array.isArray(faqsState) && faqsState.map((faq, index) => (
-          <Card key={index} className="relative">
+          <Card key={faq.id || index} className="relative">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-base">FAQ #{index + 1}</CardTitle>

@@ -51,10 +51,21 @@ export default function GoogleMap({
   // Handle image load error
   const handleImageError = (e) => {
     console.error("Failed to load map image:", e);
+    
+    // For static maps, we can't easily detect the specific error type from the image load error
+    // but we can provide better guidance
+    const solution = "Your Google Maps API key may be restricted. Configure HTTP referrer restrictions in Google Cloud Console to allow:\n\n" +
+      "1. http://localhost:3000/*\n" +
+      "2. http://localhost:3001/*\n" +
+      "3. https://yourdomain.com/* (for production)\n\n" +
+      "Also ensure these APIs are enabled:\n" +
+      "- Static Maps API\n\n" +
+      "See Google Cloud Console > APIs & Services > Credentials";
+    
     setError({
       title: "Map Loading Failed",
-      message: "Failed to load map image",
-      solution: "Check your API key and ensure Static Maps API is enabled",
+      message: "Failed to load map image. This usually indicates an API key issue.",
+      solution: solution,
     });
     setLoading(false);
   };

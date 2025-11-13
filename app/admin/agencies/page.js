@@ -26,6 +26,7 @@ export default function AdminAgencies() {
   const [filter, setFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalAgencies, setTotalAgencies] = useState(0);
 
   useEffect(() => {
     // Check if user is admin by verifying admin token
@@ -63,7 +64,7 @@ export default function AdminAgencies() {
       
       const params = new URLSearchParams();
       params.append('page', currentPage);
-      params.append('limit', 50); // Increased limit to show more agencies
+      params.append('limit', 10); // Show 10 agencies per page
       
       if (filter !== 'all') {
         params.append('status', filter);
@@ -78,6 +79,7 @@ export default function AdminAgencies() {
         const data = await response.json();
         setAgencies(data.agencies || []);
         setTotalPages(data.totalPages || 1);
+        setTotalAgencies(data.total || 0);
       }
     } catch (error) {
       console.error('Error fetching agencies:', error);
@@ -222,8 +224,8 @@ export default function AdminAgencies() {
         {/* Agencies List */}
         <Card className="glass-card rounded-modern">
           <CardHeader>
-            <CardTitle className="font-poppins">Agencies ({agencies.length})</CardTitle>
-            <CardDescription className="font-inter">Manage agency approvals and features</CardDescription>
+            <CardTitle className="font-poppins">Agencies ({totalAgencies} total)</CardTitle>
+            <CardDescription className="font-inter">Manage agency approvals and features (Page {currentPage} of {totalPages})</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -329,9 +331,35 @@ export default function AdminAgencies() {
               >
                 Previous
               </Button>
-              <span className="font-inter">
-                Page {currentPage} of {totalPages}
-              </span>
+              <div className="flex items-center space-x-2">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  // Calculate page number to display
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  // Don't render if page number is out of bounds
+                  if (pageNum < 1 || pageNum > totalPages) return null;
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      variant={currentPage === pageNum ? 'default' : 'outline'}
+                      className={`font-inter ${currentPage === pageNum ? 'bg-primary-green text-text-charcoal' : ''}`}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+              </div>
               <Button 
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}

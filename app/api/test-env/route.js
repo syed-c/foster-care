@@ -6,6 +6,7 @@ export async function GET() {
     isPlaceholder: apiKey === 'your-google-maps-api-key',
     isEmpty: apiKey === '',
     keyLength: apiKey ? apiKey.length : 0,
-    keyStart: apiKey ? apiKey.substring(0, 10) : null
+    keyStart: apiKey ? apiKey.substring(0, 10) : null,
+    setupInstructions: "If you see RefererNotAllowedMapError, configure HTTP referrer restrictions in Google Cloud Console. Add http://localhost:3000/* and http://localhost:3001/* to allowed referrers. See GOOGLE_MAPS_SETUP.md for detailed instructions."
   });
 }

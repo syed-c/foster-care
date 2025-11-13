@@ -16,6 +16,8 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
+import SectionRenderer from '@/components/sections/SectionRenderer';
+import { normalizeLocation } from '@/lib/normalizeLocation';
 
 export async function generateStaticParams() {
   const paths = await generateCountryPaths();
@@ -38,8 +40,10 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function CountryPage({ params }) {
+  console.log('COUNTRY PAGE LOADED WITH PARAMS:', params);
   const resolvedParams = await params;
   const country = resolvedParams.country;
+  console.log('Country:', country);
   
   // Use the optimized data loading function
   const structure = await loadAllLocations();
@@ -52,9 +56,182 @@ export default async function CountryPage({ params }) {
   
   const countryName = formatSlugToTitle(country);
   const canonicalSlug = `/foster-agency/${country}`;
+  console.log('Canonical slug:', canonicalSlug);
   
   // Try to get content from the new location content system using canonical slug
-  const content = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
+  const rawContent = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
+  console.log('Raw content loaded:', rawContent);
+  
+  // Normalize the content
+  const normalizedContent = normalizeLocation(rawContent);
+  console.log('Normalized content:', normalizedContent);
+  
+  // Check if we have any content
+  const hasContent = rawContent && Object.keys(rawContent).length > 0;
+  console.log('Has content:', hasContent);
+  
+  // If we have normalized sections, use them; otherwise, fall back to the existing displayContent
+  if (normalizedContent.sections && normalizedContent.sections.length > 0) {
+    console.log('Rendering dynamic sections');
+    return (
+      <div className="min-h-screen bg-background-offwhite">
+        {/* Breadcrumb */}
+        <div className="bg-white/50 backdrop-blur-sm border-b border-gray-100 py-4">
+          <div className="container mx-auto px-4">
+            <nav className="flex items-center space-x-2 text-sm text-gray-600 font-inter">
+              <Link href="/" className="hover:text-primary-green transition-colors">Home</Link>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <Link href="/foster-agency" className="hover:text-primary-green transition-colors">Foster Agencies</Link>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <span className="text-text-charcoal font-medium">{countryName}</span>
+            </nav>
+          </div>
+        </div>
+
+        {/* Render dynamic sections */}
+        {normalizedContent.sections.map((section) => (
+          <SectionRenderer key={section.id || section.key || section.type || Math.random()} section={section} />
+        ))}
+      </div>
+    );
+  }
+  
+  // Fallback to existing implementation if no normalized sections
+  console.log('Falling back to static content');
+  
+  // Ensure we have all required sections with proper structure
+  const displayContent = {
+    // Hero section
+    hero: {
+      heading: content?.hero?.heading || `Foster Agencies in ${countryName}`,
+      subheading: content?.hero?.subheading || `Find accredited foster agencies in ${countryName}`,
+      cta_primary: {
+        text: content?.hero?.cta_primary?.text || "Get Foster Agency Support",
+        link: content?.hero?.cta_primary?.link || "/contact"
+      },
+      cta_secondary: {
+        text: content?.hero?.cta_secondary?.text || "Explore Regions",
+        link: content?.hero?.cta_secondary?.link || "#regions"
+      }
+    },
+    
+    // Overview section
+    overview: {
+      title: content?.overview?.title || `About Fostering in ${countryName}`,
+      body: content?.overview?.body || `<p>Welcome to our directory of foster agencies in ${countryName}. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.</p>`
+    },
+    
+    // Agency Finder section
+    agencyFinder: content?.agencyFinder || {
+      title: `Foster Agency Finder by Region`,
+      intro: `Discover the best foster agencies across ${countryName} by region. Our comprehensive directory helps you find the perfect match for your fostering journey.`,
+      ctaText: "Find Agencies by Region"
+    },
+    
+    // Popular Locations section
+    popularLocations: content?.popularLocations || {
+      title: `Featured Popular Locations in ${countryName}`,
+      description: `Discover top cities and towns in ${countryName} with high demand for foster carers`,
+      locations: [
+        { name: "London", link: "#", demand: "High", agencies: "200+" },
+        { name: "Manchester", link: "#", demand: "High", agencies: "75+" },
+        { name: "Birmingham", link: "#", demand: "High", agencies: "65+" }
+      ]
+    },
+    
+    // Top Agencies section
+    topAgencies: content?.topAgencies || {
+      title: `Top Foster Agencies in ${countryName}`,
+      description: `Connect with trusted fostering services across ${countryName}`,
+      items: [
+        {
+          name: `${countryName} Family Care`,
+          summary: `Dedicated fostering service providing compassionate care for children in ${countryName}.`,
+          link: "#",
+          featured: true,
+          type: "National",
+          rating: 4.8,
+          reviewCount: 42,
+          phone: "+44 123 456 7890",
+          email: `info@${countryName.toLowerCase().replace(/\s+/g, '')}familycare.co.uk`,
+          website: `https://${countryName.toLowerCase().replace(/\s+/g, '')}familycare.co.uk`
+        }
+      ]
+    },
+    
+    // Foster System section
+    fosterSystem: content?.fosterSystem || {
+      title: `What is the Foster Care System Like in ${countryName}?`,
+      sections: [
+        {
+          title: "Allowances & Support",
+          items: [
+            { title: "Weekly fostering allowances to cover child care costs" },
+            { title: "24/7 support helpline for emergency assistance" },
+            { title: "Regular supervision and mentoring" },
+            { title: "Access to training and professional development" }
+          ]
+        },
+        {
+          title: "Matching Process",
+          items: [
+            { title: "Initial enquiry and information session" },
+            { title: "Formal application and documentation" },
+            { title: "Home study and assessment" },
+            { title: "Approval panel review" }
+          ]
+        }
+      ]
+    },
+    
+    // Why Foster section
+    whyFoster: content?.whyFoster || {
+      title: `Why Choose to Foster in ${countryName}?`,
+      description: `Make a meaningful difference in the lives of children in your community`,
+      points: [
+        { 
+          text: "Help Children Locally", 
+          description: "Provide stable, loving homes for children in your own community who need care and support." 
+        },
+        { 
+          text: "Professional Support", 
+          description: "Access comprehensive training, 24/7 support, and ongoing guidance from experienced professionals." 
+        },
+        { 
+          text: "Make a Lasting Impact", 
+          description: "Contribute to positive outcomes for vulnerable children and strengthen your local community." 
+        }
+      ]
+    },
+    
+    // FAQs section
+    faqs: content?.faqs || {
+      title: `FAQs About Fostering in ${countryName}`,
+      description: `Common questions about becoming a foster carer in ${countryName}`,
+      items: [
+        {
+          question: `Do you get paid to foster in ${countryName}?`,
+          answer: `Yes, foster carers in ${countryName} receive a fostering allowance to cover the costs of caring for a child. The amount varies depending on the agency and the child's needs, typically ranging from £400-£600 per week per child.`
+        },
+        {
+          question: `Who can foster in ${countryName}?`,
+          answer: `To foster in ${countryName}, you must be over 21, have a spare room, pass background checks, and complete training. You can be single, married, in a relationship, working, or retired. ${currentCountryData.regulator} sets the standards for approval.`
+        }
+      ]
+    },
+    
+    // Regulated section
+    regulated: content?.regulated || {
+      regulator: currentCountryData.regulator,
+      description: "All agencies meet strict regulatory standards"
+    },
+    
+    // Find Agencies section
+    findAgencies: content?.findAgencies || {
+      title: "Find Agencies Near You",
+      description: `Connect with local fostering services in ${countryName}`
+    }
+  };
 
   if (regions.length === 0) {
     // Fallback to individual loading if structure is empty
