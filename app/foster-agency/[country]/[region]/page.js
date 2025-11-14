@@ -59,15 +59,25 @@ export default async function RegionPage({ params }) {
   
   // Try to get content from the new location content system using canonical slug
   const rawContent = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
-  console.log('Raw content loaded:', rawContent);
+  console.log('Raw content loaded:', JSON.stringify(rawContent, null, 2));
   
   // Normalize the content
   const normalizedContent = normalizeLocation(rawContent);
-  console.log('Normalized content:', normalizedContent);
+  console.log('Normalized content:', JSON.stringify(normalizedContent, null, 2));
   
   // Check if we have any content
   const hasContent = rawContent && Object.keys(rawContent).length > 0;
   console.log('Has content:', hasContent);
+  
+  // Log the structure of rawContent to understand how it's organized
+  console.log('Raw content keys:', Object.keys(rawContent || {}));
+  if (rawContent && rawContent.content) {
+    console.log('Raw content.content keys:', Object.keys(rawContent.content));
+  }
+  if (rawContent && rawContent.sections) {
+    console.log('Raw content.sections type:', typeof rawContent.sections);
+    console.log('Raw content.sections length:', Array.isArray(rawContent.sections) ? rawContent.sections.length : 'Not an array');
+  }
   
   // If we have normalized sections, use them; otherwise, fall back to the existing displayContent
   if (normalizedContent.sections && normalizedContent.sections.length > 0) {
