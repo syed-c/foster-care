@@ -599,7 +599,7 @@ async function getAgenciesByRegion(regionSlug, limit = 10, filters = {}) {
     let query = supabaseAdmin
       .from('agencies')
       .select('*')
-      .eq('region_slug', regionSlug)
+      .eq('region', regionSlug)  // Changed from region_slug to region
       .limit(limit);
 
     // Apply filters if provided
@@ -629,9 +629,9 @@ async function getAgenciesByRegion(regionSlug, limit = 10, filters = {}) {
 async function getCitiesByRegion(regionSlug, limit = 10) {
   try {
     const { data, error } = await supabaseAdmin
-      .from('cities')
+      .from('agency_locations')  // Changed from cities to agency_locations
       .select('*')
-      .eq('region_slug', regionSlug)
+      .eq('region', regionSlug)  // Changed from region_slug to region
       .limit(limit);
 
     if (error) {
