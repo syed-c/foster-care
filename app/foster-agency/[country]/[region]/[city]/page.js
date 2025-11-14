@@ -168,26 +168,26 @@ export default async function CityPage({ params }) {
   const displayContent = {
     // Hero section
     hero: {
-      heading: content?.hero?.heading || `Foster Agencies in ${cityName}`,
-      subheading: content?.hero?.subheading || `Find accredited foster agencies in ${cityName}, ${regionName}`,
+      heading: rawContent?.hero?.heading || `Foster Agencies in ${cityName}`,
+      subheading: rawContent?.hero?.subheading || `Find accredited foster agencies in ${cityName}, ${regionName}`,
       cta_primary: {
-        text: content?.hero?.cta_primary?.text || "Talk to a Foster Advisor",
-        link: content?.hero?.cta_primary?.link || "/contact"
+        text: rawContent?.hero?.cta_primary?.text || "Talk to a Foster Advisor",
+        link: rawContent?.hero?.cta_primary?.link || "/contact"
       },
       cta_secondary: {
-        text: content?.hero?.cta_secondary?.text || "View Agencies",
-        link: content?.hero?.cta_secondary?.link || "#agencies"
+        text: rawContent?.hero?.cta_secondary?.text || "View Agencies",
+        link: rawContent?.hero?.cta_secondary?.link || "#agencies"
       }
     },
     
     // About section
     about: {
-      title: content?.about?.title || `About Fostering in ${cityName}`,
-      body: content?.about?.body || `<p>Welcome to our directory of foster agencies in ${cityName}. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.</p>`
+      title: rawContent?.about?.title || `About Fostering in ${cityName}`,
+      body: rawContent?.about?.body || `<p>Welcome to our directory of foster agencies in ${cityName}. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.</p>`
     },
     
     // Types section
-    types: content?.types || {
+    types: rawContent?.types || {
       title: `Types of Fostering Available in ${cityName}`,
       description: `Various fostering opportunities are available to suit different circumstances and preferences`,
       items: [
@@ -207,7 +207,7 @@ export default async function CityPage({ params }) {
     },
     
     // Top Agencies section
-    topAgencies: content?.topAgencies || {
+    topAgencies: rawContent?.topAgencies || {
       title: `Top Foster Agencies in ${cityName}`,
       description: `Connect with trusted fostering services in your local area`,
       items: [
@@ -227,7 +227,7 @@ export default async function CityPage({ params }) {
     },
     
     // Why Foster section
-    whyFoster: content?.whyFoster || {
+    whyFoster: rawContent?.whyFoster || {
       title: `Why Foster in ${cityName}?`,
       description: `Make a meaningful difference in the lives of children in your community`,
       points: [
@@ -247,7 +247,7 @@ export default async function CityPage({ params }) {
     },
     
     // Allowances section
-    allowances: content?.allowances || {
+    allowances: rawContent?.allowances || {
       title: `Foster Allowances & Support in ${cityName}`,
       description: `Comprehensive support system for foster carers in ${cityName}`,
       items: [
@@ -263,7 +263,7 @@ export default async function CityPage({ params }) {
     },
     
     // Resources section
-    resources: content?.resources || {
+    resources: rawContent?.resources || {
       title: `Local Support & Resources in ${cityName}`,
       description: `Access community resources and support networks in ${cityName}`,
       items: [
@@ -276,7 +276,7 @@ export default async function CityPage({ params }) {
     },
     
     // FAQs section
-    faqs: content?.faqs || {
+    faqs: rawContent?.faqs || {
       title: `FAQs About Fostering in ${cityName}`,
       description: `Common questions about becoming a foster carer in ${cityName}`,
       items: [
@@ -292,13 +292,13 @@ export default async function CityPage({ params }) {
     },
     
     // Regulated section
-    regulated: content?.regulated || {
+    regulated: rawContent?.regulated || {
       regulator: getRegulatorForCountry(country),
       description: "All agencies meet strict regulatory standards"
     },
     
     // CTA section
-    cta: content?.cta || {
+    cta: rawContent?.cta || {
       title: `Ready to Start Fostering in ${cityName}?`,
       description: `Speak with a foster care advisor today to learn more about opportunities in ${cityName}`,
       cta_primary: {

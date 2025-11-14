@@ -103,33 +103,33 @@ export default async function CountryPage({ params }) {
   const displayContent = {
     // Hero section
     hero: {
-      heading: content?.hero?.heading || `Foster Agencies in ${countryName}`,
-      subheading: content?.hero?.subheading || `Find accredited foster agencies in ${countryName}`,
+      heading: rawContent?.hero?.heading || `Foster Agencies in ${countryName}`,
+      subheading: rawContent?.hero?.subheading || `Find accredited foster agencies in ${countryName}`,
       cta_primary: {
-        text: content?.hero?.cta_primary?.text || "Get Foster Agency Support",
-        link: content?.hero?.cta_primary?.link || "/contact"
+        text: rawContent?.hero?.cta_primary?.text || "Get Foster Agency Support",
+        link: rawContent?.hero?.cta_primary?.link || "/contact"
       },
       cta_secondary: {
-        text: content?.hero?.cta_secondary?.text || "Explore Regions",
-        link: content?.hero?.cta_secondary?.link || "#regions"
+        text: rawContent?.hero?.cta_secondary?.text || "Explore Regions",
+        link: rawContent?.hero?.cta_secondary?.link || "#regions"
       }
     },
     
     // Overview section
     overview: {
-      title: content?.overview?.title || `About Fostering in ${countryName}`,
-      body: content?.overview?.body || `<p>Welcome to our directory of foster agencies in ${countryName}. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.</p>`
+      title: rawContent?.overview?.title || `About Fostering in ${countryName}`,
+      body: rawContent?.overview?.body || `<p>Welcome to our directory of foster agencies in ${countryName}. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.</p>`
     },
     
     // Agency Finder section
-    agencyFinder: content?.agencyFinder || {
+    agencyFinder: rawContent?.agencyFinder || {
       title: `Foster Agency Finder by Region`,
       intro: `Discover the best foster agencies across ${countryName} by region. Our comprehensive directory helps you find the perfect match for your fostering journey.`,
       ctaText: "Find Agencies by Region"
     },
     
     // Popular Locations section
-    popularLocations: content?.popularLocations || {
+    popularLocations: rawContent?.popularLocations || {
       title: `Featured Popular Locations in ${countryName}`,
       description: `Discover top cities and towns in ${countryName} with high demand for foster carers`,
       locations: [
@@ -140,7 +140,7 @@ export default async function CountryPage({ params }) {
     },
     
     // Top Agencies section
-    topAgencies: content?.topAgencies || {
+    topAgencies: rawContent?.topAgencies || {
       title: `Top Foster Agencies in ${countryName}`,
       description: `Connect with trusted fostering services across ${countryName}`,
       items: [
@@ -160,7 +160,7 @@ export default async function CountryPage({ params }) {
     },
     
     // Foster System section
-    fosterSystem: content?.fosterSystem || {
+    fosterSystem: rawContent?.fosterSystem || {
       title: `What is the Foster Care System Like in ${countryName}?`,
       sections: [
         {
@@ -185,7 +185,7 @@ export default async function CountryPage({ params }) {
     },
     
     // Why Foster section
-    whyFoster: content?.whyFoster || {
+    whyFoster: rawContent?.whyFoster || {
       title: `Why Choose to Foster in ${countryName}?`,
       description: `Make a meaningful difference in the lives of children in your community`,
       points: [
@@ -205,7 +205,7 @@ export default async function CountryPage({ params }) {
     },
     
     // FAQs section
-    faqs: content?.faqs || {
+    faqs: rawContent?.faqs || {
       title: `FAQs About Fostering in ${countryName}`,
       description: `Common questions about becoming a foster carer in ${countryName}`,
       items: [
@@ -221,13 +221,13 @@ export default async function CountryPage({ params }) {
     },
     
     // Regulated section
-    regulated: content?.regulated || {
+    regulated: rawContent?.regulated || {
       regulator: currentCountryData.regulator,
       description: "All agencies meet strict regulatory standards"
     },
     
     // Find Agencies section
-    findAgencies: content?.findAgencies || {
+    findAgencies: rawContent?.findAgencies || {
       title: "Find Agencies Near You",
       description: `Connect with local fostering services in ${countryName}`
     }
@@ -954,10 +954,10 @@ export default async function CountryPage({ params }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">Find Agencies</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                {content.findAgencies.title || "Find Agencies Near You"}
+                {rawContent.findAgencies?.title || "Find Agencies Near You"}
               </h2>
               <p className="text-gray-600 mb-12 font-inter">
-                {content.findAgencies.description || `Connect with local fostering services in ${countryName}`}
+                {rawContent.findAgencies?.description || `Connect with local fostering services in ${countryName}`}
               </p>
               
               {/* Search Bar */}
