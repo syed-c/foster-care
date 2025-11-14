@@ -16,7 +16,7 @@ const sectionComponents = {
   breadcrumb: RegionBreadcrumbSection,
   hero: RegionHeroSection,
   about: RegionAboutSection,
-  benefitsSupport: RegionBenefitsSection,
+  benefits: RegionBenefitsSection,
   popularCities: RegionPopularCitiesSection,
   allowances: RegionAllowancesSection,
   testimonials: RegionTestimonialsSection,

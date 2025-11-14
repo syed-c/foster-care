@@ -4,11 +4,12 @@ import { Heart, Shield } from 'lucide-react';
 
 export default function RegionBenefitsSection({ data, regionSlug }) {
   // Default values if no data provided
-  const title = data?.title || `Benefits and Support for Foster Carers`;
-  const description = data?.description || `Comprehensive support system for foster carers in this region`;
+  const title = data?.title || `Benefits of Fostering Locally`;
+  const description = data?.description || `Discover the advantages of becoming a foster carer in your local community`;
   const benefitsItems = data?.items || [
-    { title: "Financial Support", description: "Receive competitive fostering allowances to cover the costs of caring for a child." },
-    { title: "Additional Payments", description: "Additional payments for special circumstances." }
+    { title: "Community Connection", description: "Build strong relationships within your local community." },
+    { title: "Local Support Networks", description: "Access specialized local resources and support services." },
+    { title: "Cultural Familiarity", description: "Understand local customs, schools, and healthcare services." }
   ];
 
   return (
