@@ -31,11 +31,11 @@ export async function generateMetadata({ params }) {
   const canonicalSlug = `/foster-agency/${country}`;
   
   // Try to get content from the new location content system using canonical slug
-  const content = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
+  const rawContent = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
 
   return {
-    title: content?.meta_title || content?.title || `Foster Agencies in ${countryName} | UK Directory`,
-    description: content?.meta_description || `Find foster agencies in ${countryName}. Browse regions and cities to discover fostering services near you.`,
+    title: rawContent?.meta_title || rawContent?.title || `Foster Agencies in ${countryName} | UK Directory`,
+    description: rawContent?.meta_description || `Find foster agencies in ${countryName}. Browse regions and cities to discover fostering services near you.`,
   };
 }
 
@@ -99,6 +99,68 @@ export default async function CountryPage({ params }) {
   // Fallback to existing implementation if no normalized sections
   console.log('Falling back to static content');
   
+  // Get country-specific data
+  const countryData = {
+    england: {
+      population: "56.5 million",
+      agencies: "1,200+",
+      demand: "High",
+      regulator: "Ofsted",
+      description: "England has the largest fostering system in the UK with diverse opportunities across urban and rural areas."
+    },
+    scotland: {
+      population: "5.5 million",
+      agencies: "300+",
+      demand: "Moderate",
+      regulator: "Care Inspectorate",
+      description: "Scotland offers unique fostering opportunities with a strong emphasis on community-based care."
+    },
+    wales: {
+      population: "3.1 million",
+      agencies: "200+",
+      demand: "Moderate",
+      regulator: "CSSIW",
+      description: "Wales provides bilingual fostering services and close-knit community support networks."
+    },
+    'northern-ireland': {
+      population: "1.9 million",
+      agencies: "150+",
+      demand: "Moderate",
+      regulator: "NICCY",
+      description: "Northern Ireland offers personalized fostering experiences with strong local authority support."
+    }
+  };
+
+  const currentCountryData = countryData[country] || countryData.england;
+
+  // Popular regions for each country
+  const popularRegions = {
+    england: [
+      { name: "Greater London", agencies: "200+", demand: "High" },
+      { name: "West Midlands", agencies: "80+", demand: "High" },
+      { name: "Greater Manchester", agencies: "75+", demand: "High" },
+      { name: "West Yorkshire", agencies: "65+", demand: "High" },
+      { name: "South East", agencies: "150+", demand: "High" }
+    ],
+    scotland: [
+      { name: "Glasgow City", agencies: "40+", demand: "High" },
+      { name: "Edinburgh", agencies: "35+", demand: "High" },
+      { name: "Aberdeen City", agencies: "20+", demand: "Moderate" },
+      { name: "Fife", agencies: "25+", demand: "Moderate" }
+    ],
+    wales: [
+      { name: "Cardiff", agencies: "25+", demand: "High" },
+      { name: "Swansea", agencies: "20+", demand: "Moderate" },
+      { name: "Newport", agencies: "15+", demand: "Moderate" }
+    ],
+    'northern-ireland': [
+      { name: "Belfast", agencies: "20+", demand: "High" },
+      { name: "Derry", agencies: "10+", demand: "Moderate" }
+    ]
+  };
+
+  const currentPopularRegions = popularRegions[country] || popularRegions.england;
+
   // Ensure we have all required sections with proper structure
   const displayContent = {
     // Hero section
@@ -246,70 +308,8 @@ export default async function CountryPage({ params }) {
     var regionsToShow = regions;
   }
 
-  // Get country-specific data
-  const countryData = {
-    england: {
-      population: "56.5 million",
-      agencies: "1,200+",
-      demand: "High",
-      regulator: "Ofsted",
-      description: "England has the largest fostering system in the UK with diverse opportunities across urban and rural areas."
-    },
-    scotland: {
-      population: "5.5 million",
-      agencies: "300+",
-      demand: "Moderate",
-      regulator: "Care Inspectorate",
-      description: "Scotland offers unique fostering opportunities with a strong emphasis on community-based care."
-    },
-    wales: {
-      population: "3.1 million",
-      agencies: "200+",
-      demand: "Moderate",
-      regulator: "CSSIW",
-      description: "Wales provides bilingual fostering services and close-knit community support networks."
-    },
-    'northern-ireland': {
-      population: "1.9 million",
-      agencies: "150+",
-      demand: "Moderate",
-      regulator: "NICCY",
-      description: "Northern Ireland offers personalized fostering experiences with strong local authority support."
-    }
-  };
-
-  const currentCountryData = countryData[country] || countryData.england;
-
-  // Popular regions for each country
-  const popularRegions = {
-    england: [
-      { name: "Greater London", agencies: "200+", demand: "High" },
-      { name: "West Midlands", agencies: "80+", demand: "High" },
-      { name: "Greater Manchester", agencies: "75+", demand: "High" },
-      { name: "West Yorkshire", agencies: "65+", demand: "High" },
-      { name: "South East", agencies: "150+", demand: "High" }
-    ],
-    scotland: [
-      { name: "Glasgow City", agencies: "40+", demand: "High" },
-      { name: "Edinburgh", agencies: "35+", demand: "High" },
-      { name: "Aberdeen City", agencies: "20+", demand: "Moderate" },
-      { name: "Fife", agencies: "25+", demand: "Moderate" }
-    ],
-    wales: [
-      { name: "Cardiff", agencies: "25+", demand: "High" },
-      { name: "Swansea", agencies: "20+", demand: "Moderate" },
-      { name: "Newport", agencies: "15+", demand: "Moderate" }
-    ],
-    'northern-ireland': [
-      { name: "Belfast", agencies: "20+", demand: "High" },
-      { name: "Derry", agencies: "10+", demand: "Moderate" }
-    ]
-  };
-
-  const currentPopularRegions = popularRegions[country] || popularRegions.england;
-
   // FAQs for each country
-  const faqs = content?.faqs?.items || content?.faqs || [
+  const faqs = rawContent?.faqs?.items || rawContent?.faqs || [
     {
       question: "Do you get paid to foster in " + countryName + "?",
       answer: "Yes, foster carers in " + countryName + " receive a fostering allowance to cover the costs of caring for a child. The amount varies depending on the agency and the child's needs, typically ranging from £400-£600 per week per child."
@@ -405,10 +405,10 @@ export default async function CountryPage({ params }) {
               <span className="text-sm font-medium text-text-charcoal font-inter">{countryName}</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-text-charcoal mb-6 font-poppins">
-              {content?.title || `Foster Agencies in ${countryName}`}
+              {rawContent?.title || `Foster Agencies in ${countryName}`}
             </h1>
             <p className="text-xl text-gray-600 mb-8 font-inter">
-              {content?.meta_description || `Find accredited foster agencies in ${countryName}`}
+              {rawContent?.meta_description || `Find accredited foster agencies in ${countryName}`}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Button
@@ -444,7 +444,7 @@ export default async function CountryPage({ params }) {
       </section>
 
       {/* Overview of Fostering in Country */}
-      {content?.overview && (
+      {rawContent?.overview && (
         <section className="py-16 section-alt">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
@@ -454,14 +454,14 @@ export default async function CountryPage({ params }) {
                   <span className="text-sm font-medium text-text-charcoal font-inter">About Fostering</span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                  {content.overview.title || `About Fostering in ${countryName}`}
+                  {rawContent.overview?.title || `About Fostering in ${countryName}`}
                 </h2>
               </div>
               
               <Card className="section-card rounded-modern-xl p-6 md:p-8">
                 <div className="prose max-w-none text-gray-600 font-inter">
-                  {content.overview.body ? (
-                    <div dangerouslySetInnerHTML={{ __html: content.overview.body }} />
+                  {rawContent.overview?.body ? (
+                    <div dangerouslySetInnerHTML={{ __html: rawContent.overview.body }} />
                   ) : (
                     <div className="space-y-4">
                       <p>
@@ -515,7 +515,7 @@ export default async function CountryPage({ params }) {
       )}
 
       {/* Foster Agency Finder by Region */}
-      {content?.agencyFinder && (
+      {rawContent?.agencyFinder && (
         <section id="regions" className="py-16 md:py-24 relative overflow-hidden section-highlight">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
@@ -529,10 +529,10 @@ export default async function CountryPage({ params }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">Agency Finder</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                {content.agencyFinder.title || `Foster Agency Finder by Region`}
+                {rawContent.agencyFinder?.title || `Foster Agency Finder by Region`}
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                {content.agencyFinder.intro || `Discover the best foster agencies across ${countryName} by region`}
+                {rawContent.agencyFinder?.intro || `Discover the best foster agencies across ${countryName} by region`}
               </p>
             </div>
 
@@ -627,7 +627,7 @@ export default async function CountryPage({ params }) {
       )}
 
       {/* Featured Popular Locations */}
-      {content?.popularLocations && (
+      {rawContent?.popularLocations && (
         <section className="py-16 section-contrast">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
@@ -637,15 +637,15 @@ export default async function CountryPage({ params }) {
                   <span className="text-sm font-medium text-text-charcoal font-inter">Popular Locations</span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                  {content.popularLocations.title || `Featured Popular Locations in ${countryName}`}
+                  {rawContent.popularLocations?.title || `Featured Popular Locations in ${countryName}`}
                 </h2>
                 <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                  {content.popularLocations.description || `Discover top cities and towns in ${countryName} with high demand for foster carers`}
+                  {rawContent.popularLocations?.description || `Discover top cities and towns in ${countryName} with high demand for foster carers`}
                 </p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                {(content.popularLocations.locations || currentPopularRegions).map((region, index) => (
+                {(rawContent.popularLocations?.locations || currentPopularRegions).map((region, index) => (
                   <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all">
                     <div className="flex justify-between items-start">
                       <h4 className="text-lg font-bold text-text-charcoal font-poppins">
@@ -677,7 +677,7 @@ export default async function CountryPage({ params }) {
       )}
 
       {/* Top Agencies in Country */}
-      {content?.topAgencies && (
+      {rawContent?.topAgencies && (
         <section id="agencies" className="py-16 md:py-24 relative overflow-hidden section-muted">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
@@ -691,15 +691,15 @@ export default async function CountryPage({ params }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">Top Agencies</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                {content.topAgencies.title || `Top Foster Agencies in ${countryName}`}
+                {rawContent.topAgencies?.title || `Top Foster Agencies in ${countryName}`}
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                {content.topAgencies.description || `Connect with trusted fostering services across ${countryName}`}
+                {rawContent.topAgencies?.description || `Connect with trusted fostering services across ${countryName}`}
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {(content.topAgencies.items || featuredAgencies).map((agency) => (
+              {(rawContent.topAgencies?.items || featuredAgencies).map((agency) => (
                 <Card key={agency.id} className="section-card rounded-modern-xl hover-lift transition-all">
                   <CardHeader>
                     <div className="flex items-start justify-between mb-4">
@@ -790,7 +790,7 @@ export default async function CountryPage({ params }) {
       )}
 
       {/* What is the Foster Care System Like */}
-      {content?.fosterSystem && (
+      {rawContent?.fosterSystem && (
         <section className="py-16 section-alt">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
@@ -800,12 +800,12 @@ export default async function CountryPage({ params }) {
                   <span className="text-sm font-medium text-text-charcoal font-inter">Foster Care System</span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                  {content.fosterSystem.title || `What is the Foster Care System Like in ${countryName}?`}
+                  {rawContent.fosterSystem?.title || `What is the Foster Care System Like in ${countryName}?`}
                 </h2>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {content.fosterSystem.sections?.map((section, index) => (
+                {rawContent.fosterSystem?.sections?.map((section, index) => (
                   <Card key={index} className="section-card rounded-modern-xl p-6">
                     <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
                       {index === 0 ? <Heart className="w-5 h-5 text-primary-green mr-2" /> : 
@@ -832,7 +832,7 @@ export default async function CountryPage({ params }) {
       )}
 
       {/* Why Choose to Foster in Country */}
-      {content?.whyFoster && (
+      {rawContent?.whyFoster && (
         <section className="py-16 md:py-24 section-highlight">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
@@ -841,14 +841,14 @@ export default async function CountryPage({ params }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">Why Foster</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                {content.whyFoster.title || `Why Choose to Foster in ${countryName}?`}
+                {rawContent.whyFoster?.title || `Why Choose to Foster in ${countryName}?`}
               </h2>
               <p className="text-gray-600 mb-12 font-inter">
-                {content.whyFoster.description || `Make a meaningful difference in the lives of children in your community`}
+                {rawContent.whyFoster?.description || `Make a meaningful difference in the lives of children in your community`}
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {(content.whyFoster.points || [
+                {(rawContent.whyFoster?.points || [
                   { text: "Help Children Locally", description: "Provide stable, loving homes for children in your own community who need care and support." },
                   { text: "Professional Support", description: "Access comprehensive training, 24/7 support, and ongoing guidance from experienced professionals." },
                   { text: "Make a Lasting Impact", description: "Contribute to positive outcomes for vulnerable children and strengthen your local community." }
@@ -874,7 +874,7 @@ export default async function CountryPage({ params }) {
       )}
 
       {/* FAQs */}
-      {content?.faqs && (
+      {rawContent?.faqs && (
         <section className="py-16 md:py-24 section-contrast">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
@@ -884,15 +884,15 @@ export default async function CountryPage({ params }) {
                   <span className="text-sm font-medium text-text-charcoal font-inter">FAQs</span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                  {content.faqs.title || `FAQs About Fostering in ${countryName}`}
+                  {rawContent.faqs?.title || `FAQs About Fostering in ${countryName}`}
                 </h2>
                 <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                  {content.faqs.description || `Common questions about becoming a foster carer in ${countryName}`}
+                  {rawContent.faqs?.description || `Common questions about becoming a foster carer in ${countryName}`}
                 </p>
               </div>
               
               <Accordion type="single" collapsible className="space-y-4">
-                {(content.faqs.items || faqs).map((faq, index) => (
+                {(rawContent.faqs?.items || faqs).map((faq, index) => (
                   <AccordionItem key={index} value={`item-${index}`} className="section-card rounded-modern-xl px-6">
                     <AccordionTrigger className="text-left text-text-charcoal font-poppins hover:no-underline py-4">
                       {faq.question}
@@ -909,15 +909,15 @@ export default async function CountryPage({ params }) {
       )}
 
       {/* Regulated & Trusted by UK Authorities */}
-      {content?.regulated && (
+      {rawContent?.regulated && (
         <section className="py-12 bg-gradient-to-r from-primary-green/10 to-secondary-blue/10">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
                 <div className="text-center md:text-left">
-                  <h3 className="text-xl font-bold text-text-charcoal mb-2 font-poppins">Regulated by {content.regulated.regulator || currentCountryData.regulator}</h3>
+                  <h3 className="text-xl font-bold text-text-charcoal mb-2 font-poppins">Regulated by {rawContent.regulated?.regulator || currentCountryData.regulator}</h3>
                   <p className="text-text-charcoal/90 text-sm font-inter">
-                    {content.regulated.description || "All agencies meet strict regulatory standards"}
+                    {rawContent.regulated?.description || "All agencies meet strict regulatory standards"}
                   </p>
                 </div>
                 <div className="flex justify-center space-x-8">
@@ -945,7 +945,7 @@ export default async function CountryPage({ params }) {
       )}
 
       {/* Find Agencies Near You */}
-      {content?.findAgencies && (
+      {rawContent?.findAgencies && (
         <section className="py-16 section-muted">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">

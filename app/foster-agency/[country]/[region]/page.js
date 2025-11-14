@@ -23,11 +23,11 @@ export async function generateMetadata({ params }) {
   const canonicalSlug = `/foster-agency/${country}/${region}`;
   
   // Try to get content from the new location content system using canonical slug
-  const content = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
+  const rawContent = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
 
   return {
-    title: content?.meta_title || `Foster Agencies in ${regionName}, ${countryName} | UK Directory`,
-    description: content?.meta_description || `Find foster agencies in ${regionName}, ${countryName}. Browse cities and discover fostering services in your area.`,
+    title: rawContent?.meta_title || `Foster Agencies in ${regionName}, ${countryName} | UK Directory`,
+    description: rawContent?.meta_description || `Find foster agencies in ${regionName}, ${countryName}. Browse cities and discover fostering services in your area.`,
   };
 }
 
