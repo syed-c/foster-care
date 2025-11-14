@@ -477,14 +477,25 @@ async function getLocationContentByCanonicalSlug(canonicalSlug) {
     // First, try to query location_content directly using the canonical_slug column
     const { data: directData, error: directError } = await supabaseAdmin
       .from('location_content')
-      .select('content_json')
+      .select('content_json, canonical_slug')
       .eq('canonical_slug', formattedCanonicalSlug)
       .maybeSingle();
 
     if (directData && !directError) {
       console.log('Data fetched directly for canonical slug:', formattedCanonicalSlug, directData);
       // Ensure we return a proper object structure
-      const content = directData?.content_json || null;
+      let content = directData?.content_json || null;
+      
+      // If we have content but it's a string, parse it
+      if (typeof content === 'string') {
+        try {
+          content = JSON.parse(content);
+        } catch (parseError) {
+          console.error('Error parsing content JSON:', parseError);
+          content = null;
+        }
+      }
+      
       console.log('Returning content:', !!content);
       return content;
     }
@@ -541,7 +552,18 @@ async function getLocationContentByCanonicalSlug(canonicalSlug) {
 
         console.log('Content fetched by location_id:', contentData);
         // Ensure we return a proper object structure
-        const content = contentData?.content_json || null;
+        let content = contentData?.content_json || null;
+        
+        // If we have content but it's a string, parse it
+        if (typeof content === 'string') {
+          try {
+            content = JSON.parse(content);
+          } catch (parseError) {
+            console.error('Error parsing content JSON:', parseError);
+            content = null;
+          }
+        }
+        
         console.log('Returning content:', !!content);
         return content;
       }
@@ -551,7 +573,18 @@ async function getLocationContentByCanonicalSlug(canonicalSlug) {
 
     console.log('Data fetched for canonical slug:', formattedCanonicalSlug, data);
     // Ensure we return a proper object structure
-    const content = data?.content_json || null;
+    let content = data?.content_json || null;
+    
+    // If we have content but it's a string, parse it
+    if (typeof content === 'string') {
+      try {
+        content = JSON.parse(content);
+      } catch (parseError) {
+        console.error('Error parsing content JSON:', parseError);
+        content = null;
+      }
+    }
+    
     console.log('Returning content:', !!content);
     return content;
   } catch (error) {

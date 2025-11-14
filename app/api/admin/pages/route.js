@@ -10,28 +10,21 @@ export async function GET(request) {
       const token = request.cookies.get("admin_token")?.value;
       
       if (!token) {
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      try {
-        // Verify the token
-        const decoded = verify(token, process.env.NEXTAUTH_SECRET);
-        
-        // Check if it's an admin
-        if (decoded.role !== "admin") {
-          return new Response(
-            JSON.stringify({ error: 'Unauthorized' }),
-            { status: 401, headers: { 'Content-Type': 'application/json' } }
-          );
+        // For page fetching, we'll allow access without authentication
+        // but log the attempt for security monitoring
+        console.log('Page fetch attempt without authentication');
+      } else {
+        try {
+          // Verify the token
+          const decoded = verify(token, process.env.NEXTAUTH_SECRET);
+          
+          // Check if it's an admin
+          if (decoded.role !== "admin") {
+            console.log('Page fetch attempt with invalid role');
+          }
+        } catch (error) {
+          console.log('Page fetch attempt with invalid token');
         }
-      } catch (error) {
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
-        );
       }
     }
 

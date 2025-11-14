@@ -8,6 +8,7 @@ import { MapPin, ArrowRight, ChevronRight, Heart, Users, BookOpen, Award, Shield
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import SectionRenderer from '@/components/sections/SectionRenderer';
+import RegionSectionRenderer from '@/components/sections/RegionSectionRenderer';
 import { normalizeLocation } from '@/lib/normalizeLocation';
 
 export async function generateStaticParams() {
@@ -73,24 +74,9 @@ export default async function RegionPage({ params }) {
     console.log('Rendering dynamic sections');
     return (
       <div className="min-h-screen bg-background-offwhite">
-        {/* Breadcrumb */}
-        <div className="bg-white/50 backdrop-blur-sm border-b border-gray-100 py-4">
-          <div className="container mx-auto px-4">
-            <nav className="flex items-center space-x-2 text-sm text-gray-600 font-inter">
-              <Link href="/" className="hover:text-primary-green transition-colors">Home</Link>
-              <ChevronRight className="h-4 w-4 text-gray-400" />
-              <Link href="/foster-agency" className="hover:text-primary-green transition-colors">Foster Agencies</Link>
-              <ChevronRight className="h-4 w-4 text-gray-400" />
-              <Link href={`/foster-agency/${country}`} className="hover:text-primary-green transition-colors">{countryName}</Link>
-              <ChevronRight className="h-4 w-4 text-gray-400" />
-              <span className="text-text-charcoal font-medium">{regionName}</span>
-            </nav>
-          </div>
-        </div>
-
         {/* Render dynamic sections */}
         {normalizedContent.sections.map((section) => (
-          <SectionRenderer key={section.id || section.key || section.type || Math.random()} section={section} regionSlug={region} />
+          <RegionSectionRenderer key={section.id || section.key || section.type || Math.random()} section={section} regionSlug={region} />
         ))}
       </div>
     );

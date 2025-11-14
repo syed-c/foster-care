@@ -1346,7 +1346,16 @@ export default function PageEditor() {
                           ) : (
                             <div className="border rounded-lg p-4 bg-gray-50">
                               <h3 className="text-lg font-medium mb-2">Page Preview</h3>
-                              <p className="text-gray-500">This would show a preview of the page with the current content.</p>
+                              <p className="text-gray-500 mb-4">Previewing: {formData.slug?.current ? `/${formData.slug.current}` : '/[page]'}</p>
+                              <iframe 
+                                src={formData.slug?.current ? `/${formData.slug.current}` : '/'} 
+                                className="w-full h-96 border rounded"
+                                title="Page Preview"
+                                onError={(e) => {
+                                  e.target.src = '/';
+                                  console.log('Preview not available for this page');
+                                }}
+                              />
                             </div>
                           )}
                         </div>
