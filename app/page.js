@@ -118,13 +118,13 @@ export default function HomePage() {
                 {pageSections?.find(s => s.title === 'Hero Section')?.subtitle || 'Foster Care Directory'}
               </span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-text-charcoal mb-6 font-poppins animate-slide-up">
+            <h1 className="text-responsive-4xl font-bold text-text-charcoal mb-6 font-poppins animate-slide-up">
               {pageSections?.find(s => s.title === 'Hero Section')?.heading || 'Find Your Perfect'}{" "}
               <span className="bg-gradient-to-r from-primary-green to-secondary-blue bg-clip-text text-transparent">
                 {pageSections?.find(s => s.title === 'Hero Section')?.subheading || 'Fostering Agency'}
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-8 font-inter animate-slide-up-delay">
+            <p className="text-responsive-lg text-gray-600 mb-8 font-inter animate-slide-up-delay">
               {pageSections?.find(s => s.title === 'Hero Section')?.content || 
                 'Connecting caring hearts with fostering opportunities across the UK. Browse verified agencies, read reviews, and start your fostering journey today.'}
             </p>
@@ -148,7 +148,7 @@ export default function HomePage() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="h-12 px-8 bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 rounded-xl btn-3d font-inter transition-all duration-300 hover:from-primary-green/90 hover:to-secondary-blue/90"
+                  className="h-12 px-8 bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 rounded-xl btn-3d font-inter transition-all duration-300 hover:from-primary-green/90 hover:to-secondary-blue/90 touch-target active-state"
                 >
                   Search
                 </Button>
@@ -157,11 +157,11 @@ export default function HomePage() {
 
             <div className="flex flex-wrap justify-center gap-3 text-sm font-inter animate-fade-in-delay">
               <span className="text-gray-600">Popular:</span>
-              {["London", "Manchester", "Birmingham", "Glasgow"].map((city, index) => (
+{["London", "Manchester", "Birmingham", "Glasgow"].map((city, index) => (
                 <Link
                   key={city}
                   href={`/agencies?search=${city}`}
-                  className="px-4 py-1 rounded-full glass hover:bg-white/50 transition-all duration-300 hover:scale-105 btn-3d"
+                  className="px-4 py-1 rounded-full glass hover:bg-white/50 transition-all duration-300 hover:scale-105 btn-3d touch-target active-state"
                   style={{ transitionDelay: `${index * 0.1}s` }}
                 >
                   {city}
@@ -191,16 +191,16 @@ export default function HomePage() {
                 {pageSections?.find(s => s.title === 'How It Works Section')?.subtitle || 'Simple Process'}
               </span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins animate-slide-up">
+            <h2 className="text-responsive-3xl font-bold text-text-charcoal mb-4 font-poppins animate-slide-up">
               {pageSections?.find(s => s.title === 'How It Works Section')?.heading || 'How It Works'}
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto font-inter animate-slide-up-delay">
+            <p className="text-responsive-base text-gray-600 max-w-2xl mx-auto font-inter animate-slide-up-delay">
               {pageSections?.find(s => s.title === 'How It Works Section')?.content || 
                 'Finding the right fostering agency is easy with our simple three-step process'}
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {pageSections?.find(s => s.title === 'How It Works Section')?.cards ? 
               JSON.parse(pageSections.find(s => s.title === 'How It Works Section').cards).map((card, index) => {
                 let IconComponent;
@@ -215,7 +215,7 @@ export default function HomePage() {
                 return (
               <Card
                   key={index}
-                  className="section-card hover-lift transition-all card-3d hover:scale-105"
+                  className="section-card hover-lift transition-all card-3d hover:scale-105 touch-target"
                   style={{ transitionDelay: `${index * 0.1}s` }}
                 >
                   <CardHeader>
@@ -230,12 +230,12 @@ export default function HomePage() {
                         style={{ color: `var(--${index === 0 ? 'primary-green' : index === 1 ? 'secondary-blue' : 'accent-peach'})` }}
                       />
                     </div>
-                    <CardTitle className="text-center text-xl font-poppins">
+                    <CardTitle className="text-center text-responsive-xl font-poppins">
                       {card.title}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <CardDescription className="text-center text-base font-inter">
+                    <CardDescription className="text-center text-responsive-base font-inter">
                       {card.description}
                     </CardDescription>
                   </CardContent>
@@ -279,7 +279,7 @@ export default function HomePage() {
               ].map((step, index) => (
                 <Card
                   key={index}
-                  className="section-card hover-lift transition-all card-3d hover:scale-105"
+                  className="section-card hover-lift transition-all card-3d hover:scale-105 touch-target"
                   style={{ transitionDelay: `${index * 0.1}s` }}
                 >
                   <CardHeader>
@@ -343,10 +343,10 @@ export default function HomePage() {
                   {pageSections?.find(s => s.title === 'Featured Agencies Section')?.subtitle || 'Verified Agencies'}
                 </span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-2 font-poppins animate-slide-up">
+              <h2 className="text-responsive-3xl font-bold text-text-charcoal mb-2 font-poppins animate-slide-up">
                 {pageSections?.find(s => s.title === 'Featured Agencies Section')?.heading || 'Featured Agencies'}
               </h2>
-              <p className="text-gray-600 font-inter animate-slide-up-delay">
+              <p className="text-responsive-base text-gray-600 font-inter animate-slide-up-delay">
                 {pageSections?.find(s => s.title === 'Featured Agencies Section')?.content || 'Trusted fostering agencies across the UK'}
               </p>
             </div>
@@ -650,7 +650,7 @@ export default function HomePage() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-delay">
                   <Button
                     size="lg"
-                    className="bg-white text-text-charcoal hover:bg-white/90 hover:scale-105 transition-all shadow-lg border-2 border-white/20 px-8 py-6 text-lg font-semibold font-inter btn-3d"
+                    className="bg-white text-text-charcoal hover:bg-white/90 hover:scale-105 transition-all shadow-lg border-2 border-white/20 px-8 py-6 text-lg font-semibold font-inter btn-3d touch-target active-state"
                     asChild
                   >
                     <Link href="/auth/signup">
@@ -660,7 +660,7 @@ export default function HomePage() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 hover:scale-105 transition-all shadow-md px-8 py-6 text-lg font-semibold font-inter btn-3d"
+                    className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 hover:scale-105 transition-all shadow-md px-8 py-6 text-lg font-semibold font-inter btn-3d touch-target active-state"
                     asChild
                   >
                     <Link href="/contact">
@@ -692,9 +692,9 @@ function AgencyCard({ agency }) {
   };
 
   return (
-    <Card className="section-card rounded-modern hover-lift transition-all cursor-pointer card-3d hover:scale-105">
-      <Link href={`/agency/${agency.id}`}>
-        <CardHeader>
+    <Card className="section-card rounded-modern hover-lift transition-all cursor-pointer card-3d hover:scale-105 touch-target">
+      <Link href={`/agency/${agency.id}`} className="block h-full flex flex-col">
+        <CardHeader className="flex-shrink-0">
           <div className="flex items-start justify-between mb-4">
             <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center transition-all duration-300 hover:scale-110">
               {agency.logo ? (
@@ -710,12 +710,12 @@ function AgencyCard({ agency }) {
               )}
             </div>
             {agency.featured && (
-              <Badge className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal border-0 font-inter transition-all duration-300 hover:scale-110">
+              <Badge className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal border-0 font-inter transition-all duration-300 hover:scale-110 badge-responsive">
                 Featured
               </Badge>
             )}
           </div>
-          <CardTitle className="text-xl group-hover:text-primary-green transition-colors font-poppins transition-all duration-300 hover:text-primary-green">
+          <CardTitle className="text-responsive-xl group-hover:text-primary-green transition-colors font-poppins transition-all duration-300 hover:text-primary-green">
             {agency.name}
           </CardTitle>
           <CardDescription className="flex items-center gap-1 mt-2 font-inter">
@@ -723,25 +723,25 @@ function AgencyCard({ agency }) {
             {agency.location?.city || "UK"}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-600 line-clamp-2 mb-4 font-inter">
+        <CardContent className="flex-grow">
+          <p className="text-responsive-sm text-gray-600 line-clamp-2 mb-4 font-inter">
             {agency.description ||
               "Dedicated to providing exceptional foster care services."}
           </p>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-1">
               {renderStars(agency.rating || 0)}
-              <span className="text-sm text-gray-600 ml-2 font-inter">
+              <span className="text-responsive-sm text-gray-600 ml-2 font-inter">
                 ({agency.reviewCount || 0})
               </span>
             </div>
-            <Badge variant="outline" className="font-inter transition-all duration-300 hover:scale-110">{agency.type}</Badge>
+            <Badge variant="outline" className="font-inter transition-all duration-300 hover:scale-110 badge-responsive">{agency.type}</Badge>
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex-shrink-0 mt-auto">
           <Button
             variant="ghost"
-            className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter btn-3d transition-all duration-300 hover:scale-105"
+            className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter btn-3d transition-all duration-300 hover:scale-105 touch-target"
           >
             View Profile <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
           </Button>

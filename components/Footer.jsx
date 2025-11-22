@@ -12,11 +12,11 @@ export default function Footer() {
       </div>
       
       <div className="container mx-auto px-4 py-12 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
-          <div className="col-span-1">
+          <div className="col-span-1 sm:col-span-2 md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-green to-secondary-blue flex items-center justify-center glow-primary transition-all duration-300 hover:scale-110 card-3d">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-green to-secondary-blue flex items-center justify-center glow-primary transition-all duration-300 hover:scale-110 card-3d touch-target">
                 <Heart className="w-6 h-6 text-text-charcoal" fill="currentColor" />
               </div>
               <span className="text-lg font-bold bg-gradient-to-r from-primary-green to-secondary-blue bg-clip-text text-transparent transition-all duration-300 hover:scale-105">
@@ -27,39 +27,39 @@ export default function Footer() {
               Connecting caring hearts with fostering opportunities across the UK.
             </p>
             <div className="flex space-x-3">
-              <a href="#" className="w-8 h-8 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green/20 transition-all duration-300 hover:scale-110 glow-primary card-3d">
-                <Facebook className="w-4 h-4 text-primary-green" />
+              <a href="#" className="w-10 h-10 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green/20 transition-all duration-300 hover:scale-110 glow-primary card-3d touch-target" aria-label="Facebook">
+                <Facebook className="w-5 h-5 text-primary-green" />
               </a>
-              <a href="#" className="w-8 h-8 rounded-full bg-secondary-blue/10 flex items-center justify-center hover:bg-secondary-blue/20 transition-all duration-300 hover:scale-110 glow-secondary card-3d">
-                <Twitter className="w-4 h-4 text-secondary-blue" />
+              <a href="#" className="w-10 h-10 rounded-full bg-secondary-blue/10 flex items-center justify-center hover:bg-secondary-blue/20 transition-all duration-300 hover:scale-110 glow-secondary card-3d touch-target" aria-label="Twitter">
+                <Twitter className="w-5 h-5 text-secondary-blue" />
               </a>
-              <a href="#" className="w-8 h-8 rounded-full bg-accent-peach/10 flex items-center justify-center hover:bg-accent-peach/20 transition-all duration-300 hover:scale-110 glow-accent card-3d">
-                <Instagram className="w-4 h-4 text-accent-peach" />
+              <a href="#" className="w-10 h-10 rounded-full bg-accent-peach/10 flex items-center justify-center hover:bg-accent-peach/20 transition-all duration-300 hover:scale-110 glow-accent card-3d touch-target" aria-label="Instagram">
+                <Instagram className="w-5 h-5 text-accent-peach" />
               </a>
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold text-text-charcoal mb-4 font-poppins">Quick Links</h3>
+            <h3 className="font-semibold text-text-charcoal mb-4 font-poppins text-lg">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/agencies" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
+                <Link href="/agencies" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d touch-target">
                   Browse Agencies
                 </Link>
               </li>
               <li>
-                <Link href="/resources" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
+                <Link href="/resources" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d touch-target">
                   Resources
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
+                <Link href="/about" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d touch-target">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
+                <Link href="/contact" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d touch-target">
                   Contact
                 </Link>
               </li>
@@ -68,20 +68,20 @@ export default function Footer() {
 
           {/* For Agencies */}
           <div>
-            <h3 className="font-semibold text-text-charcoal mb-4 font-poppins">For Agencies</h3>
+            <h3 className="font-semibold text-text-charcoal mb-4 font-poppins text-lg">For Agencies</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/auth/signup" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
+                <Link href="/auth/signup" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d touch-target">
                   Register Your Agency
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
+                <Link href="/pricing" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d touch-target">
                   Pricing Plans
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
+                <Link href="/dashboard" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d touch-target">
                   Agency Dashboard
                 </Link>
               </li>
@@ -90,18 +90,18 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="font-semibold text-text-charcoal mb-4 font-poppins">Contact Us</h3>
+            <h3 className="font-semibold text-text-charcoal mb-4 font-poppins text-lg">Contact Us</h3>
             <ul className="space-y-3">
-              <li className="flex items-start space-x-2 text-sm text-gray-600 font-inter hover:text-primary-green transition-all duration-300 cursor-pointer card-3d">
-                <Mail className="w-4 h-4 mt-0.5 text-primary-green transition-all duration-300 hover:scale-110" />
+              <li className="flex items-start space-x-3 text-sm text-gray-600 font-inter hover:text-primary-green transition-all duration-300 cursor-pointer card-3d touch-target">
+                <Mail className="w-5 h-5 mt-0.5 text-primary-green transition-all duration-300 hover:scale-110 flex-shrink-0" />
                 <span>info@foster-care.co.uk</span>
               </li>
-              <li className="flex items-start space-x-2 text-sm text-gray-600 font-inter hover:text-secondary-blue transition-all duration-300 cursor-pointer card-3d">
-                <Phone className="w-4 h-4 mt-0.5 text-secondary-blue transition-all duration-300 hover:scale-110" />
+              <li className="flex items-start space-x-3 text-sm text-gray-600 font-inter hover:text-secondary-blue transition-all duration-300 cursor-pointer card-3d touch-target">
+                <Phone className="w-5 h-5 mt-0.5 text-secondary-blue transition-all duration-300 hover:scale-110 flex-shrink-0" />
                 <span>0800 123 4567</span>
               </li>
-              <li className="flex items-start space-x-2 text-sm text-gray-600 font-inter hover:text-primary-green transition-all duration-300 cursor-pointer card-3d">
-                <MapPin className="w-4 h-4 mt-0.5 text-primary-green transition-all duration-300 hover:scale-110" />
+              <li className="flex items-start space-x-3 text-sm text-gray-600 font-inter hover:text-primary-green transition-all duration-300 cursor-pointer card-3d touch-target">
+                <MapPin className="w-5 h-5 mt-0.5 text-primary-green transition-all duration-300 hover:scale-110 flex-shrink-0" />
                 <span>London, United Kingdom</span>
               </li>
             </ul>
@@ -111,11 +111,11 @@ export default function Footer() {
         <div className="border-t border-gray-200 mt-8 pt-8 text-center">
           <p className="text-sm text-gray-600 font-inter">
             © {new Date().getFullYear()} Foster Care Directory UK. All rights reserved. |{' '}
-            <Link href="/privacy" className="hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
+            <Link href="/privacy" className="hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d touch-target">
               Privacy Policy
             </Link>
             {' | '}
-            <Link href="/terms" className="hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
+            <Link href="/terms" className="hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d touch-target">
               Terms of Service
             </Link>
           </p>

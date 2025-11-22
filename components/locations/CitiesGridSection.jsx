@@ -26,13 +26,13 @@ export default function CitiesGridSection({ country, region, cities = [] }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {cities.map((city) => (
             <Link 
               key={city.id || city.slug} 
               href={`/foster-agency/${country}/${region}/${city.slug || city.name.toLowerCase().replace(/\s+/g, '-')}`}
             >
-              <Card className="section-card rounded-modern-xl hover-lift transition-all cursor-pointer group">
+              <Card className="section-card rounded-modern-xl hover-lift transition-all cursor-pointer group touch-target">
                 <CardHeader>
                   <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <MapPin className="w-7 h-7 text-primary-green" />

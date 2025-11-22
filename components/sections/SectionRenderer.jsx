@@ -123,7 +123,7 @@ function HeroSection({ heading, subheading, cta_primary, cta_secondary }) {
             {cta_primary && cta_primary.link && cta_primary.text && (
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic"
+                className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic btn-responsive touch-target active-state"
                 asChild
               >
                 <Link href={cta_primary.link}>{cta_primary.text}</Link>
@@ -133,7 +133,7 @@ function HeroSection({ heading, subheading, cta_primary, cta_secondary }) {
               <Button
                 size="lg"
                 variant="outline"
-                className="glass font-inter px-8 py-6 text-lg"
+                className="glass font-inter px-8 py-6 text-lg btn-responsive touch-target active-state"
                 asChild
               >
                 <Link href={cta_secondary.link}>{cta_secondary.text}</Link>
@@ -253,12 +253,12 @@ function PopularCities({ title, description, cities }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {safeCities.map((city, index) => (
-            <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all">
+            <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all touch-target">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-lg font-bold text-text-charcoal font-poppins">{city?.name || 'City'}</h3>
-                <span className="bg-primary-green/10 text-primary-green text-xs px-2 py-1 rounded-full">
+                <span className="bg-primary-green/10 text-primary-green text-xs px-2 py-1 rounded-full badge-responsive">
                   {city?.population || 'Population'}
                 </span>
               </div>
@@ -267,7 +267,7 @@ function PopularCities({ title, description, cities }) {
               </p>
               <Link 
                 href={city?.link || "#"}
-                className="text-primary-green font-medium hover:underline flex items-center"
+                className="text-primary-green font-medium hover:underline flex items-center touch-target"
               >
                 Explore Opportunities <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
@@ -347,13 +347,13 @@ function TopAgencies({ title, description, items }) {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {safeItems.map((agency, index) => (
-            <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all h-full flex flex-col">
+            <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all h-full flex flex-col touch-target">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-bold text-text-charcoal font-poppins">{agency?.name || 'Agency'}</h3>
                 {agency?.featured && (
-                  <Badge variant="secondary" className="bg-primary-green/10 text-primary-green border-0">
+                  <Badge variant="secondary" className="bg-primary-green/10 text-primary-green border-0 badge-responsive">
                     Featured
                   </Badge>
                 )}
@@ -370,19 +370,19 @@ function TopAgencies({ title, description, items }) {
                   <span className="mx-1 text-gray-400">•</span>
                   <span className="text-sm text-gray-500">{agency?.reviewCount || 0} reviews</span>
                 </div>
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs badge-responsive">
                   {agency?.type || "Agency"}
                 </Badge>
               </div>
               
-              <div className="flex space-x-2">
-                <Button size="sm" variant="outline" className="flex-grow font-inter" asChild>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button size="sm" variant="outline" className="font-inter touch-target" asChild>
                   <Link href={agency?.website || agency?.link || "#"}>
                     <ExternalLink className="w-4 h-4 mr-2" />
                     Visit Website
                   </Link>
                 </Button>
-                <Button size="sm" className="font-inter" asChild>
+                <Button size="sm" className="font-inter touch-target" asChild>
                   <Link href="/contact">
                     Contact
                   </Link>
@@ -430,13 +430,13 @@ function AgencyFinder({ title, intro, ctaText }) {
             <input
               type="text"
               placeholder="Search for agencies in this region..."
-              className="w-full pl-12 pr-4 py-4 rounded-xl glass text-text-charcoal placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-green"
+              className="w-full pl-12 pr-4 py-4 rounded-xl glass text-text-charcoal placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-green input-responsive"
             />
           </div>
         </div>
 
         <div className="text-center mt-8">
-          <Button size="lg" className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic" asChild>
+          <Button size="lg" className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic btn-responsive touch-target active-state" asChild>
             <Link href="#">
               {safeCtaText}
             </Link>

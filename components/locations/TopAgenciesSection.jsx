@@ -32,9 +32,9 @@ export default function TopAgenciesSection({ locationType, locationName, agencie
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {agencies.slice(0, 12).map((agency) => (
-            <Card key={agency.id} className="section-card rounded-modern-xl hover-lift transition-all">
+            <Card key={agency.id} className="section-card rounded-modern-xl hover-lift transition-all touch-target">
               <CardHeader>
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center">
@@ -82,7 +82,7 @@ export default function TopAgenciesSection({ locationType, locationName, agencie
                   {agency.phone && (
                     <a 
                       href={`tel:${agency.phone}`} 
-                      className="text-primary-green text-sm font-medium hover:underline flex items-center"
+                      className="text-primary-green text-sm font-medium hover:underline flex items-center touch-target"
                     >
                       <span className="mr-1">📞</span> Call
                     </a>
@@ -90,7 +90,7 @@ export default function TopAgenciesSection({ locationType, locationName, agencie
                   {agency.email && (
                     <a 
                       href={`mailto:${agency.email}`} 
-                      className="text-primary-green text-sm font-medium hover:underline flex items-center"
+                      className="text-primary-green text-sm font-medium hover:underline flex items-center touch-target"
                     >
                       <span className="mr-1">✉️</span> Email
                     </a>
@@ -100,7 +100,7 @@ export default function TopAgenciesSection({ locationType, locationName, agencie
                       href={agency.website} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-primary-green text-sm font-medium hover:underline flex items-center"
+                      className="text-primary-green text-sm font-medium hover:underline flex items-center touch-target"
                     >
                       <ExternalLink className="w-3 h-3 mr-1" /> Website
                     </a>
@@ -108,7 +108,7 @@ export default function TopAgenciesSection({ locationType, locationName, agencie
                 </div>
                 <Button
                   variant="ghost"
-                  className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter"
+                  className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter touch-target"
                   asChild
                 >
                   <Link href={`/agency/${agency.id}`}>

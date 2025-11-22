@@ -36,21 +36,21 @@ export default function Navigation() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-green to-secondary-blue flex items-center justify-center glow-primary transition-all duration-300 hover:scale-110 card-3d">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-green to-secondary-blue flex items-center justify-center glow-primary transition-all duration-300 hover:scale-110 card-3d touch-target">
               <Heart className="w-6 h-6 text-text-charcoal" fill="currentColor" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary-green to-secondary-blue bg-clip-text text-transparent font-poppins transition-all duration-300 hover:scale-105">
+            <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-primary-green to-secondary-blue bg-clip-text text-transparent font-poppins transition-all duration-300 hover:scale-105">
               Foster Care UK
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-all duration-300 hover:text-primary-green hover:scale-105 font-inter card-3d ${
+                className={`text-sm font-medium transition-all duration-300 hover:text-primary-green hover:scale-105 font-inter card-3d touch-target ${
                   pathname === link.href ? 'text-primary-green font-bold' : 'text-text-charcoal'
                 }`}
               >
@@ -63,7 +63,7 @@ export default function Navigation() {
             ) : session ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-white/50 transition-all duration-300 hover:scale-105 card-3d">
+                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-white/50 transition-all duration-300 hover:scale-105 card-3d touch-target">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-green to-secondary-blue flex items-center justify-center glow-primary transition-all duration-300 hover:scale-110">
                       {session.user.image ? (
                         <img src={session.user.image} alt={session.user.name} className="w-8 h-8 rounded-full transition-all duration-300 hover:scale-110" />
@@ -71,7 +71,7 @@ export default function Navigation() {
                         <User className="w-4 h-4 text-text-charcoal" />
                       )}
                     </div>
-                    <span className="text-sm font-medium font-inter">{session.user.name}</span>
+                    <span className="text-sm font-medium font-inter hidden lg:inline">{session.user.name}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 glass-card rounded-modern card-3d">
@@ -109,8 +109,9 @@ export default function Navigation() {
               </DropdownMenu>
             ) : (
               <Button
-                className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 font-inter btn-3d transition-all duration-300 hover:scale-105"
+                className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 font-inter btn-3d transition-all duration-300 hover:scale-105 touch-target"
                 asChild
+                size="sm"
               >
                 <Link href="/auth/signin">Sign In</Link>
               </Button>
@@ -120,7 +121,9 @@ export default function Navigation() {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-all duration-300 hover:scale-105 card-3d"
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-all duration-300 hover:scale-105 card-3d touch-target"
+            aria-label={isOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isOpen}
           >
             {isOpen ? <X className="w-6 h-6 transition-all duration-300 hover:scale-110" /> : <Menu className="w-6 h-6 transition-all duration-300 hover:scale-110" />}
           </button>
@@ -128,75 +131,79 @@ export default function Navigation() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100 glass-card rounded-b-modern card-3d">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`block py-2 text-sm font-medium font-inter hover:bg-white/30 transition-colors rounded-lg px-2 ${
-                  pathname === link.href ? 'text-primary-green font-bold' : 'text-text-charcoal'
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
-            {session ? (
-              <>
+          <div className="md:hidden py-4 border-t border-gray-100 glass-card rounded-b-modern card-3d max-h-[calc(100vh-4rem)] overflow-y-auto">
+            <div className="space-y-1">
+              {links.map((link) => (
                 <Link
-                  href="/dashboard"
-                  className="block py-2 text-sm font-medium text-text-charcoal font-inter hover:bg-white/30 transition-colors rounded-lg px-2"
+                  key={link.href}
+                  href={link.href}
+                  className={`block py-3 px-4 text-base font-medium font-inter hover:bg-white/30 transition-colors rounded-lg ${
+                    pathname === link.href ? 'text-primary-green font-bold bg-white/20' : 'text-text-charcoal'
+                  }`}
                   onClick={() => setIsOpen(false)}
                 >
-                  Dashboard
+                  {link.label}
                 </Link>
-                {session.user.role === 'admin' && (
-                  <Link
-                    href="/admin"
-                    className="block py-2 text-sm font-medium text-text-charcoal font-inter hover:bg-white/30 transition-colors rounded-lg px-2"
-                    onClick={() => setIsOpen(false)}
+              ))}
+              {session ? (
+                <>
+                  <div className="border-t border-gray-200 my-2 pt-2">
+                    <Link
+                      href="/dashboard"
+                      className="block py-3 px-4 text-base font-medium text-text-charcoal font-inter hover:bg-white/30 transition-colors rounded-lg"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    {session.user.role === 'admin' && (
+                      <Link
+                        href="/admin"
+                        className="block py-3 px-4 text-base font-medium text-text-charcoal font-inter hover:bg-white/30 transition-colors rounded-lg"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Admin Dashboard
+                      </Link>
+                    )}
+                    {/* Developer links - only shown in development */}
+                    {process.env.NODE_ENV === 'development' && (
+                      <>
+                        <Link
+                          href="/api-test"
+                          className="block py-3 px-4 text-base font-medium text-text-charcoal font-inter hover:bg-white/30 transition-colors rounded-lg"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          API Test
+                        </Link>
+                        <Link
+                          href="/google-maps-test"
+                          className="block py-3 px-4 text-base font-medium text-text-charcoal font-inter hover:bg-white/30 transition-colors rounded-lg"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Maps Test
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full mt-4 font-inter btn-3d transition-all duration-300 hover:scale-105 touch-target"
+                    onClick={() => {
+                      signOut({ callbackUrl: '/' });
+                      setIsOpen(false);
+                    }}
                   >
-                    Admin Dashboard
-                  </Link>
-                )}
-                {/* Developer links - only shown in development */}
-                {process.env.NODE_ENV === 'development' && (
-                  <>
-                    <Link
-                      href="/api-test"
-                      className="block py-2 text-sm font-medium text-text-charcoal font-inter hover:bg-white/30 transition-colors rounded-lg px-2"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      API Test
-                    </Link>
-                    <Link
-                      href="/google-maps-test"
-                      className="block py-2 text-sm font-medium text-text-charcoal font-inter hover:bg-white/30 transition-colors rounded-lg px-2"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      Maps Test
-                    </Link>
-                  </>
-                )}
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
                 <Button
-                  variant="outline"
-                  className="w-full mt-4 font-inter btn-3d transition-all duration-300 hover:scale-105"
-                  onClick={() => {
-                    signOut({ callbackUrl: '/' });
-                    setIsOpen(false);
-                  }}
+                  className="w-full mt-4 bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal font-inter btn-3d transition-all duration-300 hover:scale-105 touch-target"
+                  asChild
                 >
-                  Sign Out
+                  <Link href="/auth/signin">Sign In</Link>
                 </Button>
-              </>
-            ) : (
-              <Button
-                className="w-full mt-4 bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal font-inter btn-3d transition-all duration-300 hover:scale-105"
-                asChild
-              >
-                <Link href="/auth/signin">Sign In</Link>
-              </Button>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>

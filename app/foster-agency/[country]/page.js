@@ -582,10 +582,10 @@ export default async function CountryPage({ params, searchParams }) {
               </h3>
               
               {/* Regions Grid - First Page */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {regionsToShow.slice(0, regionsPerPage).map((region) => (
                   <Link key={region.slug} href={`/foster-agency/${country}/${region.slug}`}>
-                    <Card className="section-card rounded-modern-xl hover-lift transition-all cursor-pointer group">
+                    <Card className="section-card rounded-modern-xl hover-lift transition-all cursor-pointer group touch-target">
                       <CardHeader>
                         <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                           <MapPin className="w-7 h-7 text-primary-green" />
@@ -613,21 +613,21 @@ export default async function CountryPage({ params, searchParams }) {
                   <Pagination>
                     <PaginationContent>
                       <PaginationItem>
-                        <PaginationPrevious href="#" className="glass" />
+                        <PaginationPrevious href="#" className="glass touch-target" />
                       </PaginationItem>
                       {[...Array(totalPages)].map((_, i) => (
                         <PaginationItem key={i}>
                           <PaginationLink 
                             href="#" 
                             isActive={i === 0}
-                            className={i === 0 ? "glass bg-primary-green text-white" : "glass"}
+                            className={`${i === 0 ? "glass bg-primary-green text-white" : "glass"} touch-target`}
                           >
                             {i + 1}
                           </PaginationLink>
                         </PaginationItem>
                       ))}
                       <PaginationItem>
-                        <PaginationNext href="#" className="glass" />
+                        <PaginationNext href="#" className="glass touch-target" />
                       </PaginationItem>
                     </PaginationContent>
                   </Pagination>
