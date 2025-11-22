@@ -1,3 +1,5 @@
+'use client';
+
 // RegionFaqSection.js
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Users } from 'lucide-react';

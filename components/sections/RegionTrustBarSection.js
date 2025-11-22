@@ -1,3 +1,5 @@
+'use client';
+
 // RegionTrustBarSection.js
 import { Shield, Award } from 'lucide-react';
 

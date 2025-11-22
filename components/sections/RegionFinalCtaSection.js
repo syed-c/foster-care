@@ -1,3 +1,5 @@
+'use client';
+
 // RegionFinalCtaSection.js
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';

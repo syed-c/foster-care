@@ -1,3 +1,5 @@
+'use client';
+
 // RegionTestimonialsSection.js
 import { Card } from '@/components/ui/card';
 import { Users, Star } from 'lucide-react';

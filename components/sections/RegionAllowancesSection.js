@@ -1,3 +1,5 @@
+'use client';
+
 // RegionAllowancesSection.js
 import { Card } from '@/components/ui/card';
 import { Wallet, Heart } from 'lucide-react';

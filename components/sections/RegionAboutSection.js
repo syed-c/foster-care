@@ -1,3 +1,5 @@
+'use client';
+
 // RegionAboutSection.js
 import { Card } from '@/components/ui/card';
 import { BookOpen } from 'lucide-react';

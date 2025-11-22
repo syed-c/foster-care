@@ -1,3 +1,5 @@
+'use client';
+
 // RegionPopularCitiesSection.js
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';

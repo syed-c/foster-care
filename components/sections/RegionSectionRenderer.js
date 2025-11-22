@@ -1,3 +1,5 @@
+'use client';
+
 // RegionSectionRenderer.js
 import { Fragment } from 'react';
 import RegionBreadcrumbSection from './RegionBreadcrumbSection';

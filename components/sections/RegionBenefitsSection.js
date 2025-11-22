@@ -1,3 +1,5 @@
+'use client';
+
 // RegionBenefitsSection.js
 import { Card } from '@/components/ui/card';
 import { Heart, Shield } from 'lucide-react';
