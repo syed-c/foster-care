@@ -20,40 +20,72 @@ import {
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-// Dynamic imports for section components
+// Error boundary component to catch rendering errors
+// Error boundary component to catch rendering errors
+function ErrorBoundary({ children }) {
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    if (hasError) {
+      // Reset error state after a short delay
+      const timer = setTimeout(() => setHasError(false), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [hasError]);
+
+  if (hasError) {
+    return <div className="p-4 bg-red-100 border border-red-400 rounded text-red-700">Component failed to render</div>;
+  }
+
+  try {
+    return children;
+  } catch (error) {
+    console.error('ErrorBoundary caught an error:', error);
+    setHasError(true);
+    return <div className="p-4 bg-red-100 border border-red-400 rounded text-red-700">Component failed to render</div>;
+  }
+}
+
+// Dynamic imports for section components with error handling
 const map = {
-  hero: dynamic(() => import('./HeroSection')),
-  overview: dynamic(() => import('./OverviewSection')),
-  benefits: dynamic(() => import('./BenefitsSection')),
-  popularCities: dynamic(() => import('./PopularCitiesDynamic')),
-  faqs: dynamic(() => import('./FaqSection')),
-  topAgencies: dynamic(() => import('./TopAgenciesDynamic')),
-  agencyFinder: dynamic(() => import('./AgencyFinder')),
+  hero: dynamic(() => import('./HeroSection'), { ssr: false, loading: () => <div>Loading hero section...</div> }),
+  overview: dynamic(() => import('./OverviewSection'), { ssr: false, loading: () => <div>Loading overview section...</div> }),
+  benefits: dynamic(() => import('./BenefitsSection'), { ssr: false, loading: () => <div>Loading benefits section...</div> }),
+  popularCities: dynamic(() => import('./PopularCitiesDynamic'), { ssr: false, loading: () => <div>Loading popular cities section...</div> }),
+  faqs: dynamic(() => import('./FaqSection'), { ssr: false, loading: () => <div>Loading FAQ section...</div> }),
+  topAgencies: dynamic(() => import('./TopAgenciesDynamic'), { ssr: false, loading: () => <div>Loading top agencies section...</div> }),
+  agencyFinder: dynamic(() => import('./AgencyFinder'), { ssr: false, loading: () => <div>Loading agency finder section...</div> }),
   // fallback to GenericBlock
 };
 
 // Generic block component for unknown section types
 function GenericBlock({ section }) {
+  // Provide default values to prevent destructuring errors
+  const safeSection = section && typeof section === 'object' ? section : {};
+  const safeTitle = safeSection.title || safeSection.heading || 'Untitled Section';
+  const safeContent = safeSection.content;
+  const safeDescription = safeSection.description;
+  
   return (
     <Card className="section-card rounded-modern-xl p-6">
       <CardHeader>
         <CardTitle className="text-2xl font-poppins">
-          {section.title || section.heading || 'Untitled Section'}
+          {safeTitle}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {section.content && (
+        {safeContent && (
           <div className="prose max-w-none text-gray-600 font-inter">
-            {typeof section.content === 'string' ? (
-              <div dangerouslySetInnerHTML={{ __html: section.content }} />
+            {typeof safeContent === 'string' ? (
+              <div dangerouslySetInnerHTML={{ __html: safeContent }} />
             ) : (
-              <p>{JSON.stringify(section.content)}</p>
+              <p>{JSON.stringify(safeContent)}</p>
             )}
           </div>
         )}
-        {section.description && (
+        {safeDescription && (
           <p className="text-gray-600 mt-2 font-inter">
-            {section.description}
+            {safeDescription}
           </p>
         )}
       </CardContent>
@@ -63,6 +95,10 @@ function GenericBlock({ section }) {
 
 // Specific section components
 function HeroSection({ heading, subheading, cta_primary, cta_secondary }) {
+  // Provide default values to prevent destructuring errors
+  const safeHeading = heading || 'Untitled';
+  const safeSubheading = subheading || '';
+  
   return (
     <section className="relative py-16 md:py-24 overflow-hidden section-hero">
       <div className="absolute inset-0 gradient-mesh opacity-50" />
@@ -78,13 +114,13 @@ function HeroSection({ heading, subheading, cta_primary, cta_secondary }) {
             <span className="text-sm font-medium text-text-charcoal font-inter">Location</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-text-charcoal mb-6 font-poppins">
-            {heading}
+            {safeHeading}
           </h1>
           <p className="text-xl text-gray-600 mb-8 font-inter">
-            {subheading}
+            {safeSubheading}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            {cta_primary && (
+            {cta_primary && cta_primary.link && cta_primary.text && (
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic"
@@ -93,7 +129,7 @@ function HeroSection({ heading, subheading, cta_primary, cta_secondary }) {
                 <Link href={cta_primary.link}>{cta_primary.text}</Link>
               </Button>
             )}
-            {cta_secondary && (
+            {cta_secondary && cta_secondary.link && cta_secondary.text && (
               <Button
                 size="lg"
                 variant="outline"
@@ -111,6 +147,9 @@ function HeroSection({ heading, subheading, cta_primary, cta_secondary }) {
 }
 
 function OverviewSection({ title, body }) {
+  // Provide default values to prevent destructuring errors
+  const safeTitle = title || 'About This Location';
+  
   return (
     <section className="py-16 section-alt">
       <div className="container mx-auto px-4">
@@ -121,7 +160,7 @@ function OverviewSection({ title, body }) {
               <span className="text-sm font-medium text-text-charcoal font-inter">About Fostering</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-              {title}
+              {safeTitle}
             </h2>
           </div>
           
@@ -141,6 +180,11 @@ function OverviewSection({ title, body }) {
 }
 
 function BenefitsSection({ title, description, items }) {
+  // Provide default values to prevent destructuring errors
+  const safeTitle = title || 'Benefits & Support';
+  const safeDescription = description || '';
+  const safeItems = Array.isArray(items) ? items : [];
+  
   return (
     <section className="py-16 md:py-24 section-highlight">
       <div className="container mx-auto px-4">
@@ -151,10 +195,10 @@ function BenefitsSection({ title, description, items }) {
               <span className="text-sm font-medium text-text-charcoal font-inter">Benefits & Support</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-              {title}
+              {safeTitle}
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-              {description}
+              {safeDescription}
             </p>
           </div>
           
@@ -165,12 +209,12 @@ function BenefitsSection({ title, description, items }) {
                 Benefits
               </h3>
               <ul className="space-y-3">
-                {Array.isArray(items) && items.map((item, index) => (
+                {safeItems.map((item, index) => (
                   <li key={index} className="flex items-start">
                     <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
                       <span className="text-primary-green text-xs">✓</span>
                     </div>
-                    <span>{item.title || item.description || item}</span>
+                    <span>{item?.title || item?.description || item || 'Benefit item'}</span>
                   </li>
                 ))}
               </ul>
@@ -183,6 +227,11 @@ function BenefitsSection({ title, description, items }) {
 }
 
 function PopularCities({ title, description, cities }) {
+  // Provide default values to prevent destructuring errors
+  const safeTitle = title || 'Popular Cities';
+  const safeDescription = description || '';
+  const safeCities = Array.isArray(cities) ? cities : [];
+  
   return (
     <section className="py-16 md:py-24 relative overflow-hidden section-contrast">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -197,27 +246,27 @@ function PopularCities({ title, description, cities }) {
             <span className="text-sm font-medium text-text-charcoal font-inter">Popular Cities</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-            {title}
+            {safeTitle}
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-            {description}
+            {safeDescription}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {Array.isArray(cities) && cities.map((city, index) => (
+          {safeCities.map((city, index) => (
             <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all">
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-bold text-text-charcoal font-poppins">{city.name}</h3>
+                <h3 className="text-lg font-bold text-text-charcoal font-poppins">{city?.name || 'City'}</h3>
                 <span className="bg-primary-green/10 text-primary-green text-xs px-2 py-1 rounded-full">
-                  {city.population}
+                  {city?.population || 'Population'}
                 </span>
               </div>
               <p className="text-gray-600 text-sm mb-4 font-inter">
-                {city.reason}
+                {city?.reason || 'Reason to visit'}
               </p>
               <Link 
-                href={city.link || "#"}
+                href={city?.link || "#"}
                 className="text-primary-green font-medium hover:underline flex items-center"
               >
                 Explore Opportunities <ArrowRight className="ml-2 w-4 h-4" />
@@ -231,6 +280,11 @@ function PopularCities({ title, description, cities }) {
 }
 
 function FaqSection({ title, description, items }) {
+  // Provide default values to prevent destructuring errors
+  const safeTitle = title || 'Frequently Asked Questions';
+  const safeDescription = description || '';
+  const safeItems = Array.isArray(items) ? items : [];
+  
   return (
     <section className="py-16 md:py-24 section-alt">
       <div className="container mx-auto px-4">
@@ -241,21 +295,21 @@ function FaqSection({ title, description, items }) {
               <span className="text-sm font-medium text-text-charcoal font-inter">FAQs</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-              {title}
+              {safeTitle}
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-              {description}
+              {safeDescription}
             </p>
           </div>
           
           <Accordion type="single" collapsible className="space-y-4">
-            {Array.isArray(items) && items.map((faq, index) => (
+            {safeItems.map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`} className="section-card rounded-modern-lg border border-gray-200">
                 <AccordionTrigger className="px-6 py-4 text-left font-poppins text-lg font-medium text-text-charcoal hover:bg-gray-50 rounded-t-modern-lg">
-                  {faq.question}
+                  {faq?.question || 'Question'}
                 </AccordionTrigger>
                 <AccordionContent className="px-6 py-4 text-gray-600 font-inter bg-white rounded-b-modern-lg">
-                  {faq.answer}
+                  {faq?.answer || 'Answer'}
                 </AccordionContent>
               </AccordionItem>
             ))}
@@ -267,6 +321,11 @@ function FaqSection({ title, description, items }) {
 }
 
 function TopAgencies({ title, description, items }) {
+  // Provide default values to prevent destructuring errors
+  const safeTitle = title || 'Featured Agencies';
+  const safeDescription = description || '';
+  const safeItems = Array.isArray(items) ? items : [];
+  
   return (
     <section className="py-16 md:py-24 relative overflow-hidden section-highlight">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -281,19 +340,19 @@ function TopAgencies({ title, description, items }) {
             <span className="text-sm font-medium text-text-charcoal font-inter">Featured Agencies</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-            {title}
+            {safeTitle}
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-            {description}
+            {safeDescription}
           </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {Array.isArray(items) && items.map((agency, index) => (
+          {safeItems.map((agency, index) => (
             <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all h-full flex flex-col">
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-xl font-bold text-text-charcoal font-poppins">{agency.name}</h3>
-                {agency.featured && (
+                <h3 className="text-xl font-bold text-text-charcoal font-poppins">{agency?.name || 'Agency'}</h3>
+                {agency?.featured && (
                   <Badge variant="secondary" className="bg-primary-green/10 text-primary-green border-0">
                     Featured
                   </Badge>
@@ -301,24 +360,24 @@ function TopAgencies({ title, description, items }) {
               </div>
               
               <p className="text-gray-600 mb-4 flex-grow font-inter">
-                {agency.summary || agency.description}
+                {agency?.summary || agency?.description || 'No description available'}
               </p>
               
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                  <span className="ml-1 text-sm font-medium">{agency.rating || "N/A"}</span>
+                  <span className="ml-1 text-sm font-medium">{agency?.rating || "N/A"}</span>
                   <span className="mx-1 text-gray-400">•</span>
-                  <span className="text-sm text-gray-500">{agency.reviewCount || 0} reviews</span>
+                  <span className="text-sm text-gray-500">{agency?.reviewCount || 0} reviews</span>
                 </div>
                 <Badge variant="outline" className="text-xs">
-                  {agency.type || "Agency"}
+                  {agency?.type || "Agency"}
                 </Badge>
               </div>
               
               <div className="flex space-x-2">
                 <Button size="sm" variant="outline" className="flex-grow font-inter" asChild>
-                  <Link href={agency.website || agency.link || "#"}>
+                  <Link href={agency?.website || agency?.link || "#"}>
                     <ExternalLink className="w-4 h-4 mr-2" />
                     Visit Website
                   </Link>
@@ -338,6 +397,11 @@ function TopAgencies({ title, description, items }) {
 }
 
 function AgencyFinder({ title, intro, ctaText }) {
+  // Provide default values to prevent destructuring errors
+  const safeTitle = title || 'Find Agencies';
+  const safeIntro = intro || '';
+  const safeCtaText = ctaText || 'Search';
+  
   return (
     <section className="py-16 md:py-24 relative overflow-hidden section-highlight">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -352,10 +416,10 @@ function AgencyFinder({ title, intro, ctaText }) {
             <span className="text-sm font-medium text-text-charcoal font-inter">Agency Finder</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-            {title}
+            {safeTitle}
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-            {intro}
+            {safeIntro}
           </p>
         </div>
 
@@ -374,7 +438,7 @@ function AgencyFinder({ title, intro, ctaText }) {
         <div className="text-center mt-8">
           <Button size="lg" className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic" asChild>
             <Link href="#">
-              {ctaText}
+              {safeCtaText}
             </Link>
           </Button>
         </div>
@@ -384,16 +448,43 @@ function AgencyFinder({ title, intro, ctaText }) {
 }
 
 export default function SectionRenderer({ section, regionSlug }) {
+  // Safety check for section
+  if (!section || typeof section !== 'object') {
+    return <GenericBlock section={{ title: 'Invalid Section', content: 'This section could not be loaded properly.' }} />;
+  }
+  
   // If section has a type, use the mapped component
   if (section.type && map[section.type]) {
     const Component = map[section.type];
-    return <Component key={section.id} {...section.data} regionSlug={regionSlug} />;
+    // Safety check for section.data
+    const sectionData = section.data && typeof section.data === 'object' ? section.data : {};
+    try {
+      // Wrap in error boundary to catch runtime errors
+      return (
+        <ErrorBoundary>
+          <Component key={section.id} {...sectionData} regionSlug={regionSlug} />
+        </ErrorBoundary>
+      );
+    } catch (error) {
+      console.error('Error rendering component:', error);
+      return <GenericBlock section={{ title: 'Component Error', content: `Failed to render ${section.type} component` }} />;
+    }
   }
   
   // If section has a key that matches a known type, use the mapped component
   if (section.key && map[section.key]) {
     const Component = map[section.key];
-    return <Component key={section.id} {...section} regionSlug={regionSlug} />;
+    try {
+      // Wrap in error boundary to catch runtime errors
+      return (
+        <ErrorBoundary>
+          <Component key={section.id} {...section} regionSlug={regionSlug} />
+        </ErrorBoundary>
+      );
+    } catch (error) {
+      console.error('Error rendering component:', error);
+      return <GenericBlock section={{ title: 'Component Error', content: `Failed to render ${section.key} component` }} />;
+    }
   }
   
   // Otherwise, use a generic block

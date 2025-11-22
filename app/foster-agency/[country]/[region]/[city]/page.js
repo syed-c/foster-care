@@ -40,34 +40,56 @@ export default async function CityPage({ params }) {
 
   let sections = [];
 
-  if (content?.sections && Array.isArray(content.sections)) {
-    sections = content.sections;
-  } else if (content?.content_json?.sections && Array.isArray(content.content_json.sections)) {
-    sections = content.content_json.sections;
-  } else if (content?.content_json && typeof content.content_json === 'object') {
-    sections = Object.keys(content.content_json)
-      .filter(key => typeof content.content_json[key] === 'object' && content.content_json[key] !== null)
-      .map(key => ({
-        type: key,
-        key,
-        data: content.content_json[key]
-      }));
-  } else if (typeof content === 'object') {
-    sections = Object.keys(content)
-      .filter(
-        key =>
-          typeof content[key] === 'object' &&
-          content[key] !== null &&
-          key !== 'meta_title' &&
-          key !== 'meta_description' &&
+  // Safely process content sections with better error handling
+  try {
+    if (content?.sections && Array.isArray(content.sections)) {
+      sections = content.sections.filter(section => section && typeof section === 'object');
+    } else if (content?.content_json?.sections && Array.isArray(content.content_json.sections)) {
+      sections = content.content_json.sections.filter(section => section && typeof section === 'object');
+    } else if (content?.content_json && typeof content.content_json === 'object') {
+      sections = Object.keys(content.content_json)
+        .filter(key => 
+          typeof content.content_json[key] === 'object' && 
+          content.content_json[key] !== null &&
+          key !== 'meta_title' && 
+          key !== 'meta_description' && 
           key !== 'title'
-      )
-      .map(key => ({
-        type: key,
-        key,
-        data: content[key]
-      }));
+        )
+        .map(key => ({
+          type: key,
+          key,
+          data: content.content_json[key]
+        }))
+        .filter(section => section && typeof section === 'object');
+    } else if (typeof content === 'object') {
+      sections = Object.keys(content)
+        .filter(
+          key =>
+            typeof content[key] === 'object' &&
+            content[key] !== null &&
+            key !== 'meta_title' &&
+            key !== 'meta_description' &&
+            key !== 'title'
+        )
+        .map(key => ({
+          type: key,
+          key,
+          data: content[key]
+        }))
+        .filter(section => section && typeof section === 'object');
+    }
+  } catch (error) {
+    console.error('Error processing content sections:', error);
+    // Return notFound if we can't process sections properly
+    return notFound();
   }
+
+  // Filter out any invalid sections
+  sections = sections.filter(section => 
+    section && 
+    typeof section === 'object' && 
+    (section.type || section.key)
+  );
 
   if (!sections.length) {
     return notFound();
