@@ -607,7 +607,7 @@ async function getAgenciesByRegion(regionSlug, limit = 10, filters = {}) {
       query = query.eq('featured', true);
     }
 
-    if (filters.type) {
+    if (filters.type && filters.type !== 'all') {
       query = query.eq('type', filters.type);
     }
 
