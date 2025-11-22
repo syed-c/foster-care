@@ -3,6 +3,11 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getLocationContentByCanonicalSlug } from '@/services/locationService';
 import SectionRenderer from '@/components/sections/SectionRenderer';
+import DynamicLocationSections from '@/components/DynamicLocationSections';
+
+// Make sure pages run on dynamic rendering mode
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function generateStaticParams() {
   const paths = await generateCityPaths();
@@ -34,9 +39,8 @@ export default async function CityPage({ params }) {
   
   const content = await getLocationContentByCanonicalSlug(canonicalSlug);
 
-  if (!content) {
-    return notFound();
-  }
+  // CityPage should NEVER return early when content is empty
+  // Always render default layout + dynamic sections below
 
   let sections = [];
 
@@ -91,9 +95,8 @@ export default async function CityPage({ params }) {
     (section.type || section.key)
   );
 
-  if (!sections.length) {
-    return notFound();
-  }
+  // CityPage should NEVER return early when sections are empty
+  // Always render default layout + dynamic sections below
 
   return (
     <div className="min-h-screen bg-background-offwhite">
@@ -103,6 +106,13 @@ export default async function CityPage({ params }) {
           section={section}
         />
       ))}
+      
+      {/* Dynamic Location Sections */}
+      <DynamicLocationSections 
+        country={country}
+        region={region}
+        city={city}
+      />
     </div>
   );
 }

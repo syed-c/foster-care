@@ -7,6 +7,11 @@ import {
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import RegionSectionRenderer from '@/components/sections/RegionSectionRenderer';
+import DynamicLocationSections from '@/components/DynamicLocationSections';
+
+// Make sure pages run on dynamic rendering mode
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function generateStaticParams() {
   const paths = await generateRegionPaths();
@@ -39,10 +44,8 @@ export default async function RegionPage({ params }) {
   // Fetch content from Supabase using canonical slug
   const content = await getLocationContentByCanonicalSlug(canonicalSlug);
   
-  // If no content found, return not found
-  if (!content) {
-    return notFound();
-  }
+  // RegionPage should NEVER return early when content is empty
+  // Always render default layout + dynamic sections below
   
   // Extract sections from content - handle both flat content and sections array
   let sections = [];
@@ -114,6 +117,14 @@ export default async function RegionPage({ params }) {
           cities={cities}
         />
       ))}
+      
+      {/* Dynamic Location Sections */}
+      <DynamicLocationSections 
+        country={country}
+        region={region}
+        agencies={agencies}
+        cities={cities}
+      />
     </div>
   );
 }

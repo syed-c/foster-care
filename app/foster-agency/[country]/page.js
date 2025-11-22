@@ -18,6 +18,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import SectionRenderer from '@/components/sections/SectionRenderer';
 import { normalizeLocation } from '@/lib/normalizeLocation';
+import DynamicLocationSections from '@/components/DynamicLocationSections';
+
+// Make sure pages run on dynamic rendering mode
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function generateStaticParams() {
   const paths = await generateCountryPaths();
@@ -96,8 +101,8 @@ export default async function CountryPage({ params }) {
     );
   }
   
-  // Fallback to existing implementation if no normalized sections
-  console.log('Falling back to static content');
+  // Always render default layout + dynamic sections below, even if content is empty
+  console.log('Rendering default layout with dynamic sections');
   
   // Get country-specific data
   const countryData = {
@@ -975,6 +980,12 @@ export default async function CountryPage({ params }) {
           </div>
         </section>
       )}
+      
+      {/* Dynamic Location Sections */}
+      <DynamicLocationSections 
+        country={country}
+        regions={regions}
+      />
     </div>
   );
 }

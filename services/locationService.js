@@ -565,7 +565,8 @@ async function getLocationContentByCanonicalSlug(canonicalSlug) {
         }
         
         console.log('Returning content:', !!content);
-        return content;
+        // Return contentData?.content_json or contentData instead of raw object
+        return contentData?.content_json || contentData || content;
       }
       
       return null;
@@ -586,7 +587,8 @@ async function getLocationContentByCanonicalSlug(canonicalSlug) {
     }
     
     console.log('Returning content:', !!content);
-    return content;
+    // Return data?.content_json or data instead of raw object
+    return data?.content_json || data || content;
   } catch (error) {
     console.error('Error getting location content by canonical slug:', error);
     return null;
