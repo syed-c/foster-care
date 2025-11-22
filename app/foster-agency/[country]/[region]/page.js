@@ -7,11 +7,12 @@ import {
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import RegionSectionRenderer from '@/components/sections/RegionSectionRenderer';
-import DynamicLocationSections from '@/components/DynamicLocationSections';
+import CitiesGridSection from '@/components/locations/CitiesGridSection';
+import TopAgenciesSection from '@/components/locations/TopAgenciesSection';
 
 // Make sure pages run on dynamic rendering mode
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   const paths = await generateRegionPaths();
@@ -118,12 +119,18 @@ export default async function RegionPage({ params }) {
         />
       ))}
       
-      {/* Dynamic Location Sections */}
-      <DynamicLocationSections 
+      {/* Cities Grid Section */}
+      <CitiesGridSection 
         country={country}
         region={region}
-        agencies={agencies}
         cities={cities}
+      />
+      
+      {/* Top Agencies Section */}
+      <TopAgenciesSection 
+        locationType="region"
+        locationName={region}
+        agencies={agencies}
       />
     </div>
   );

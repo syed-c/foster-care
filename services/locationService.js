@@ -627,6 +627,51 @@ async function getAgenciesByRegion(regionSlug, limit = 10, filters = {}) {
   }
 }
 
+// Helper function to get agencies by country
+async function getAgenciesByCountry(countrySlug, limit = 10, filters = {}) {
+  try {
+    // First get the country ID
+    const { data: country, error: countryError } = await supabaseAdmin
+      .from('countries')
+      .select('id')
+      .eq('slug', countrySlug)
+      .single();
+
+    if (countryError || !country) {
+      console.error('Country not found:', countryError);
+      return [];
+    }
+
+    // Then get agencies for that country
+    let query = supabaseAdmin
+      .from('agencies')
+      .select('*')
+      .eq('country_id', country.id)
+      .limit(limit);
+
+    // Apply filters if provided
+    if (filters.featured) {
+      query = query.eq('featured', true);
+    }
+
+    if (filters.type && filters.type !== 'all') {
+      query = query.eq('type', filters.type);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching agencies by country:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error getting agencies by country:', error);
+    return [];
+  }
+}
+
 // Helper function to get cities by region
 async function getCitiesByRegion(regionSlug, limit = 10) {
   try {
@@ -655,5 +700,6 @@ module.exports = {
   getLocationContentBySlug,
   getLocationContentByCanonicalSlug,
   getAgenciesByRegion,
+  getAgenciesByCountry,
   getCitiesByRegion
 };

@@ -3,11 +3,11 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getLocationContentByCanonicalSlug } from '@/services/locationService';
 import SectionRenderer from '@/components/sections/SectionRenderer';
-import DynamicLocationSections from '@/components/DynamicLocationSections';
+import TopAgenciesSection from '@/components/locations/TopAgenciesSection';
 
 // Make sure pages run on dynamic rendering mode
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   const paths = await generateCityPaths();
@@ -107,11 +107,11 @@ export default async function CityPage({ params }) {
         />
       ))}
       
-      {/* Dynamic Location Sections */}
-      <DynamicLocationSections 
-        country={country}
-        region={region}
-        city={city}
+      {/* Top Agencies Section */}
+      <TopAgenciesSection 
+        locationType="city"
+        locationName={city}
+        agencies={[]}
       />
     </div>
   );

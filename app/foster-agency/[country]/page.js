@@ -1,5 +1,5 @@
 import { generateCountryPaths, loadRegionsForCountry, formatSlugToTitle, buildLocationStructure, getRegionsForCountry, loadAllLocations } from '@/lib/locationData';
-import { getLocationContentByCanonicalSlug } from '@/services/locationService';
+import { getLocationContentByCanonicalSlug, getAgenciesByCountry } from '@/services/locationService';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,11 +18,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import SectionRenderer from '@/components/sections/SectionRenderer';
 import { normalizeLocation } from '@/lib/normalizeLocation';
-import DynamicLocationSections from '@/components/DynamicLocationSections';
+import TopAgenciesSection from '@/components/locations/TopAgenciesSection';
 
 // Make sure pages run on dynamic rendering mode
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   const paths = await generateCountryPaths();
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function CountryPage({ params }) {
+export default async function CountryPage({ params, searchParams }) {
   console.log('COUNTRY PAGE LOADED WITH PARAMS:', params);
   const resolvedParams = await params;
   const country = resolvedParams.country;
@@ -103,6 +103,13 @@ export default async function CountryPage({ params }) {
   
   // Always render default layout + dynamic sections below, even if content is empty
   console.log('Rendering default layout with dynamic sections');
+  
+  // Handle pagination for regions
+  const page = parseInt(searchParams?.page) || 1;
+  const totalRegions = regionsToShow.length;
+  const startIndex = (page - 1) * regionsPerPage;
+  const endIndex = startIndex + regionsPerPage;
+  const paginatedRegions = regionsToShow.slice(startIndex, endIndex);
   
   // Get country-specific data
   const countryData = {
@@ -981,10 +988,143 @@ export default async function CountryPage({ params }) {
         </section>
       )}
       
-      {/* Dynamic Location Sections */}
-      <DynamicLocationSections 
-        country={country}
-        regions={regions}
+      {/* All Regions Grid Section */}
+      <section className="py-16 md:py-24 relative overflow-hidden section-highlight">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
+          <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+              <MapPin className="w-4 h-4 text-primary-green" />
+              <span className="text-sm font-medium text-text-charcoal font-inter">All Regions</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+              All Regions in {countryName}
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+              Explore all regions and discover fostering opportunities across the country
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {paginatedRegions.map((regionItem) => (
+              <Link key={regionItem.slug} href={`/foster-agency/${country}/${regionItem.slug}`}>
+                <Card className="section-card rounded-modern-xl hover-lift transition-all cursor-pointer group">
+                  <CardHeader>
+                    <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <MapPin className="w-7 h-7 text-primary-green" />
+                    </div>
+                    <CardTitle className="text-lg font-poppins group-hover:text-primary-green transition-colors">
+                      {regionItem.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="font-inter mb-4">
+                      View cities in this region
+                    </CardDescription>
+                    <div className="flex items-center text-primary-green font-medium group-hover:translate-x-1 transition-transform">
+                      Explore cities <ArrowRight className="ml-2 w-4 h-4" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-12">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      href={`?page=${page > 1 ? page - 1 : 1}`} 
+                      aria-disabled={page <= 1}
+                      tabIndex={page <= 1 ? -1 : undefined}
+                      className={page <= 1 ? "pointer-events-none opacity-50 glass" : "glass"}
+                    />
+                  </PaginationItem>
+                  
+                  {/* First page */}
+                  <PaginationItem>
+                    <PaginationLink 
+                      href="?page=1" 
+                      isActive={page === 1}
+                      className={page === 1 ? "glass bg-primary-green text-white" : "glass"}
+                    >
+                      1
+                    </PaginationLink>
+                  </PaginationItem>
+                  
+                  {/* Ellipsis if needed */}
+                  {page > 3 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+                  
+                  {/* Pages around current page */}
+                  {Array.from({ length: Math.min(3, totalPages - 2) }, (_, i) => {
+                    const pageNum = Math.max(2, Math.min(page - 1, totalPages - 2)) + i;
+                    if (pageNum > 1 && pageNum < totalPages) {
+                      return (
+                        <PaginationItem key={pageNum}>
+                          <PaginationLink 
+                            href={`?page=${pageNum}`}
+                            isActive={page === pageNum}
+                            className={page === pageNum ? "glass bg-primary-green text-white" : "glass"}
+                          >
+                            {pageNum}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    }
+                    return null;
+                  })}
+                  
+                  {/* Ellipsis if needed */}
+                  {page < totalPages - 2 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+                  
+                  {/* Last page */}
+                  {totalPages > 1 && (
+                    <PaginationItem>
+                      <PaginationLink 
+                        href={`?page=${totalPages}`}
+                        isActive={page === totalPages}
+                        className={page === totalPages ? "glass bg-primary-green text-white" : "glass"}
+                      >
+                        {totalPages}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      href={`?page=${page < totalPages ? page + 1 : totalPages}`}
+                     aria-disabled={page >= totalPages}
+                      tabIndex={page >= totalPages ? -1 : undefined}
+                      className={page >= totalPages ? "pointer-events-none opacity-50 glass" : "glass"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </div>
+      </section>
+      
+      {/* Top Agencies Section */}
+      <TopAgenciesSection 
+        locationType="country"
+        locationName={country}
+        agencies={agencies}
       />
     </div>
   );
