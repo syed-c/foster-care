@@ -2,12 +2,6 @@ import { NextResponse } from "next/server";
 import { verify } from "jsonwebtoken";
 
 export function middleware(request) {
-  // TEMPORARILY DISABLED AUTHENTICATION FOR TESTING
-  // Allow all access for now
-  return NextResponse.next();
-  
-  // Original authentication code below
-  /*
   // Special case for auth@syedrayyan.com
   const specialAccess = request.cookies.get('special_super_admin_access')?.value;
   if (specialAccess === 'auth@syedrayyan.com') {
@@ -37,7 +31,6 @@ export function middleware(request) {
     // Token is invalid or expired
     return NextResponse.redirect(new URL("/admin/signin", request.url));
   }
-  */
 }
 
 export const config = {

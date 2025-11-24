@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   MessageSquare, 
   Search, 
@@ -19,8 +19,10 @@ import {
 } from 'lucide-react';
 
 export default function AdminLeads() {
+  const router = useRouter();
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,8 +31,34 @@ export default function AdminLeads() {
   const [editFormData, setEditFormData] = useState({});
 
   useEffect(() => {
-    fetchLeads();
-  }, [currentPage, filter]);
+    // Check if user is admin by verifying admin token
+    const checkAdminStatus = async () => {
+      try {
+        const response = await fetch('/api/auth/admin/me');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user && data.user.role === 'admin') {
+            setIsAdmin(true);
+          } else {
+            router.push('/admin/signin');
+          }
+        } else {
+          router.push('/admin/signin');
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        router.push('/admin/signin');
+      }
+    };
+
+    checkAdminStatus();
+  }, [router]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchLeads();
+    }
+  }, [isAdmin, currentPage, filter]);
 
   const fetchLeads = async () => {
     try {
@@ -138,6 +166,18 @@ export default function AdminLeads() {
       [field]: value
     }));
   };
+
+  // If not admin, don't render the leads list
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background-offwhite">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary-green border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 font-inter">Checking admin access...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background-offwhite">
@@ -248,16 +288,11 @@ export default function AdminLeads() {
                           </div>
                           <div>
                             <label className="block text-sm font-medium mb-1">Status</label>
-                            <Select value={editFormData.status || 'new'} onValueChange={(value) => handleEditChange('status', value)}>
-                              <SelectTrigger className="font-inter">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="new">New</SelectItem>
-                                <SelectItem value="replied">Replied</SelectItem>
-                                <SelectItem value="closed">Closed</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select value={editFormData.status || 'new'} onChange={(e) => handleEditChange('status', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md font-inter">
+                              <option value="new">New</option>
+                              <option value="replied">Replied</option>
+                              <option value="closed">Closed</option>
+                            </select>
                           </div>
                         </div>
                         <div>
