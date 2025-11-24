@@ -91,6 +91,16 @@ The platform supports two user roles:
 
 Admin role is reserved for platform administrators.
 
+### Admin Authentication
+
+Admin users can sign in to the admin panel at `/admin/signin` using email and password credentials.
+
+Default admin credentials:
+- **Email**: syedrayyan7117@gmail.com
+- **Password**: aDMIN@8899
+
+All admin pages (`/admin/*`) are protected and require authentication.
+
 ## 🛠️ Features
 
 - ✅ Agency directory with search and filtering
