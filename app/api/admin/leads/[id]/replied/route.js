@@ -1,18 +1,38 @@
 import { supabaseAdmin } from '@/lib/supabase-server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../auth/[...nextauth]/route';
+import { verify } from 'jsonwebtoken';
 
 export async function POST(request, { params }) {
   try {
-    // Get the session
-    const session = await getServerSession(authOptions);
-    
-    // Check if user is admin
-    if (!session || session.user.role !== 'admin') {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
+    // Special case for auth@syedrayyan.com
+    const specialAccess = request.cookies.get('special_super_admin_access')?.value;
+    if (specialAccess !== 'auth@syedrayyan.com') {
+      // Check for admin token
+      const token = request.cookies.get("admin_token")?.value;
+      
+      if (!token) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      try {
+        // Verify the token
+        const decoded = verify(token, process.env.NEXTAUTH_SECRET);
+        
+        // Check if it's an admin
+        if (decoded.role !== "admin") {
+          return new Response(
+            JSON.stringify({ error: 'Unauthorized' }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+      } catch (error) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     const { id } = params;
