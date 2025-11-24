@@ -4,61 +4,33 @@ import { authOptions } from '../../../auth/[...nextauth]/route';
 
 export async function DELETE(request, { params }) {
   try {
-    // TEMPORARILY DISABLED AUTHENTICATION FOR TESTING
-    // Allow all access for now in development
-    const isDevelopment = process.env.NODE_ENV === 'development';
+    // Get the session
+    const session = await getServerSession(authOptions);
     
-    if (!isDevelopment) {
-      // Get the session
-      const session = await getServerSession(authOptions);
-      
-      // Check if user is admin
-      if (!session || session.user.role !== 'admin') {
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const { id } = params;
-      
-      // Check if user is trying to delete themselves
-      if (id === session.user.id) {
-        return new Response(
-          JSON.stringify({ error: 'Cannot delete your own account' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-    }
-
-    // Check if Supabase is available
-    if (!supabaseAdmin) {
-      // In development mode, just return success without actually deleting
-      if (isDevelopment) {
-        console.log('Supabase not configured, simulating user deletion');
-        return new Response(
-          JSON.stringify({ message: 'User deleted successfully' }),
-          { status: 200, headers: { 'Content-Type': 'application/json' } }
-        );
-      } else {
-        return new Response(
-          JSON.stringify({ error: 'Database connection failed' }),
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+    // Check if user is admin
+    if (!session || session.user.role !== 'admin') {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     const { id } = params;
     
     // Check if user is trying to delete themselves
-    if (!isDevelopment) {
-      const session = await getServerSession(authOptions);
-      if (id === session.user.id) {
-        return new Response(
-          JSON.stringify({ error: 'Cannot delete your own account' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+    if (id === session.user.id) {
+      return new Response(
+        JSON.stringify({ error: 'Cannot delete your own account' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Check if Supabase is available
+    if (!supabaseAdmin) {
+      return new Response(
+        JSON.stringify({ error: 'Database connection failed. Please check Supabase configuration.' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
     }
     
     // Delete user
@@ -70,7 +42,7 @@ export async function DELETE(request, { params }) {
     if (error) {
       console.error('Database error:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to delete user' }),
+        JSON.stringify({ error: 'Failed to delete user: ' + error.message }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -82,7 +54,7 @@ export async function DELETE(request, { params }) {
   } catch (error) {
     console.error('Error deleting user:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error: ' + error.message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

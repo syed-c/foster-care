@@ -4,63 +4,23 @@ import { authOptions } from '../../auth/[...nextauth]/route';
 
 export async function GET(request) {
   try {
-    // TEMPORARILY DISABLED AUTHENTICATION FOR TESTING
-    // Allow all access for now in development
-    const isDevelopment = process.env.NODE_ENV === 'development';
+    // Get the session
+    const session = await getServerSession(authOptions);
     
-    if (!isDevelopment) {
-      // Get the session
-      const session = await getServerSession(authOptions);
-      
-      // Check if user is admin
-      if (!session || session.user.role !== 'admin') {
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+    // Check if user is admin
+    if (!session || session.user.role !== 'admin') {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     // Check if Supabase is available
     if (!supabaseAdmin) {
-      // Return mock data in development when Supabase is not configured
-      if (isDevelopment) {
-        console.log('Supabase not configured, returning mock data');
-        const mockLeads = [
-          {
-            id: '1',
-            name: 'John Doe',
-            email: 'john@example.com',
-            message: 'I am interested in fostering',
-            status: 'new',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: '2',
-            name: 'Jane Smith',
-            email: 'jane@example.com',
-            message: 'Looking for more information about fostering',
-            status: 'replied',
-            created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-            updated_at: new Date(Date.now() - 86400000).toISOString()
-          }
-        ];
-
-        return new Response(
-          JSON.stringify({ 
-            leads: mockLeads, 
-            totalPages: 1,
-            currentPage: 1
-          }),
-          { status: 200, headers: { 'Content-Type': 'application/json' } }
-        );
-      } else {
-        return new Response(
-          JSON.stringify({ error: 'Database connection failed' }),
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+      return new Response(
+        JSON.stringify({ error: 'Database connection failed. Please check Supabase configuration.' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     // Parse query parameters
@@ -100,7 +60,7 @@ export async function GET(request) {
     if (error) {
       console.error('Database error:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch leads' }),
+        JSON.stringify({ error: 'Failed to fetch leads: ' + error.message }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -118,7 +78,7 @@ export async function GET(request) {
   } catch (error) {
     console.error('Error fetching leads:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error: ' + error.message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

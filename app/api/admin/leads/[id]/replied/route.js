@@ -4,21 +4,15 @@ import { authOptions } from '../../../../auth/[...nextauth]/route';
 
 export async function POST(request, { params }) {
   try {
-    // TEMPORARILY DISABLED AUTHENTICATION FOR TESTING
-    // Allow all access for now in development
-    const isDevelopment = process.env.NODE_ENV === 'development';
+    // Get the session
+    const session = await getServerSession(authOptions);
     
-    if (!isDevelopment) {
-      // Get the session
-      const session = await getServerSession(authOptions);
-      
-      // Check if user is admin
-      if (!session || session.user.role !== 'admin') {
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+    // Check if user is admin
+    if (!session || session.user.role !== 'admin') {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     const { id } = params;
@@ -37,7 +31,7 @@ export async function POST(request, { params }) {
     if (error) {
       console.error('Database error:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to update lead status' }),
+        JSON.stringify({ error: 'Failed to update lead status: ' + error.message }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -56,7 +50,7 @@ export async function POST(request, { params }) {
   } catch (error) {
     console.error('Error updating lead status:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error: ' + error.message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
