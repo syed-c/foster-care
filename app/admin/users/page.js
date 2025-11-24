@@ -28,38 +28,6 @@ export default function AdminUsers() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      
-      // Mock data for testing
-      const mockUsers = [
-        {
-          id: 1,
-          name: "John Smith",
-          email: "john@example.com",
-          role: "user",
-          created_at: "2023-05-15T10:30:00Z"
-        },
-        {
-          id: 2,
-          name: "Admin User",
-          email: "admin@example.com",
-          role: "admin",
-          created_at: "2023-04-10T08:15:00Z"
-        },
-        {
-          id: 3,
-          name: "Jane Doe",
-          email: "jane@example.com",
-          role: "user",
-          created_at: "2023-06-20T14:45:00Z"
-        }
-      ];
-      
-      setUsers(mockUsers);
-      setTotalPages(1);
-      setLoading(false);
-      
-      // Original API call code commented out
-      /*
       const params = new URLSearchParams();
       params.append('page', currentPage);
       params.append('limit', 10);
@@ -78,7 +46,6 @@ export default function AdminUsers() {
         setUsers(data.users || []);
         setTotalPages(data.totalPages || 1);
       }
-      */
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -187,7 +154,7 @@ export default function AdminUsers() {
                       <div className="flex-1">
                         <div className="flex flex-col md:flex-row md:items-center gap-4">
                           <div>
-                            <h3 className="font-medium font-poppins">{user.name}</h3>
+                            <h3 className="font-medium font-poppins">{user.name || 'No name'}</h3>
                             <p className="text-sm text-gray-600 font-inter">{user.email}</p>
                           </div>
                           <div className="flex items-center gap-2">
@@ -198,7 +165,7 @@ export default function AdminUsers() {
                                 'bg-accent-peach'
                               }
                             >
-                              {user.role}
+                              {user.role || 'user'}
                             </Badge>
                             <Badge 
                               className={

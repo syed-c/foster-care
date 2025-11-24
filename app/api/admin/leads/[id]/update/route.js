@@ -2,7 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../auth/[...nextauth]/route';
 
-export async function POST(request, { params }) {
+export async function PUT(request, { params }) {
   try {
     // TEMPORARILY DISABLED AUTHENTICATION FOR TESTING
     // Allow all access for now in development
@@ -22,14 +22,18 @@ export async function POST(request, { params }) {
     }
 
     const { id } = params;
+    const body = await request.json();
     
-    // Update lead status to replied
+    // Remove fields that shouldn't be updated directly
+    const { id: _, created_at: __, ...updateData } = body;
+    
+    // Add updated_at timestamp
+    updateData.updated_at = new Date().toISOString();
+    
+    // Update lead
     const { data, error } = await supabaseAdmin
       .from('contact_inquiries')
-      .update({ 
-        status: 'replied',
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
@@ -37,7 +41,7 @@ export async function POST(request, { params }) {
     if (error) {
       console.error('Database error:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to update lead status' }),
+        JSON.stringify({ error: 'Failed to update lead' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -54,7 +58,7 @@ export async function POST(request, { params }) {
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error updating lead status:', error);
+    console.error('Error updating lead:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

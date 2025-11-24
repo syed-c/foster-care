@@ -63,6 +63,16 @@ app/
 2. Run the SQL schema from `supabase-schema.sql`
 3. Update environment variables with your Supabase credentials
 
+## 🔄 Database Updates
+
+When updating the database schema, run the migration script:
+
+```bash
+node scripts/update-contact-inquiries-schema.js
+```
+
+This will output the SQL needed to update your database schema for the contact inquiries table.
+
 ## 📚 CMS Integration
 
 This project uses Sanity CMS for content management:

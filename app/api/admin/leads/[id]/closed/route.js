@@ -1,18 +1,24 @@
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../auth/[...nextauth]/route';
 
 export async function POST(request, { params }) {
   try {
-    // Get the session
-    const session = await getServerSession(authOptions);
+    // TEMPORARILY DISABLED AUTHENTICATION FOR TESTING
+    // Allow all access for now in development
+    const isDevelopment = process.env.NODE_ENV === 'development';
     
-    // Check if user is admin
-    if (!session || session.user.role !== 'admin') {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
+    if (!isDevelopment) {
+      // Get the session
+      const session = await getServerSession(authOptions);
+      
+      // Check if user is admin
+      if (!session || session.user.role !== 'admin') {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     const { id } = params;

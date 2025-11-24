@@ -177,10 +177,12 @@ CREATE TABLE IF NOT EXISTS contact_inquiries (
   agency_id UUID REFERENCES agencies(id) ON DELETE SET NULL,
   name TEXT NOT NULL,
   email TEXT NOT NULL,
+  phone TEXT,
   message TEXT NOT NULL,
   type TEXT DEFAULT 'general' CHECK (type IN ('general', 'agency')),
   status TEXT DEFAULT 'new' CHECK (status IN ('new', 'replied', 'closed')),
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =====================================================
@@ -249,6 +251,9 @@ CREATE TRIGGER update_agency_locations_updated_at BEFORE UPDATE ON agency_locati
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_contact_inquiries_updated_at BEFORE UPDATE ON contact_inquiries
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- =====================================================
