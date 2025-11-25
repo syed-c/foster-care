@@ -4,115 +4,275 @@ import Link from 'next/link';
 import { getLocationContentByCanonicalSlug } from '@/services/locationService';
 import SectionRenderer from '@/components/sections/SectionRenderer';
 import TopAgenciesSection from '@/components/locations/TopAgenciesSection';
+import { Button } from '@/components/ui/button';
+import { MapPin, ChevronRight } from 'lucide-react';
 
 // Make sure pages run on dynamic rendering mode
 export const dynamic = "force-dynamic";
-export const revalidate = 60;
+export const revalidate = 0; // No caching for better debugging
 
 export async function generateStaticParams() {
-  const paths = await generateCityPaths();
-  return paths;
+  try {
+    const paths = await generateCityPaths();
+    console.log('Generated city paths:', paths.length);
+    return paths;
+  } catch (error) {
+    console.error('Error generating city paths:', error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }) {
-  const resolvedParams = await params;
-  const { country, region, city } = resolvedParams;
-  const canonicalSlug = `/foster-agency/${country}/${region}/${city}`;
+  try {
+    const resolvedParams = await params;
+    const { country, region, city } = resolvedParams;
+    const canonicalSlug = `/foster-agency/${country}/${region}/${city}`;
 
-  const content = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
-  const cityName = formatSlugToTitle(city);
-  const regionName = formatSlugToTitle(region);
-  const countryName = formatSlugToTitle(country);
+    const content = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
+    const cityName = formatSlugToTitle(city);
+    const regionName = formatSlugToTitle(region);
+    const countryName = formatSlugToTitle(country);
 
-  return {
-    title: content?.meta_title || `Foster Agencies in ${cityName}, ${regionName} | UK Directory`,
-    description:
-      content?.meta_description ||
-      `Find foster agencies in ${cityName}, ${regionName}. Browse trusted fostering services.`
-  };
+    return {
+      title: content?.meta_title || `Foster Agencies in ${cityName}, ${regionName} | UK Directory`,
+      description:
+        content?.meta_description ||
+        `Find foster agencies in ${cityName}, ${regionName}. Browse trusted fostering services.`
+    };
+  } catch (error) {
+    console.error('Error generating city metadata:', error);
+    const resolvedParams = await params;
+    const { country, region, city } = resolvedParams;
+    const cityName = formatSlugToTitle(city);
+    const regionName = formatSlugToTitle(region);
+    const countryName = formatSlugToTitle(country);
+    
+    return {
+      title: `Foster Agencies in ${cityName}, ${regionName} | UK Directory`,
+      description:
+        `Find foster agencies in ${cityName}, ${regionName}. Browse trusted fostering services.`
+    };
+  }
 }
 
 export default async function CityPage({ params }) {
-  const resolvedParams = await params;
-  const { country, region, city } = resolvedParams;
-  const canonicalSlug = `/foster-agency/${country}/${region}/${city}`;
+  console.log('CITY PAGE LOADED WITH PARAMS:', params);
   
-  const content = await getLocationContentByCanonicalSlug(canonicalSlug);
-
-  // CityPage should NEVER return early when content is empty
-  // Always render default layout + dynamic sections below
-
-  let sections = [];
-
-  // Safely process content sections with better error handling
   try {
-    if (content?.sections && Array.isArray(content.sections)) {
-      sections = content.sections.filter(section => section && typeof section === 'object');
-    } else if (content?.content_json?.sections && Array.isArray(content.content_json.sections)) {
-      sections = content.content_json.sections.filter(section => section && typeof section === 'object');
-    } else if (content?.content_json && typeof content.content_json === 'object') {
-      sections = Object.keys(content.content_json)
-        .filter(key => 
-          typeof content.content_json[key] === 'object' && 
-          content.content_json[key] !== null &&
-          key !== 'meta_title' && 
-          key !== 'meta_description' && 
-          key !== 'title'
-        )
-        .map(key => ({
-          type: key,
-          key,
-          data: content.content_json[key]
-        }))
-        .filter(section => section && typeof section === 'object');
-    } else if (typeof content === 'object') {
-      sections = Object.keys(content)
-        .filter(
-          key =>
-            typeof content[key] === 'object' &&
-            content[key] !== null &&
-            key !== 'meta_title' &&
-            key !== 'meta_description' &&
-            key !== 'title'
-        )
-        .map(key => ({
-          type: key,
-          key,
-          data: content[key]
-        }))
-        .filter(section => section && typeof section === 'object');
+    const resolvedParams = await params;
+    const { country, region, city } = resolvedParams;
+    const canonicalSlug = `/foster-agency/${country}/${region}/${city}`;
+    
+    // Validate parameters
+    if (!country || !region || !city) {
+      console.error('Missing country, region, or city parameter');
+      notFound();
     }
+    
+    const content = await getLocationContentByCanonicalSlug(canonicalSlug);
+
+    // CityPage should NEVER return early when content is empty
+    // Always render default layout + dynamic sections below
+
+    let sections = [];
+
+    // Safely process content sections with better error handling
+    try {
+      if (content?.sections && Array.isArray(content.sections)) {
+        sections = content.sections.filter(section => section && typeof section === 'object');
+      } else if (content?.content_json?.sections && Array.isArray(content.content_json.sections)) {
+        sections = content.content_json.sections.filter(section => section && typeof section === 'object');
+      } else if (content?.content_json && typeof content.content_json === 'object') {
+        sections = Object.keys(content.content_json)
+          .filter(key => 
+            typeof content.content_json[key] === 'object' && 
+            content.content_json[key] !== null &&
+            key !== 'meta_title' && 
+            key !== 'meta_description' && 
+            key !== 'title'
+          )
+          .map(key => ({
+            type: key,
+            key: key,
+            data: content.content_json[key]
+          }));
+      }
+    } catch (sectionError) {
+      console.error('Error processing sections:', sectionError);
+      sections = [];
+    }
+    
+    console.log('Sections extracted:', sections.length);
+
+    const cityName = formatSlugToTitle(city);
+    const regionName = formatSlugToTitle(region);
+    const countryName = formatSlugToTitle(country);
+
+    // If we have sections, render them
+    if (sections.length > 0) {
+      return (
+        <div className="min-h-screen bg-background-offwhite">
+          {/* Breadcrumb */}
+          <div className="bg-white/50 backdrop-blur-sm border-b border-gray-100 py-4">
+            <div className="container mx-auto px-4">
+              <nav className="flex items-center space-x-2 text-sm text-gray-600 font-inter">
+                <Link href="/" className="hover:text-primary-green transition-colors">Home</Link>
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+                <Link href="/foster-agency" className="hover:text-primary-green transition-colors">Foster Agencies</Link>
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+                <Link href={`/foster-agency/${country}`} className="hover:text-primary-green transition-colors">{countryName}</Link>
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+                <Link href={`/foster-agency/${country}/${region}`} className="hover:text-primary-green transition-colors">{regionName}</Link>
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+                <span className="text-text-charcoal font-medium">{cityName}</span>
+              </nav>
+            </div>
+          </div>
+          
+          {/* Render dynamic sections */}
+          <div className="container mx-auto px-4 py-8">
+            {sections.map((section) => (
+              <SectionRenderer 
+                key={section.id || section.key || section.type || Math.random()} 
+                section={section} 
+              />
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
+    // Default rendering when no dynamic sections
+    console.log('Rendering default city page');
+    
+    return (
+      <div className="min-h-screen bg-background-offwhite">
+        {/* Breadcrumb */}
+        <div className="bg-white/50 backdrop-blur-sm border-b border-gray-100 py-4">
+          <div className="container mx-auto px-4">
+            <nav className="flex items-center space-x-2 text-sm text-gray-600 font-inter">
+              <Link href="/" className="hover:text-primary-green transition-colors">Home</Link>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <Link href="/foster-agency" className="hover:text-primary-green transition-colors">Foster Agencies</Link>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <Link href={`/foster-agency/${country}`} className="hover:text-primary-green transition-colors">{countryName}</Link>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <Link href={`/foster-agency/${country}/${region}`} className="hover:text-primary-green transition-colors">{regionName}</Link>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <span className="text-text-charcoal font-medium">{cityName}</span>
+            </nav>
+          </div>
+        </div>
+
+        {/* Hero Section */}
+        <section className="py-16 md:py-24 relative overflow-hidden section-hero">
+          <div className="absolute inset-0 gradient-mesh opacity-50" />
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-10 left-10 w-72 h-72 bg-primary-green/15 rounded-full blur-3xl float-animation" />
+            <div className="absolute bottom-10 right-10 w-80 h-80 bg-secondary-blue/15 rounded-full blur-3xl float-animation" style={{ animationDelay: "2s" }} />
+          </div>
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+                <MapPin className="w-4 h-4 text-primary-green" />
+                <span className="text-sm font-medium text-text-charcoal font-inter">{cityName}, {regionName}</span>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-text-charcoal mb-6 font-poppins">
+                {content?.title || `Foster Agencies in ${cityName}`}
+              </h1>
+              <p className="text-xl text-gray-600 mb-8 font-inter max-w-3xl mx-auto">
+                {content?.meta_description || `Find accredited foster agencies in ${cityName}, ${regionName}. Connect with caring services in your local community.`}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic"
+                  asChild
+                >
+                  <Link href="/contact">Get Support</Link>
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="glass font-inter px-8 py-6 text-lg"
+                  asChild
+                >
+                  <Link href="#agencies">View Agencies</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Content Sections */}
+        <section className="py-16 section-alt">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="prose max-w-none text-gray-600 font-inter">
+                {content?.overview ? (
+                  <div dangerouslySetInnerHTML={{ __html: content.overview }} />
+                ) : (
+                  <div className="space-y-4">
+                    <p>
+                      Welcome to our directory of foster agencies in {cityName}, {regionName}. We've compiled a list of 
+                      accredited and trusted agencies to help you start your fostering journey in this area.
+                    </p>
+                    <p>
+                      {cityName} offers unique fostering opportunities with a strong emphasis on community-based care. 
+                      Our local agencies provide personalized support and ongoing guidance to both foster carers and children.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
   } catch (error) {
-    console.error('Error processing content sections:', error);
-    // Return notFound if we can't process sections properly
-    return notFound();
+    console.error('Error in CityPage:', error);
+    // Return a simple error page instead of crashing
+    const resolvedParams = await params;
+    const { country, region, city } = resolvedParams;
+    const cityName = formatSlugToTitle(city) || 'Unknown City';
+    const regionName = formatSlugToTitle(region) || 'Unknown Region';
+    const countryName = formatSlugToTitle(country) || 'Unknown Country';
+    
+    return (
+      <div className="min-h-screen bg-background-offwhite flex items-center justify-center">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-lg p-8 glass">
+              <div className="text-red-500 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-text-charcoal mb-4">Something went wrong</h1>
+              <p className="text-gray-600 mb-6">
+                We're sorry, but we encountered an error while loading the page for {cityName}, {regionName}, {countryName}. 
+                This issue has been logged and we're working to fix it.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-6 py-3 font-semibold rounded-xl"
+                  asChild
+                >
+                  <Link href="/">Go Home</Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="glass px-6 py-3"
+                  asChild
+                >
+                  <Link href="/foster-agency">View All Countries</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
-
-  // Filter out any invalid sections
-  sections = sections.filter(section => 
-    section && 
-    typeof section === 'object' && 
-    (section.type || section.key)
-  );
-
-  // CityPage should NEVER return early when sections are empty
-  // Always render default layout + dynamic sections below
-
-  return (
-    <div className="min-h-screen bg-background-offwhite">
-      {sections.map((section, i) => (
-        <SectionRenderer
-          key={section.id || section.key || section.type || i}
-          section={section}
-        />
-      ))}
-      
-      {/* Top Agencies Section */}
-      <TopAgenciesSection 
-        locationType="city"
-        locationName={city}
-        agencies={[]}
-      />
-    </div>
-  );
 }
