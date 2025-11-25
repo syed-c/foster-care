@@ -243,44 +243,18 @@ export default async function RegionPage({ params }) {
     );
   } catch (error) {
     console.error('Error in RegionPage:', error);
-    // Return a simple error page instead of crashing
-    const resolvedParams = await params;
-    const { country, region } = resolvedParams;
-    const countryName = formatSlugToTitle(country) || 'Unknown Country';
-    const regionName = formatSlugToTitle(region) || 'Unknown Region';
-    
+    // Return a user-friendly error message
     return (
-      <div className="min-h-screen bg-background-offwhite flex items-center justify-center">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-lg p-8 glass">
-              <div className="text-red-500 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <h1 className="text-2xl font-bold text-text-charcoal mb-4">Something went wrong</h1>
-              <p className="text-gray-600 mb-6">
-                We're sorry, but we encountered an error while loading the page for {regionName}, {countryName}. 
-                This issue has been logged and we're working to fix it.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-6 py-3 font-semibold rounded-xl"
-                  asChild
-                >
-                  <Link href="/">Go Home</Link>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="glass px-6 py-3"
-                  asChild
-                >
-                  <Link href="/foster-agency">View All Countries</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
+      <div className="min-h-screen bg-background-offwhite flex items-center justify-center p-4">
+        <div className="max-w-md text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h1>
+          <p className="text-gray-600 mb-6">
+            We're sorry, but we encountered an error while loading the region page. 
+            This issue has been logged and we're working to fix it.
+          </p>
+          <Button asChild>
+            <Link href="/foster-agency">Back to Agencies</Link>
+          </Button>
         </div>
       </div>
     );

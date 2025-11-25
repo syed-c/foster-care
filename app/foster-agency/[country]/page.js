@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, ArrowRight, ChevronRight, Heart, Users, BookOpen, Award, Shield, Search, Star, ExternalLink } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { 
   Pagination,
   PaginationContent,
@@ -136,6 +135,20 @@ export default async function CountryPage({ params, searchParams }) {
     
     // Always render default layout + dynamic sections below, even if content is empty
     console.log('Rendering default layout with dynamic sections');
+    
+    // Initialize regionsToShow properly
+    let regionsToShow;
+    if (regions.length === 0) {
+      const regionsData = await loadRegionsForCountry(country);
+      if (regionsData.length === 0) {
+        notFound();
+      }
+      // Use regionsData if available
+      regionsToShow = regionsData.map(r => ({ slug: r.slug, name: r.name }));
+    } else {
+      // Use regions from structure
+      regionsToShow = regions;
+    }
     
     // Handle pagination for regions
     const page = parseInt(searchParams?.page) || 1;
@@ -340,19 +353,6 @@ export default async function CountryPage({ params, searchParams }) {
       }
     };
 
-    if (regions.length === 0) {
-      // Fallback to individual loading if structure is empty
-      const regionsData = await loadRegionsForCountry(country);
-      if (regionsData.length === 0) {
-        notFound();
-      }
-      // Use regionsData if available
-      regionsToShow = regionsData.map(r => ({ slug: r.slug, name: r.name }));
-    } else {
-      // Use regions from structure
-      regionsToShow = regions;
-    }
-
     // FAQs for each country
     const faqs = rawContent?.faqs?.items || rawContent?.faqs || [
       {
@@ -543,13 +543,6 @@ export default async function CountryPage({ params, searchParams }) {
                           <li>Have good physical and mental health</li>
                           <li>Provide references</li>
                         </ul>
-                        
-                        <h3 className="text-xl font-bold text-text-charcoal mt-6">Government Initiatives</h3>
-                        <p>
-                          The government in {countryName} has implemented several initiatives to support foster care, 
-                          including increased funding for allowances, specialized training programs, and support services 
-                          for both carers and children.
-                        </p>
                       </div>
                     )}
                   </div>
@@ -559,104 +552,69 @@ export default async function CountryPage({ params, searchParams }) {
           </section>
         )}
 
-        {/* Foster Agency Finder by Region */}
-        {rawContent?.agencyFinder && (
-          <section id="regions" className="py-16 md:py-24 relative overflow-hidden section-highlight">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
-              <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
-            </div>
-
-            <div className="container mx-auto px-4 relative z-10">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                  <MapPin className="w-4 h-4 text-primary-green" />
-                  <span className="text-sm font-medium text-text-charcoal font-inter">Agency Finder</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                  {rawContent.agencyFinder?.title || `Foster Agency Finder by Region`}
-                </h2>
-                <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                  {rawContent.agencyFinder?.intro || `Discover the best foster agencies across ${countryName} by region`}
-                </p>
+        {/* Regions Grid */}
+        <section id="regions" className="py-16 md:py-24 relative overflow-hidden section-muted">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-1/4 left-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
+            <div className="absolute bottom-1/4 right-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
+          </div>
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-4xl mx-auto text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+                <MapPin className="w-4 h-4 text-primary-green" />
+                <span className="text-sm font-medium text-text-charcoal font-inter">Regions</span>
               </div>
-
-              {/* Country Stats */}
-              <Card className="section-card rounded-modern-xl p-6 mb-12 max-w-4xl mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="w-16 h-16 rounded-full bg-primary-green/10 flex items-center justify-center mx-auto mb-3">
-                      <Users className="w-8 h-8 text-primary-green" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-text-charcoal">{currentCountryData.population}</h3>
-                    <p className="text-gray-600">Population</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="w-16 h-16 rounded-full bg-primary-green/10 flex items-center justify-center mx-auto mb-3">
-                      <Heart className="w-8 h-8 text-primary-green" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-text-charcoal">{currentCountryData.agencies}</h3>
-                    <p className="text-gray-600">Foster Agencies</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="w-16 h-16 rounded-full bg-primary-green/10 flex items-center justify-center mx-auto mb-3">
-                      <Award className="w-8 h-8 text-primary-green" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-text-charcoal">{currentCountryData.demand}</h3>
-                    <p className="text-gray-600">Foster Demand</p>
-                  </div>
-                </div>
-              </Card>
-
-              {/* All Regions with Pagination */}
-              <div className="max-w-6xl mx-auto">
-                <h3 className="text-2xl font-bold text-text-charcoal mb-6 font-poppins text-center">
-                  All Regions in {countryName}
-                </h3>
-                
-                {/* Regions Grid - First Page */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {regionsToShow.slice(0, regionsPerPage).map((region) => (
-                    <Link key={region.slug} href={`/foster-agency/${country}/${region.slug}`}>
-                      <Card className="section-card rounded-modern-xl hover-lift transition-all cursor-pointer group">
-                        <CardHeader>
-                          <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <MapPin className="w-7 h-7 text-primary-green" />
-                          </div>
-                          <CardTitle className="text-lg font-poppins group-hover:text-primary-green transition-colors">
-                            {region.name}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <CardDescription className="font-inter mb-4">
-                            View cities in this region
-                          </CardDescription>
-                          <div className="flex items-center text-primary-green font-medium group-hover:translate-x-1 transition-transform">
-                            Explore cities <ArrowRight className="ml-2 w-4 h-4" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
-                
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-center mt-8">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious href="#" className="glass" />
-                        </PaginationItem>
-                        {[...Array(totalPages)].map((_, i) => (
-                          <PaginationItem key={i}>
-                            <PaginationLink 
-                              href="#" 
-                              isActive={i === 0}
-                              className={i === 0 ? "glass bg-primary-green text-white" : "glass"}
-                            >
-                              {i + 1}
-                            </PaginationLink>
+              <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+                {rawContent?.agencyFinder?.title || `Foster Agency Finder by Region`}
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+                {rawContent?.agencyFinder?.intro || `Discover the best foster agencies across ${countryName} by region. Our comprehensive directory helps you find the perfect match for your fostering journey.`}
+              </p>
+            </div>
+            
+            <div className="max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {regionsToShow.slice(0, regionsPerPage).map((region) => (
+                  <Card key={region.slug} className="section-card rounded-modern-xl hover-lift transition-all">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-poppins flex items-center">
+                        <MapPin className="w-5 h-5 text-primary-green mr-2" />
+                        {region.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter"
+                        asChild
+                      >
+                        <Link href={`/foster-agency/${country}/${region.slug}`}>
+                          View Agencies <ArrowRight className="ml-2 w-4 h-4" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-8">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious href="#" className="glass" />
+                      </PaginationItem>
+                      {[...Array(totalPages)].map((_, i) => (
+                        <PaginationItem key={i}>
+                          <PaginationLink 
+                            href="#" 
+                            isActive={i === 0}
+                            className={i === 0 ? "glass bg-primary-green text-white" : "glass"}
+                          >
+                            {i + 1}
+                          </PaginationLink>
                         </PaginationItem>
                       ))}
                       <PaginationItem>
@@ -669,530 +627,352 @@ export default async function CountryPage({ params, searchParams }) {
             </div>
           </div>
         </section>
-      )}
 
-      {/* Featured Popular Locations */}
-      {rawContent?.popularLocations && (
-        <section className="py-16 section-contrast">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                  <MapPin className="w-4 h-4 text-primary-green" />
-                  <span className="text-sm font-medium text-text-charcoal font-inter">Popular Locations</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                  {rawContent.popularLocations?.title || `Featured Popular Locations in ${countryName}`}
-                </h2>
-                <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                  {rawContent.popularLocations?.description || `Discover top cities and towns in ${countryName} with high demand for foster carers`}
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                {(rawContent.popularLocations?.locations || currentPopularRegions).map((region, index) => (
-                  <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all">
-                    <div className="flex justify-between items-start">
-                      <h4 className="text-lg font-bold text-text-charcoal font-poppins">
-                        {region.name}
-                      </h4>
-                      {region.demand && (
-                        <span className="bg-primary-green/10 text-primary-green text-xs px-2 py-1 rounded-full">
-                          {region.demand}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex justify-between mt-4">
-                      <span className="text-gray-600 text-sm">
-                        {region.agencies ? `Agencies: ${region.agencies}` : ''}
-                      </span>
-                      <Link 
-                        href={region.link || `/foster-agency/${country}/${region.name.toLowerCase().replace(/\s+/g, '-')}`}
-                        className="text-primary-green text-sm font-medium hover:underline"
-                      >
-                        View Agencies
-                      </Link>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Top Agencies in Country */}
-      {rawContent?.topAgencies && (
-        <section id="agencies" className="py-16 md:py-24 relative overflow-hidden section-muted">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
-            <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
-          </div>
-
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                <Heart className="w-4 h-4 text-primary-green" />
-                <span className="text-sm font-medium text-text-charcoal font-inter">Top Agencies</span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                {rawContent.topAgencies?.title || `Top Foster Agencies in ${countryName}`}
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                {rawContent.topAgencies?.description || `Connect with trusted fostering services across ${countryName}`}
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {(rawContent.topAgencies?.items || featuredAgencies).map((agency) => (
-                <Card key={agency.id} className="section-card rounded-modern-xl hover-lift transition-all">
-                  <CardHeader>
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center">
-                        <Heart className="w-8 h-8 text-primary-green" />
-                      </div>
-                      {agency.featured && (
-                        <Badge className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal border-0 font-inter">
-                          Featured
-                        </Badge>
-                      )}
-                    </div>
-                    <CardTitle className="text-xl font-poppins">
-                      {agency.name}
-                    </CardTitle>
-                    <CardDescription className="flex items-center gap-1 mt-2 font-inter">
-                      <MapPin className="w-4 h-4" />
-                      {agency.location?.country || agency.location}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 mb-4 font-inter">
-                      {agency.description || agency.summary}
-                    </p>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: 5 }, (_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < Math.floor(agency.rating || 4.5)
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                        <span className="text-sm text-gray-600 ml-2 font-inter">
-                          {agency.rating} ({agency.reviewCount} reviews)
-                        </span>
-                      </div>
-                      <Badge variant="outline" className="font-inter">
-                        {agency.type}
-                      </Badge>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {agency.phone && (
-                        <a 
-                          href={`tel:${agency.phone}`} 
-                          className="text-primary-green text-sm font-medium hover:underline flex items-center"
-                        >
-                          <span className="mr-1">📞</span> Call
-                        </a>
-                      )}
-                      {agency.email && (
-                        <a 
-                          href={`mailto:${agency.email}`} 
-                          className="text-primary-green text-sm font-medium hover:underline flex items-center"
-                        >
-                          <span className="mr-1">✉️</span> Email
-                        </a>
-                      )}
-                      {agency.website && (
-                        <a 
-                          href={agency.website} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-primary-green text-sm font-medium hover:underline flex items-center"
-                        >
-                          <ExternalLink className="w-3 h-3 mr-1" /> Website
-                        </a>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter"
-                      asChild
-                    >
-                      <Link href={`/agency/${agency.id}`}>
-                        View Agency Profile <ArrowRight className="ml-2 w-4 h-4" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* What is the Foster Care System Like */}
-      {rawContent?.fosterSystem && (
-        <section className="py-16 section-alt">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                  <Shield className="w-4 h-4 text-primary-green" />
-                  <span className="text-sm font-medium text-text-charcoal font-inter">Foster Care System</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                  {rawContent.fosterSystem?.title || `What is the Foster Care System Like in ${countryName}?`}
-                </h2>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {rawContent.fosterSystem?.sections?.map((section, index) => (
-                  <Card key={index} className="section-card rounded-modern-xl p-6">
-                    <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
-                      {index === 0 ? <Heart className="w-5 h-5 text-primary-green mr-2" /> : 
-                       index === 1 ? <BookOpen className="w-5 h-5 text-primary-green mr-2" /> : 
-                       <Award className="w-5 h-5 text-primary-green mr-2" />}
-                      {section.title}
-                    </h3>
-                    <ul className="space-y-3">
-                      {Array.isArray(section.items) && section.items.map((item, itemIndex) => (
-                        <li key={itemIndex} className="flex items-start">
-                          <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                            <span className="text-primary-green text-xs">✓</span>
-                          </div>
-                          <span>{item.title || item.description || item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Why Choose to Foster in Country */}
-      {rawContent?.whyFoster && (
-        <section className="py-16 md:py-24 section-highlight">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                <Heart className="w-4 h-4 text-primary-green" />
-                <span className="text-sm font-medium text-text-charcoal font-inter">Why Foster</span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                {rawContent.whyFoster?.title || `Why Choose to Foster in ${countryName}?`}
-              </h2>
-              <p className="text-gray-600 mb-12 font-inter">
-                {rawContent.whyFoster?.description || `Make a meaningful difference in the lives of children in your community`}
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {(rawContent.whyFoster?.points || [
-                  { text: "Help Children Locally", description: "Provide stable, loving homes for children in your own community who need care and support." },
-                  { text: "Professional Support", description: "Access comprehensive training, 24/7 support, and ongoing guidance from experienced professionals." },
-                  { text: "Make a Lasting Impact", description: "Contribute to positive outcomes for vulnerable children and strengthen your local community." }
-                ]).map((point, index) => (
-                  <div key={index} className="text-center">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mx-auto mb-4">
-                      {index === 0 && <Users className="w-8 h-8 text-primary-green" />}
-                      {index === 1 && <Shield className="w-8 h-8 text-primary-green" />}
-                      {index === 2 && <Heart className="w-8 h-8 text-primary-green" />}
-                    </div>
-                    <h3 className="text-xl font-bold text-text-charcoal mb-3 font-poppins">
-                      {point.text}
-                    </h3>
-                    <p className="text-gray-600 font-inter">
-                      {point.description}
-                    </p>
+        {/* Featured Popular Locations */}
+        {rawContent?.popularLocations && (
+          <section className="py-16 section-contrast">
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-12">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+                    <MapPin className="w-4 h-4 text-primary-green" />
+                    <span className="text-sm font-medium text-text-charcoal font-inter">Popular Locations</span>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* FAQs */}
-      {rawContent?.faqs && (
-        <section className="py-16 md:py-24 section-contrast">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                  <BookOpen className="w-4 h-4 text-primary-green" />
-                  <span className="text-sm font-medium text-text-charcoal font-inter">FAQs</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                  {rawContent.faqs?.title || `FAQs About Fostering in ${countryName}`}
-                </h2>
-                <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                  {rawContent.faqs?.description || `Common questions about becoming a foster carer in ${countryName}`}
-                </p>
-              </div>
-              
-              <Accordion type="single" collapsible className="space-y-4">
-                {(rawContent.faqs?.items || faqs).map((faq, index) => (
-                  <AccordionItem key={index} value={`item-${index}`} className="section-card rounded-modern-xl px-6">
-                    <AccordionTrigger className="text-left text-text-charcoal font-poppins hover:no-underline py-4">
-                      {faq.question}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-gray-600 font-inter pb-4">
-                      {faq.answer}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Regulated & Trusted by UK Authorities */}
-      {rawContent?.regulated && (
-        <section className="py-12 bg-gradient-to-r from-primary-green/10 to-secondary-blue/10">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-                <div className="text-center md:text-left">
-                  <h3 className="text-xl font-bold text-text-charcoal mb-2 font-poppins">Regulated by {rawContent.regulated?.regulator || currentCountryData.regulator}</h3>
-                  <p className="text-text-charcoal/90 text-sm font-inter">
-                    {rawContent.regulated?.description || "All agencies meet strict regulatory standards"}
+                  <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+                    {rawContent.popularLocations?.title || `Featured Popular Locations in ${countryName}`}
+                  </h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+                    {rawContent.popularLocations?.description || `Discover top cities and towns in ${countryName} with high demand for foster carers`}
                   </p>
                 </div>
-                <div className="flex justify-center space-x-8">
-                  <div className="text-center">
-                    <Shield className="w-10 h-10 text-text-charcoal mx-auto mb-2" />
-                    <span className="text-text-charcoal text-sm font-inter">Safeguarding</span>
-                  </div>
-                  <div className="text-center">
-                    <Award className="w-10 h-10 text-text-charcoal mx-auto mb-2" />
-                    <span className="text-text-charcoal text-sm font-inter">Accredited</span>
-                  </div>
-                </div>
-                <div className="text-center md:text-right">
-                  <Link 
-                    href={`https://www.gov.uk/fostering-${country}`}
-                    className="text-text-charcoal font-medium hover:underline font-inter"
-                  >
-                    Official Government Guidance
-                  </Link>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                  {(rawContent.popularLocations?.locations || currentPopularRegions).map((region, index) => (
+                    <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all">
+                      <div className="flex justify-between items-start">
+                        <h4 className="text-lg font-bold text-text-charcoal font-poppins">
+                          {region.name}
+                        </h4>
+                        {region.demand && (
+                          <span className="bg-primary-green/10 text-primary-green text-xs px-2 py-1 rounded-full">
+                            {region.demand}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex justify-between mt-4">
+                        <span className="text-gray-600 text-sm">
+                          {region.agencies ? `Agencies: ${region.agencies}` : ''}
+                        </span>
+                        <Link 
+                          href={region.link || `/foster-agency/${country}/${region.name.toLowerCase().replace(/\s+/g, '-')}`}
+                          className="text-primary-green text-sm font-medium hover:underline"
+                        >
+                          View Agencies
+                        </Link>
+                      </div>
+                    </Card>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
 
-      {/* Find Agencies Near You */}
-      {rawContent?.findAgencies && (
-        <section className="py-16 section-muted">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                <MapPin className="w-4 h-4 text-primary-green" />
-                <span className="text-sm font-medium text-text-charcoal font-inter">Find Agencies</span>
+        {/* Top Agencies in Country */}
+        {rawContent?.topAgencies && (
+          <section id="agencies" className="py-16 md:py-24 relative overflow-hidden section-muted">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
+              <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
+            </div>
+
+            <div className="container mx-auto px-4 relative z-10">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+                  <Heart className="w-4 h-4 text-primary-green" />
+                  <span className="text-sm font-medium text-text-charcoal font-inter">Top Agencies</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+                  {rawContent.topAgencies?.title || `Top Foster Agencies in ${countryName}`}
+                </h2>
+                <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+                  {rawContent.topAgencies?.description || `Connect with trusted fostering services across ${countryName}`}
+                </p>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                {rawContent.findAgencies?.title || "Find Agencies Near You"}
-              </h2>
-              <p className="text-gray-600 mb-12 font-inter">
-                {rawContent.findAgencies?.description || `Connect with local fostering services in ${countryName}`}
-              </p>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                {(rawContent.topAgencies?.items || featuredAgencies).map((agency) => (
+                  <Card key={agency.id} className="section-card rounded-modern-xl hover-lift transition-all">
+                    <CardHeader>
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center">
+                          <Heart className="w-8 h-8 text-primary-green" />
+                        </div>
+                        {agency.featured && (
+                          <Badge className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal border-0 font-inter">
+                            Featured
+                          </Badge>
+                        )}
+                      </div>
+                      <CardTitle className="text-xl font-poppins">
+                        {agency.name}
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-1 mt-2 font-inter">
+                        <MapPin className="w-4 h-4" />
+                        {agency.location?.country || agency.location}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 font-inter">
+                        {agency.description || agency.summary}
+                      </p>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: 5 }, (_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-4 h-4 ${
+                                i < Math.floor(agency.rating || 4.5)
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                          <span className="text-sm text-gray-600 ml-2 font-inter">
+                            {agency.rating} ({agency.reviewCount} reviews)
+                          </span>
+                        </div>
+                        <Badge variant="outline" className="font-inter">
+                          {agency.type}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {agency.phone && (
+                          <a 
+                            href={`tel:${agency.phone}`} 
+                            className="text-primary-green text-sm font-medium hover:underline flex items-center"
+                          >
+                            <span className="mr-1">📞</span> Call
+                          </a>
+                        )}
+                        {agency.email && (
+                          <a 
+                            href={`mailto:${agency.email}`} 
+                            className="text-primary-green text-sm font-medium hover:underline flex items-center"
+                          >
+                            <span className="mr-1">✉️</span> Email
+                          </a>
+                        )}
+                        {agency.website && (
+                          <a 
+                            href={agency.website} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-primary-green text-sm font-medium hover:underline flex items-center"
+                          >
+                            <ExternalLink className="w-3 h-3 mr-1" /> Website
+                          </a>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter"
+                        asChild
+                      >
+                        <Link href={`/agency/${agency.id}`}>
+                          View Agency Profile <ArrowRight className="ml-2 w-4 h-4" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* What is the Foster Care System Like */}
+        {rawContent?.fosterSystem && (
+          <section className="py-16 section-alt">
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-12">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+                    <Shield className="w-4 h-4 text-primary-green" />
+                    <span className="text-sm font-medium text-text-charcoal font-inter">Foster Care System</span>
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+                    {rawContent.fosterSystem?.title || `What is the Foster Care System Like in ${countryName}?`}
+                  </h2>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {rawContent.fosterSystem?.sections?.map((section, index) => (
+                    <Card key={index} className="section-card rounded-modern-xl p-6">
+                      <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
+                        {index === 0 ? <Heart className="w-5 h-5 text-primary-green mr-2" /> : 
+                         index === 1 ? <BookOpen className="w-5 h-5 text-primary-green mr-2" /> : 
+                         <Award className="w-5 h-5 text-primary-green mr-2" />}
+                        {section.title}
+                      </h3>
+                      <ul className="space-y-3">
+                        {Array.isArray(section.items) && section.items.map((item, itemIndex) => (
+                          <li key={itemIndex} className="flex items-start">
+                            <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                              <div className="w-1.5 h-1.5 rounded-full bg-primary-green" />
+                            </div>
+                            <span className="text-gray-600 font-inter">{item.title || item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Why Foster in Country */}
+        {rawContent?.whyFoster && (
+          <section className="py-16 md:py-24 relative overflow-hidden section-contrast">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
+              <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
+            </div>
+            
+            <div className="container mx-auto px-4 relative z-10">
+              <div className="max-w-4xl mx-auto text-center mb-12">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+                  <Users className="w-4 h-4 text-primary-green" />
+                  <span className="text-sm font-medium text-text-charcoal font-inter">Why Foster</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+                  {rawContent.whyFoster?.title || `Why Choose to Foster in ${countryName}?`}
+                </h2>
+                <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+                  {rawContent.whyFoster?.description || `Make a meaningful difference in the lives of children in your community`}
+                </p>
+              </div>
               
-              {/* Search Bar */}
-              <div className="max-w-2xl mx-auto">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder={`Search for agencies in ${countryName}...`}
-                    className="w-full pl-12 pr-4 py-4 rounded-xl glass text-text-charcoal placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-green"
-                  />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                {(rawContent.whyFoster?.points || displayContent.whyFoster.points).map((point, index) => (
+                  <Card key={index} className="section-card rounded-modern-xl p-6 text-center hover-lift transition-all">
+                    <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center mx-auto mb-4">
+                      {index === 0 ? <Heart className="w-8 h-8 text-primary-green" /> : 
+                       index === 1 ? <Users className="w-8 h-8 text-primary-green" /> : 
+                       <Award className="w-8 h-8 text-primary-green" />}
+                    </div>
+                    <CardTitle className="text-xl font-poppins mb-2">
+                      {point.text}
+                    </CardTitle>
+                    <CardDescription className="text-gray-600 font-inter">
+                      {point.description}
+                    </CardDescription>
+                  </Card>
+                ))}
               </div>
             </div>
-          </div>
-        </section>
-      )}
-      
-      {/* All Regions Grid Section */}
-      <section className="py-16 md:py-24 relative overflow-hidden section-highlight">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
-          <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
-        </div>
+          </section>
+        )}
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-              <MapPin className="w-4 h-4 text-primary-green" />
-              <span className="text-sm font-medium text-text-charcoal font-inter">All Regions</span>
+        {/* FAQs */}
+        {rawContent?.faqs && (
+          <section className="py-16 section-alt">
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-12">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+                    <BookOpen className="w-4 h-4 text-primary-green" />
+                    <span className="text-sm font-medium text-text-charcoal font-inter">FAQs</span>
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+                    {rawContent.faqs?.title || `FAQs About Fostering in ${countryName}`}
+                  </h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+                    {rawContent.faqs?.description || `Common questions about becoming a foster carer in ${countryName}`}
+                  </p>
+                </div>
+                
+                <Accordion type="single" collapsible className="space-y-4 max-w-3xl mx-auto">
+                  {(rawContent.faqs?.items || faqs).map((faq, index) => (
+                    <AccordionItem key={index} value={`item-${index}`} className="section-card rounded-modern-xl px-6">
+                      <AccordionTrigger className="text-left text-lg font-poppins text-text-charcoal hover:no-underline py-4">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-600 pb-4 font-inter">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-              All Regions in {countryName}
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-              Explore all regions and discover fostering opportunities across the country
-            </p>
-          </div>
+          </section>
+        )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {paginatedRegions.map((regionItem) => (
-              <Link key={regionItem.slug} href={`/foster-agency/${country}/${regionItem.slug}`}>
-                <Card className="section-card rounded-modern-xl hover-lift transition-all cursor-pointer group">
-                  <CardHeader>
-                    <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                      <MapPin className="w-7 h-7 text-primary-green" />
-                    </div>
-                    <CardTitle className="text-lg font-poppins group-hover:text-primary-green transition-colors">
-                      {regionItem.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="font-inter mb-4">
-                      View cities in this region
-                    </CardDescription>
-                    <div className="flex items-center text-primary-green font-medium group-hover:translate-x-1 transition-transform">
-                      Explore cities <ArrowRight className="ml-2 w-4 h-4" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+        {/* Regulated by Section */}
+        {rawContent?.regulated && (
+          <section className="py-16 bg-gradient-to-r from-primary-green/5 to-secondary-blue/5">
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+                  <Shield className="w-4 h-4 text-primary-green" />
+                  <span className="text-sm font-medium text-text-charcoal font-inter">Regulated</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+                  Regulated by {rawContent.regulated?.regulator || currentCountryData.regulator}
+                </h2>
+                <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+                  {rawContent.regulated?.description || "All agencies meet strict regulatory standards"}
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* CTA Section */}
+        <section className="py-16 md:py-24 relative overflow-hidden section-hero">
+          <div className="absolute inset-0 gradient-mesh opacity-50" />
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-10 left-10 w-72 h-72 bg-primary-green/15 rounded-full blur-3xl float-animation" />
+            <div className="absolute bottom-10 right-10 w-80 h-80 bg-secondary-blue/15 rounded-full blur-3xl float-animation" style={{ animationDelay: "2s" }} />
           </div>
           
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center mt-12">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious 
-                      href={`?page=${page > 1 ? page - 1 : 1}`} 
-                      aria-disabled={page <= 1}
-                      tabIndex={page <= 1 ? -1 : undefined}
-                      className={page <= 1 ? "pointer-events-none opacity-50 glass" : "glass"}
-                    />
-                  </PaginationItem>
-                  
-                  {/* First page */}
-                  <PaginationItem>
-                    <PaginationLink 
-                      href="?page=1" 
-                      isActive={page === 1}
-                      className={page === 1 ? "glass bg-primary-green text-white" : "glass"}
-                    >
-                      1
-                    </PaginationLink>
-                  </PaginationItem>
-                  
-                  {/* Ellipsis if needed */}
-                  {page > 3 && (
-                    <PaginationItem>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  )}
-                  
-                  {/* Pages around current page */}
-                  {Array.from({ length: Math.min(3, totalPages - 2) }, (_, i) => {
-                    const pageNum = Math.max(2, Math.min(page - 1, totalPages - 2)) + i;
-                    if (pageNum > 1 && pageNum < totalPages) {
-                      return (
-                        <PaginationItem key={pageNum}>
-                          <PaginationLink 
-                            href={`?page=${pageNum}`}
-                            isActive={page === pageNum}
-                            className={page === pageNum ? "glass bg-primary-green text-white" : "glass"}
-                          >
-                            {pageNum}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    }
-                    return null;
-                  })}
-                  
-                  {/* Ellipsis if needed */}
-                  {page < totalPages - 2 && (
-                    <PaginationItem>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  )}
-                  
-                  {/* Last page */}
-                  {totalPages > 1 && (
-                    <PaginationItem>
-                      <PaginationLink 
-                        href={`?page=${totalPages}`}
-                        isActive={page === totalPages}
-                        className={page === totalPages ? "glass bg-primary-green text-white" : "glass"}
-                      >
-                        {totalPages}
-                      </PaginationLink>
-                    </PaginationItem>
-                  )}
-                  
-                  <PaginationItem>
-                    <PaginationNext 
-                      href={`?page=${page < totalPages ? page + 1 : totalPages}`}
-                     aria-disabled={page >= totalPages}
-                      tabIndex={page >= totalPages ? -1 : undefined}
-                      className={page >= totalPages ? "pointer-events-none opacity-50 glass" : "glass"}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
-        </div>
-      </section>
-    </div>
-  );
-  } catch (error) {
-    console.error('Error in CountryPage:', error);
-    // Return a simple error page instead of crashing
-    const resolvedParams = await params;
-    const country = resolvedParams.country;
-    const countryName = formatSlugToTitle(country) || 'Unknown Country';
-    
-    return (
-      <div className="min-h-screen bg-background-offwhite flex items-center justify-center">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-lg p-8 glass">
-              <div className="text-red-500 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <h1 className="text-2xl font-bold text-text-charcoal mb-4">Something went wrong</h1>
-              <p className="text-gray-600 mb-6">
-                We're sorry, but we encountered an error while loading the page for {countryName}. 
-                This issue has been logged and we're working to fix it.
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-6 font-poppins">
+                {rawContent?.findAgencies?.title || "Find Agencies Near You"}
+              </h2>
+              <p className="text-xl text-gray-600 mb-8 font-inter max-w-2xl mx-auto">
+                {rawContent?.findAgencies?.description || `Connect with local fostering services in ${countryName}`}
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-6 py-3 font-semibold rounded-xl"
-                  asChild
-                >
-                  <Link href="/">Go Home</Link>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="glass px-6 py-3"
-                  asChild
-                >
-                  <Link href="/foster-agency">View All Countries</Link>
-                </Button>
-              </div>
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic"
+                asChild
+              >
+                <Link href="/contact">Get Started Today</Link>
+              </Button>
             </div>
           </div>
+        </section>
+      </div>
+    );
+  } catch (error) {
+    console.error('Error in CountryPage:', error);
+    // Return a user-friendly error message
+    return (
+      <div className="min-h-screen bg-background-offwhite flex items-center justify-center p-4">
+        <div className="max-w-md text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h1>
+          <p className="text-gray-600 mb-6">
+            We're sorry, but we encountered an error while loading the page for {formatSlugToTitle(resolvedParams?.country || 'this location')}. 
+            This issue has been logged and we're working to fix it.
+          </p>
+          <Button asChild>
+            <Link href="/foster-agency">Back to Agencies</Link>
+          </Button>
         </div>
       </div>
     );
