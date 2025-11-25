@@ -6,9 +6,6 @@ import {
 } from '@/services/locationService';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import RegionSectionRenderer from '@/components/sections/RegionSectionRenderer';
-import CitiesGridSection from '@/components/locations/CitiesGridSection';
-import TopAgenciesSection from '@/components/locations/TopAgenciesSection';
 import { Button } from '@/components/ui/button';
 import { MapPin, ChevronRight } from 'lucide-react';
 
@@ -82,68 +79,8 @@ export default async function RegionPage({ params }) {
       content = {};
     }
     
-    // RegionPage should NEVER return early when content is empty
-    // Always render default layout + dynamic sections below
-    
-    // Extract sections from content - handle both flat content and sections array
-    let sections = [];
-
-    // Check if content has a sections array directly
-    if (content?.sections && Array.isArray(content.sections)) {
-      sections = content.sections;
-    } 
-    // Check if content has content_json with a sections array
-    else if (content?.content_json?.sections && Array.isArray(content.content_json.sections)) {
-      sections = content.content_json.sections;
-    }
-    // Handle flat content structure
-    else if (content && typeof content === 'object' && Object.keys(content).length > 0) {
-      // Convert flat content to sections array
-      sections = Object.keys(content)
-        .filter(key => typeof content[key] === 'object' && content[key] !== null && key !== 'meta_title' && key !== 'meta_description')
-        .map(key => ({
-          type: key,
-          key: key,
-          data: content[key]
-        }));
-    }
-    
-    console.log('Sections extracted:', sections.length);
-    
     const countryName = formatSlugToTitle(country);
     const regionName = formatSlugToTitle(region);
-    
-    // If we have sections, render them
-    if (sections.length > 0) {
-      return (
-        <div className="min-h-screen bg-background-offwhite">
-          {/* Breadcrumb */}
-          <div className="bg-white/50 backdrop-blur-sm border-b border-gray-100 py-4">
-            <div className="container mx-auto px-4">
-              <nav className="flex items-center space-x-2 text-sm text-gray-600 font-inter">
-                <Link href="/" className="hover:text-primary-green transition-colors">Home</Link>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-                <Link href="/foster-agency" className="hover:text-primary-green transition-colors">Foster Agencies</Link>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-                <Link href={`/foster-agency/${country}`} className="hover:text-primary-green transition-colors">{countryName}</Link>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-                <span className="text-text-charcoal font-medium">{regionName}</span>
-              </nav>
-            </div>
-          </div>
-          
-          {/* Render dynamic sections */}
-          <div className="container mx-auto px-4 py-8">
-            {sections.map((section) => (
-              <RegionSectionRenderer 
-                key={section.key || section.type || Math.random()} 
-                section={section} 
-              />
-            ))}
-          </div>
-        </div>
-      );
-    }
     
     // Default rendering when no dynamic sections
     console.log('Rendering default region page');
@@ -203,7 +140,7 @@ export default async function RegionPage({ params }) {
                 {content?.title || `Foster Agencies in ${regionName}`}
               </h1>
               <p className="text-xl text-gray-600 mb-8 font-inter max-w-3xl mx-auto">
-                {content?.meta_description || `Find accredited foster agencies in ${regionName}, ${countryName}. Connect with caring services in your local community.`}
+                {content?.meta_description || `Find accredited foster agencies in ${regionName}, ${countryName}. Browse trusted fostering services.`}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
@@ -225,20 +162,6 @@ export default async function RegionPage({ params }) {
             </div>
           </div>
         </section>
-
-        {/* Cities Grid Section */}
-        <CitiesGridSection 
-          country={country} 
-          region={region} 
-          cities={cities} 
-        />
-
-        {/* Top Agencies Section */}
-        <TopAgenciesSection 
-          locationType="region"
-          locationName={region}
-          agencies={agencies}
-        />
       </div>
     );
   } catch (error) {

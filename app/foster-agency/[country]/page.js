@@ -1,23 +1,19 @@
-import { generateCountryPaths, loadRegionsForCountry, formatSlugToTitle, buildLocationStructure, getRegionsForCountry, loadAllLocations } from '@/lib/locationData';
-import { getLocationContentByCanonicalSlug, getAgenciesByCountry } from '@/services/locationService';
+import { generateCountryPaths, loadRegionsForCountry, formatSlugToTitle, loadAllLocations } from '@/lib/locationData';
+import { getLocationContentByCanonicalSlug } from '@/services/locationService';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, ArrowRight, ChevronRight, Heart, Users, BookOpen, Award, Shield, Search, Star, ExternalLink } from 'lucide-react';
 import { 
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
-import SectionRenderer from '@/components/sections/SectionRenderer';
-import { normalizeLocation } from '@/lib/normalizeLocation';
-import TopAgenciesSection from '@/components/locations/TopAgenciesSection';
 
 // Make sure pages run on dynamic rendering mode
 export const dynamic = "force-dynamic";
@@ -75,15 +71,27 @@ export default async function CountryPage({ params, searchParams }) {
     }
     
     // Use the optimized data loading function
-    const structure = await loadAllLocations();
-    console.log('Location structure loaded');
+    let structure = {};
+    try {
+      structure = await loadAllLocations();
+      console.log('Location structure loaded');
+    } catch (structureError) {
+      console.error('Error loading location structure:', structureError);
+      structure = {};
+    }
     
     // Get regions for this country from the structure
-    const regions = structure[country] ? Object.entries(structure[country].regions).map(([slug, region]) => ({
-      slug,
-      name: region.name
-    })) : [];
-    console.log('Regions found:', regions.length);
+    let regions = [];
+    try {
+      regions = structure[country] ? Object.entries(structure[country].regions).map(([slug, region]) => ({
+        slug,
+        name: region.name
+      })) : [];
+      console.log('Regions found:', regions.length);
+    } catch (regionsError) {
+      console.error('Error processing regions:', regionsError);
+      regions = [];
+    }
     
     const countryName = formatSlugToTitle(country);
     const canonicalSlug = `/foster-agency/${country}`;
@@ -99,56 +107,27 @@ export default async function CountryPage({ params, searchParams }) {
       rawContent = {};
     }
     
-    // Normalize the content
-    const normalizedContent = normalizeLocation(rawContent);
-    console.log('Normalized content sections:', normalizedContent.sections?.length || 0);
-    
-    // Check if we have any content
-    const hasContent = rawContent && Object.keys(rawContent).length > 0;
-    console.log('Has content:', hasContent);
-    
-    // If we have normalized sections, use them; otherwise, fall back to the existing displayContent
-    if (normalizedContent.sections && normalizedContent.sections.length > 0) {
-      console.log('Rendering dynamic sections');
-      return (
-        <div className="min-h-screen bg-background-offwhite">
-          {/* Breadcrumb */}
-          <div className="bg-white/50 backdrop-blur-sm border-b border-gray-100 py-4">
-            <div className="container mx-auto px-4">
-              <nav className="flex items-center space-x-2 text-sm text-gray-600 font-inter">
-                <Link href="/" className="hover:text-primary-green transition-colors">Home</Link>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-                <Link href="/foster-agency" className="hover:text-primary-green transition-colors">Foster Agencies</Link>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-                <span className="text-text-charcoal font-medium">{countryName}</span>
-              </nav>
-            </div>
-          </div>
-
-          {/* Render dynamic sections */}
-          {normalizedContent.sections.map((section) => (
-            <SectionRenderer key={section.id || section.key || section.type || Math.random()} section={section} />
-          ))}
-        </div>
-      );
-    }
-    
-    // Always render default layout + dynamic sections below, even if content is empty
-    console.log('Rendering default layout with dynamic sections');
-    
     // Initialize regionsToShow properly
-    let regionsToShow;
-    if (regions.length === 0) {
-      const regionsData = await loadRegionsForCountry(country);
-      if (regionsData.length === 0) {
-        notFound();
+    let regionsToShow = [];
+    try {
+      if (regions.length === 0) {
+        const regionsData = await loadRegionsForCountry(country);
+        if (regionsData.length === 0) {
+          notFound();
+        }
+        // Use regionsData if available
+        regionsToShow = regionsData.map(r => ({ slug: r.slug, name: r.name }));
+      } else {
+        // Use regions from structure
+        regionsToShow = regions;
       }
-      // Use regionsData if available
-      regionsToShow = regionsData.map(r => ({ slug: r.slug, name: r.name }));
-    } else {
-      // Use regions from structure
-      regionsToShow = regions;
+    } catch (regionsLoadError) {
+      console.error('Error loading regions:', regionsLoadError);
+      regionsToShow = [];
     }
+    
+    // Pagination logic for regions
+    const regionsPerPage = 6;
     
     // Handle pagination for regions
     const page = parseInt(searchParams?.page) || 1;
@@ -156,6 +135,7 @@ export default async function CountryPage({ params, searchParams }) {
     const startIndex = (page - 1) * regionsPerPage;
     const endIndex = startIndex + regionsPerPage;
     const paginatedRegions = regionsToShow.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(regionsToShow.length / regionsPerPage);
     
     // Get country-specific data
     const countryData = {
@@ -218,207 +198,6 @@ export default async function CountryPage({ params, searchParams }) {
     };
 
     const currentPopularRegions = popularRegions[country] || popularRegions.england;
-
-    // Ensure we have all required sections with proper structure
-    const displayContent = {
-      // Hero section
-      hero: {
-        heading: rawContent?.hero?.heading || `Foster Agencies in ${countryName}`,
-        subheading: rawContent?.hero?.subheading || `Find accredited foster agencies in ${countryName}`,
-        cta_primary: {
-          text: rawContent?.hero?.cta_primary?.text || "Get Foster Agency Support",
-          link: rawContent?.hero?.cta_primary?.link || "/contact"
-        },
-        cta_secondary: {
-          text: rawContent?.hero?.cta_secondary?.text || "Explore Regions",
-          link: rawContent?.hero?.cta_secondary?.link || "#regions"
-        }
-      },
-      
-      // Overview section
-      overview: {
-        title: rawContent?.overview?.title || `About Fostering in ${countryName}`,
-        body: rawContent?.overview?.body || `<p>Welcome to our directory of foster agencies in ${countryName}. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.</p>`
-      },
-      
-      // Agency Finder section
-      agencyFinder: rawContent?.agencyFinder || {
-        title: `Foster Agency Finder by Region`,
-        intro: `Discover the best foster agencies across ${countryName} by region. Our comprehensive directory helps you find the perfect match for your fostering journey.`,
-        ctaText: "Find Agencies by Region"
-      },
-      
-      // Popular Locations section
-      popularLocations: rawContent?.popularLocations || {
-        title: `Featured Popular Locations in ${countryName}`,
-        description: `Discover top cities and towns in ${countryName} with high demand for foster carers`,
-        locations: [
-          { name: "London", link: "#", demand: "High", agencies: "200+" },
-          { name: "Manchester", link: "#", demand: "High", agencies: "75+" },
-          { name: "Birmingham", link: "#", demand: "High", agencies: "65+" }
-        ]
-      },
-      
-      // Top Agencies section
-      topAgencies: rawContent?.topAgencies || {
-        title: `Top Foster Agencies in ${countryName}`,
-        description: `Connect with trusted fostering services across ${countryName}`,
-        items: [
-          {
-            name: `${countryName} Family Care`,
-            summary: `Dedicated fostering service providing compassionate care for children in ${countryName}.`,
-            link: "#",
-            featured: true,
-            type: "National",
-            rating: 4.8,
-            reviewCount: 42,
-            phone: "+44 123 456 7890",
-            email: `info@${countryName.toLowerCase().replace(/\s+/g, '')}familycare.co.uk`,
-            website: `https://${countryName.toLowerCase().replace(/\s+/g, '')}familycare.co.uk`
-          }
-        ]
-      },
-      
-      // Foster System section
-      fosterSystem: rawContent?.fosterSystem || {
-        title: `What is the Foster Care System Like in ${countryName}?`,
-        sections: [
-          {
-            title: "Allowances & Support",
-            items: [
-              { title: "Weekly fostering allowances to cover child care costs" },
-              { title: "24/7 support helpline for emergency assistance" },
-              { title: "Regular supervision and mentoring" },
-              { title: "Access to training and professional development" }
-            ]
-          },
-          {
-            title: "Matching Process",
-            items: [
-              { title: "Initial enquiry and information session" },
-              { title: "Formal application and documentation" },
-              { title: "Home study and assessment" },
-              { title: "Approval panel review" }
-            ]
-          }
-        ]
-      },
-      
-      // Why Foster section
-      whyFoster: rawContent?.whyFoster || {
-        title: `Why Choose to Foster in ${countryName}?`,
-        description: `Make a meaningful difference in the lives of children in your community`,
-        points: [
-          { 
-            text: "Help Children Locally", 
-            description: "Provide stable, loving homes for children in your own community who need care and support." 
-          },
-          { 
-            text: "Professional Support", 
-            description: "Access comprehensive training, 24/7 support, and ongoing guidance from experienced professionals." 
-          },
-          { 
-            text: "Make a Lasting Impact", 
-            description: "Contribute to positive outcomes for vulnerable children and strengthen your local community." 
-          }
-        ]
-      },
-      
-      // FAQs section
-      faqs: rawContent?.faqs || {
-        title: `FAQs About Fostering in ${countryName}`,
-        description: `Common questions about becoming a foster carer in ${countryName}`,
-        items: [
-          {
-            question: `Do you get paid to foster in ${countryName}?`,
-            answer: `Yes, foster carers in ${countryName} receive a fostering allowance to cover the costs of caring for a child. The amount varies depending on the agency and the child's needs, typically ranging from £400-£600 per week per child.`
-          },
-          {
-            question: `Who can foster in ${countryName}?`,
-            answer: `To foster in ${countryName}, you must be over 21, have a spare room, pass background checks, and complete training. You can be single, married, in a relationship, working, or retired. ${currentCountryData.regulator} sets the standards for approval.`
-          }
-        ]
-      },
-      
-      // Regulated section
-      regulated: rawContent?.regulated || {
-        regulator: currentCountryData.regulator,
-        description: "All agencies meet strict regulatory standards"
-      },
-      
-      // Find Agencies section
-      findAgencies: rawContent?.findAgencies || {
-        title: "Find Agencies Near You",
-        description: `Connect with local fostering services in ${countryName}`
-      }
-    };
-
-    // FAQs for each country
-    const faqs = rawContent?.faqs?.items || rawContent?.faqs || [
-      {
-        question: "Do you get paid to foster in " + countryName + "?",
-        answer: "Yes, foster carers in " + countryName + " receive a fostering allowance to cover the costs of caring for a child. The amount varies depending on the agency and the child's needs, typically ranging from £400-£600 per week per child."
-      },
-      {
-        question: "Who can foster in " + countryName + "?",
-        answer: "To foster in " + countryName + ", you must be over 21, have a spare room, pass background checks, and complete training. You can be single, married, in a relationship, working, or retired. " + currentCountryData.regulator + " sets the standards for approval."
-      },
-      {
-        question: "How long is the fostering approval process in " + countryName + "?",
-        answer: "The fostering approval process in " + countryName + " typically takes 4-6 months. This includes initial enquiry, application, assessments, training, and panel review by " + currentCountryData.regulator + "."
-      },
-      {
-        question: "What support is available for foster carers in " + countryName + "?",
-        answer: "Foster carers in " + countryName + " receive ongoing support including 24/7 helplines, regular supervision, training opportunities, and access to support groups. Agencies also provide financial allowances and respite care."
-      }
-    ];
-
-    // Pagination logic for regions
-    const regionsPerPage = 6;
-    const totalPages = Math.ceil(regionsToShow.length / regionsPerPage);
-
-    // Mock agencies data - in a real app, this would come from an API
-    const featuredAgencies = [
-      {
-        id: 1,
-        name: `${countryName} Family Care`,
-        location: { country: countryName },
-        description: `Dedicated fostering service providing compassionate care for children in ${countryName}.`,
-        rating: 4.8,
-        reviewCount: 42,
-        type: "National",
-        featured: true,
-        phone: "+44 123 456 7890",
-        email: `info@${countryName.toLowerCase().replace(/\s+/g, '')}familycare.co.uk`,
-        website: `https://${countryName.toLowerCase().replace(/\s+/g, '')}familycare.co.uk`
-      },
-      {
-        id: 2,
-        name: `Bright Futures ${countryName}`,
-        location: { country: countryName },
-        description: `Specialist in caring for teenagers and sibling groups across ${countryName}.`,
-        rating: 4.6,
-        reviewCount: 38,
-        type: "Private",
-        featured: false,
-        phone: "+44 123 456 7891",
-        email: `contact@brightfutures${countryName.toLowerCase().replace(/\s+/g, '')}.co.uk`,
-        website: `https://brightfutures${countryName.toLowerCase().replace(/\s+/g, '')}.co.uk`
-      },
-      {
-        id: 3,
-        name: `${countryName} Community Fostering`,
-        location: { country: countryName },
-        description: `Community-focused fostering service with personalized support for carers and children across ${countryName}.`,
-        rating: 4.9,
-        reviewCount: 27,
-        type: "Independent",
-        featured: true,
-        phone: "+44 123 456 7892",
-        email: `hello@${countryName.toLowerCase().replace(/\s+/g, '')}communityfostering.org`,
-        website: `https://${countryName.toLowerCase().replace(/\s+/g, '')}communityfostering.org`
-      }
-    ];
 
     return (
       <div className="min-h-screen bg-background-offwhite">
@@ -488,70 +267,6 @@ export default async function CountryPage({ params, searchParams }) {
           </div>
         </section>
 
-        {/* Overview of Fostering in Country */}
-        {rawContent?.overview && (
-          <section className="py-16 section-alt">
-            <div className="container mx-auto px-4">
-              <div className="max-w-4xl mx-auto">
-                <div className="text-center mb-12">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                    <BookOpen className="w-4 h-4 text-primary-green" />
-                    <span className="text-sm font-medium text-text-charcoal font-inter">About Fostering</span>
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                    {rawContent.overview?.title || `About Fostering in ${countryName}`}
-                  </h2>
-                </div>
-                
-                <Card className="section-card rounded-modern-xl p-6 md:p-8">
-                  <div className="prose max-w-none text-gray-600 font-inter">
-                    {rawContent.overview?.body ? (
-                      <div dangerouslySetInnerHTML={{ __html: rawContent.overview.body }} />
-                    ) : (
-                      <div className="space-y-4">
-                        <p>
-                          {currentCountryData.description} With a population of {currentCountryData.population}, 
-                          there is a significant need for dedicated foster carers across the region.
-                        </p>
-                        
-                        <h3 className="text-xl font-bold text-text-charcoal mt-6">Regulation and Oversight</h3>
-                        <p>
-                          Fostering in {countryName} is regulated by {currentCountryData.regulator}, which ensures 
-                          all foster agencies meet strict standards for safety, quality, and care. {currentCountryData.regulator} 
-                          conducts regular inspections and provides guidance to maintain the highest standards.
-                        </p>
-                        
-                        <h3 className="text-xl font-bold text-text-charcoal mt-6">Types of Fostering Available</h3>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Short-term emergency care</li>
-                          <li>Long-term placements</li>
-                          <li>Respite care for families</li>
-                          <li>Parent and baby placements</li>
-                          <li>Teenage-focused fostering</li>
-                          <li>Specialist care for children with additional needs</li>
-                        </ul>
-                        
-                        <h3 className="text-xl font-bold text-text-charcoal mt-6">Requirements to Foster</h3>
-                        <p>
-                          To become a foster carer in {countryName}, you must:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Be over 21 years old</li>
-                          <li>Have a spare bedroom</li>
-                          <li>Pass background checks (DBS)</li>
-                          <li>Complete comprehensive training</li>
-                          <li>Have good physical and mental health</li>
-                          <li>Provide references</li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              </div>
-            </div>
-          </section>
-        )}
-
         {/* Regions Grid */}
         <section id="regions" className="py-16 md:py-24 relative overflow-hidden section-muted">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -566,10 +281,10 @@ export default async function CountryPage({ params, searchParams }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">Regions</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                {rawContent?.agencyFinder?.title || `Foster Agency Finder by Region`}
+                {`Foster Agency Finder by Region`}
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                {rawContent?.agencyFinder?.intro || `Discover the best foster agencies across ${countryName} by region. Our comprehensive directory helps you find the perfect match for your fostering journey.`}
+                {`Discover the best foster agencies across ${countryName} by region. Our comprehensive directory helps you find the perfect match for your fostering journey.`}
               </p>
             </div>
             
@@ -624,336 +339,6 @@ export default async function CountryPage({ params, searchParams }) {
                   </Pagination>
                 </div>
               )}
-            </div>
-          </div>
-        </section>
-
-        {/* Featured Popular Locations */}
-        {rawContent?.popularLocations && (
-          <section className="py-16 section-contrast">
-            <div className="container mx-auto px-4">
-              <div className="max-w-4xl mx-auto">
-                <div className="text-center mb-12">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                    <MapPin className="w-4 h-4 text-primary-green" />
-                    <span className="text-sm font-medium text-text-charcoal font-inter">Popular Locations</span>
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                    {rawContent.popularLocations?.title || `Featured Popular Locations in ${countryName}`}
-                  </h2>
-                  <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                    {rawContent.popularLocations?.description || `Discover top cities and towns in ${countryName} with high demand for foster carers`}
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                  {(rawContent.popularLocations?.locations || currentPopularRegions).map((region, index) => (
-                    <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all">
-                      <div className="flex justify-between items-start">
-                        <h4 className="text-lg font-bold text-text-charcoal font-poppins">
-                          {region.name}
-                        </h4>
-                        {region.demand && (
-                          <span className="bg-primary-green/10 text-primary-green text-xs px-2 py-1 rounded-full">
-                            {region.demand}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex justify-between mt-4">
-                        <span className="text-gray-600 text-sm">
-                          {region.agencies ? `Agencies: ${region.agencies}` : ''}
-                        </span>
-                        <Link 
-                          href={region.link || `/foster-agency/${country}/${region.name.toLowerCase().replace(/\s+/g, '-')}`}
-                          className="text-primary-green text-sm font-medium hover:underline"
-                        >
-                          View Agencies
-                        </Link>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Top Agencies in Country */}
-        {rawContent?.topAgencies && (
-          <section id="agencies" className="py-16 md:py-24 relative overflow-hidden section-muted">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
-              <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
-            </div>
-
-            <div className="container mx-auto px-4 relative z-10">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                  <Heart className="w-4 h-4 text-primary-green" />
-                  <span className="text-sm font-medium text-text-charcoal font-inter">Top Agencies</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                  {rawContent.topAgencies?.title || `Top Foster Agencies in ${countryName}`}
-                </h2>
-                <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                  {rawContent.topAgencies?.description || `Connect with trusted fostering services across ${countryName}`}
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                {(rawContent.topAgencies?.items || featuredAgencies).map((agency) => (
-                  <Card key={agency.id} className="section-card rounded-modern-xl hover-lift transition-all">
-                    <CardHeader>
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center">
-                          <Heart className="w-8 h-8 text-primary-green" />
-                        </div>
-                        {agency.featured && (
-                          <Badge className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal border-0 font-inter">
-                            Featured
-                          </Badge>
-                        )}
-                      </div>
-                      <CardTitle className="text-xl font-poppins">
-                        {agency.name}
-                      </CardTitle>
-                      <CardDescription className="flex items-center gap-1 mt-2 font-inter">
-                        <MapPin className="w-4 h-4" />
-                        {agency.location?.country || agency.location}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-600 mb-4 font-inter">
-                        {agency.description || agency.summary}
-                      </p>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-1">
-                          {Array.from({ length: 5 }, (_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-4 h-4 ${
-                                i < Math.floor(agency.rating || 4.5)
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : "text-gray-300"
-                              }`}
-                            />
-                          ))}
-                          <span className="text-sm text-gray-600 ml-2 font-inter">
-                            {agency.rating} ({agency.reviewCount} reviews)
-                          </span>
-                        </div>
-                        <Badge variant="outline" className="font-inter">
-                          {agency.type}
-                        </Badge>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {agency.phone && (
-                          <a 
-                            href={`tel:${agency.phone}`} 
-                            className="text-primary-green text-sm font-medium hover:underline flex items-center"
-                          >
-                            <span className="mr-1">📞</span> Call
-                          </a>
-                        )}
-                        {agency.email && (
-                          <a 
-                            href={`mailto:${agency.email}`} 
-                            className="text-primary-green text-sm font-medium hover:underline flex items-center"
-                          >
-                            <span className="mr-1">✉️</span> Email
-                          </a>
-                        )}
-                        {agency.website && (
-                          <a 
-                            href={agency.website} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-primary-green text-sm font-medium hover:underline flex items-center"
-                          >
-                            <ExternalLink className="w-3 h-3 mr-1" /> Website
-                          </a>
-                        )}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter"
-                        asChild
-                      >
-                        <Link href={`/agency/${agency.id}`}>
-                          View Agency Profile <ArrowRight className="ml-2 w-4 h-4" />
-                        </Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* What is the Foster Care System Like */}
-        {rawContent?.fosterSystem && (
-          <section className="py-16 section-alt">
-            <div className="container mx-auto px-4">
-              <div className="max-w-4xl mx-auto">
-                <div className="text-center mb-12">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                    <Shield className="w-4 h-4 text-primary-green" />
-                    <span className="text-sm font-medium text-text-charcoal font-inter">Foster Care System</span>
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                    {rawContent.fosterSystem?.title || `What is the Foster Care System Like in ${countryName}?`}
-                  </h2>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {rawContent.fosterSystem?.sections?.map((section, index) => (
-                    <Card key={index} className="section-card rounded-modern-xl p-6">
-                      <h3 className="text-xl font-bold text-text-charcoal mb-4 font-poppins flex items-center">
-                        {index === 0 ? <Heart className="w-5 h-5 text-primary-green mr-2" /> : 
-                         index === 1 ? <BookOpen className="w-5 h-5 text-primary-green mr-2" /> : 
-                         <Award className="w-5 h-5 text-primary-green mr-2" />}
-                        {section.title}
-                      </h3>
-                      <ul className="space-y-3">
-                        {Array.isArray(section.items) && section.items.map((item, itemIndex) => (
-                          <li key={itemIndex} className="flex items-start">
-                            <div className="w-6 h-6 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                              <div className="w-1.5 h-1.5 rounded-full bg-primary-green" />
-                            </div>
-                            <span className="text-gray-600 font-inter">{item.title || item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Why Foster in Country */}
-        {rawContent?.whyFoster && (
-          <section className="py-16 md:py-24 relative overflow-hidden section-contrast">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-1/4 right-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
-              <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
-            </div>
-            
-            <div className="container mx-auto px-4 relative z-10">
-              <div className="max-w-4xl mx-auto text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                  <Users className="w-4 h-4 text-primary-green" />
-                  <span className="text-sm font-medium text-text-charcoal font-inter">Why Foster</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                  {rawContent.whyFoster?.title || `Why Choose to Foster in ${countryName}?`}
-                </h2>
-                <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                  {rawContent.whyFoster?.description || `Make a meaningful difference in the lives of children in your community`}
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                {(rawContent.whyFoster?.points || displayContent.whyFoster.points).map((point, index) => (
-                  <Card key={index} className="section-card rounded-modern-xl p-6 text-center hover-lift transition-all">
-                    <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center mx-auto mb-4">
-                      {index === 0 ? <Heart className="w-8 h-8 text-primary-green" /> : 
-                       index === 1 ? <Users className="w-8 h-8 text-primary-green" /> : 
-                       <Award className="w-8 h-8 text-primary-green" />}
-                    </div>
-                    <CardTitle className="text-xl font-poppins mb-2">
-                      {point.text}
-                    </CardTitle>
-                    <CardDescription className="text-gray-600 font-inter">
-                      {point.description}
-                    </CardDescription>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* FAQs */}
-        {rawContent?.faqs && (
-          <section className="py-16 section-alt">
-            <div className="container mx-auto px-4">
-              <div className="max-w-4xl mx-auto">
-                <div className="text-center mb-12">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                    <BookOpen className="w-4 h-4 text-primary-green" />
-                    <span className="text-sm font-medium text-text-charcoal font-inter">FAQs</span>
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                    {rawContent.faqs?.title || `FAQs About Fostering in ${countryName}`}
-                  </h2>
-                  <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                    {rawContent.faqs?.description || `Common questions about becoming a foster carer in ${countryName}`}
-                  </p>
-                </div>
-                
-                <Accordion type="single" collapsible className="space-y-4 max-w-3xl mx-auto">
-                  {(rawContent.faqs?.items || faqs).map((faq, index) => (
-                    <AccordionItem key={index} value={`item-${index}`} className="section-card rounded-modern-xl px-6">
-                      <AccordionTrigger className="text-left text-lg font-poppins text-text-charcoal hover:no-underline py-4">
-                        {faq.question}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-gray-600 pb-4 font-inter">
-                        {faq.answer}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Regulated by Section */}
-        {rawContent?.regulated && (
-          <section className="py-16 bg-gradient-to-r from-primary-green/5 to-secondary-blue/5">
-            <div className="container mx-auto px-4">
-              <div className="max-w-4xl mx-auto text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                  <Shield className="w-4 h-4 text-primary-green" />
-                  <span className="text-sm font-medium text-text-charcoal font-inter">Regulated</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                  Regulated by {rawContent.regulated?.regulator || currentCountryData.regulator}
-                </h2>
-                <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                  {rawContent.regulated?.description || "All agencies meet strict regulatory standards"}
-                </p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* CTA Section */}
-        <section className="py-16 md:py-24 relative overflow-hidden section-hero">
-          <div className="absolute inset-0 gradient-mesh opacity-50" />
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-10 left-10 w-72 h-72 bg-primary-green/15 rounded-full blur-3xl float-animation" />
-            <div className="absolute bottom-10 right-10 w-80 h-80 bg-secondary-blue/15 rounded-full blur-3xl float-animation" style={{ animationDelay: "2s" }} />
-          </div>
-          
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-6 font-poppins">
-                {rawContent?.findAgencies?.title || "Find Agencies Near You"}
-              </h2>
-              <p className="text-xl text-gray-600 mb-8 font-inter max-w-2xl mx-auto">
-                {rawContent?.findAgencies?.description || `Connect with local fostering services in ${countryName}`}
-              </p>
-              <Button 
-                size="lg" 
-                className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic"
-                asChild
-              >
-                <Link href="/contact">Get Started Today</Link>
-              </Button>
             </div>
           </div>
         </section>

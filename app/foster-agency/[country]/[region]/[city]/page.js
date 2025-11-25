@@ -1,9 +1,7 @@
-import { generateCityPaths, formatSlugToTitle, loadAllLocations } from '@/lib/locationData';
+import { generateCityPaths, formatSlugToTitle } from '@/lib/locationData';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getLocationContentByCanonicalSlug } from '@/services/locationService';
-import SectionRenderer from '@/components/sections/SectionRenderer';
-import TopAgenciesSection from '@/components/locations/TopAgenciesSection';
 import { Button } from '@/components/ui/button';
 import { MapPin, ChevronRight } from 'lucide-react';
 
@@ -71,77 +69,10 @@ export default async function CityPage({ params }) {
     
     const content = await getLocationContentByCanonicalSlug(canonicalSlug);
 
-    // CityPage should NEVER return early when content is empty
-    // Always render default layout + dynamic sections below
-
-    let sections = [];
-
-    // Safely process content sections with better error handling
-    try {
-      if (content?.sections && Array.isArray(content.sections)) {
-        sections = content.sections.filter(section => section && typeof section === 'object');
-      } else if (content?.content_json?.sections && Array.isArray(content.content_json.sections)) {
-        sections = content.content_json.sections.filter(section => section && typeof section === 'object');
-      } else if (content?.content_json && typeof content.content_json === 'object') {
-        sections = Object.keys(content.content_json)
-          .filter(key => 
-            typeof content.content_json[key] === 'object' && 
-            content.content_json[key] !== null &&
-            key !== 'meta_title' && 
-            key !== 'meta_description' && 
-            key !== 'title'
-          )
-          .map(key => ({
-            type: key,
-            key: key,
-            data: content.content_json[key]
-          }));
-      }
-    } catch (sectionError) {
-      console.error('Error processing sections:', sectionError);
-      sections = [];
-    }
-    
-    console.log('Sections extracted:', sections.length);
-
     const cityName = formatSlugToTitle(city);
     const regionName = formatSlugToTitle(region);
     const countryName = formatSlugToTitle(country);
 
-    // If we have sections, render them
-    if (sections.length > 0) {
-      return (
-        <div className="min-h-screen bg-background-offwhite">
-          {/* Breadcrumb */}
-          <div className="bg-white/50 backdrop-blur-sm border-b border-gray-100 py-4">
-            <div className="container mx-auto px-4">
-              <nav className="flex items-center space-x-2 text-sm text-gray-600 font-inter">
-                <Link href="/" className="hover:text-primary-green transition-colors">Home</Link>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-                <Link href="/foster-agency" className="hover:text-primary-green transition-colors">Foster Agencies</Link>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-                <Link href={`/foster-agency/${country}`} className="hover:text-primary-green transition-colors">{countryName}</Link>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-                <Link href={`/foster-agency/${country}/${region}`} className="hover:text-primary-green transition-colors">{regionName}</Link>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-                <span className="text-text-charcoal font-medium">{cityName}</span>
-              </nav>
-            </div>
-          </div>
-          
-          {/* Render dynamic sections */}
-          <div className="container mx-auto px-4 py-8">
-            {sections.map((section) => (
-              <SectionRenderer 
-                key={section.id || section.key || section.type || Math.random()} 
-                section={section} 
-              />
-            ))}
-          </div>
-        </div>
-      );
-    }
-    
     // Default rendering when no dynamic sections
     console.log('Rendering default city page');
     
@@ -200,30 +131,6 @@ export default async function CityPage({ params }) {
                 >
                   <Link href="#agencies">View Agencies</Link>
                 </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Content Sections */}
-        <section className="py-16 section-alt">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="prose max-w-none text-gray-600 font-inter">
-                {content?.overview ? (
-                  <div dangerouslySetInnerHTML={{ __html: content.overview }} />
-                ) : (
-                  <div className="space-y-4">
-                    <p>
-                      Welcome to our directory of foster agencies in {cityName}, {regionName}. We've compiled a list of 
-                      accredited and trusted agencies to help you start your fostering journey in this area.
-                    </p>
-                    <p>
-                      {cityName} offers unique fostering opportunities with a strong emphasis on community-based care. 
-                      Our local agencies provide personalized support and ongoing guidance to both foster carers and children.
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
