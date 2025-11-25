@@ -20,13 +20,13 @@ export default function HeroSection({ heading, subheading, cta_primary, cta_seco
             <span className="text-sm font-medium text-text-charcoal font-inter">Location</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-text-charcoal mb-6 font-poppins">
-            {heading}
+            {heading || 'Untitled'}
           </h1>
           <p className="text-xl text-gray-600 mb-8 font-inter">
-            {subheading}
+            {subheading || ''}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            {cta_primary && (
+            {cta_primary && cta_primary.link && cta_primary.text && (
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic"
@@ -35,7 +35,7 @@ export default function HeroSection({ heading, subheading, cta_primary, cta_seco
                 <Link href={cta_primary.link}>{cta_primary.text}</Link>
               </Button>
             )}
-            {cta_secondary && (
+            {cta_secondary && cta_secondary.link && cta_secondary.text && (
               <Button
                 size="lg"
                 variant="outline"

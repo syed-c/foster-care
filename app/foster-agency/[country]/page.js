@@ -1,5 +1,5 @@
 import { generateCountryPaths, loadRegionsForCountry, formatSlugToTitle, loadAllLocations } from '@/lib/locationData';
-import { getLocationContentByCanonicalSlug } from '@/services/locationService';
+import { getLocationContentByCanonicalSlug, extractSectionsFromContent } from '@/services/locationService';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
+import SectionRenderer from '@/components/sections/SectionRenderer';
 
 // Make sure pages run on dynamic rendering mode
 export const dynamic = "force-dynamic";
@@ -102,6 +103,7 @@ export default async function CountryPage({ params, searchParams }) {
     try {
       rawContent = await getLocationContentByCanonicalSlug(canonicalSlug) || {};
       console.log('Raw content loaded:', Object.keys(rawContent).length > 0 ? 'HAS CONTENT' : 'NO CONTENT');
+      console.log('Raw content:', JSON.stringify(rawContent, null, 2));
     } catch (contentError) {
       console.error('Error loading content:', contentError);
       rawContent = {};
@@ -130,7 +132,8 @@ export default async function CountryPage({ params, searchParams }) {
     const regionsPerPage = 6;
     
     // Handle pagination for regions
-    const page = parseInt(searchParams?.page) || 1;
+    const resolvedSearchParams = await searchParams;
+    const page = parseInt(resolvedSearchParams?.page) || 1;
     const totalRegions = regionsToShow.length;
     const startIndex = (page - 1) * regionsPerPage;
     const endIndex = startIndex + regionsPerPage;
@@ -198,6 +201,11 @@ export default async function CountryPage({ params, searchParams }) {
     };
 
     const currentPopularRegions = popularRegions[country] || popularRegions.england;
+
+    // Extract sections from content using the utility function
+    const sections = extractSectionsFromContent(rawContent);
+    console.log('Extracted sections:', sections.length);
+    console.log('Sections:', JSON.stringify(sections, null, 2));
 
     return (
       <div className="min-h-screen bg-background-offwhite">
@@ -267,21 +275,30 @@ export default async function CountryPage({ params, searchParams }) {
           </div>
         </section>
 
+        {/* Render CMS sections if available */}
+        {sections.length > 0 && (
+          <div className="container mx-auto px-4 py-8">
+            {sections.map((section, index) => (
+              <SectionRenderer key={index} section={section} />
+            ))}
+          </div>
+        )}
+
         {/* Regions Grid */}
-        <section id="regions" className="py-16 md:py-24 relative overflow-hidden section-muted">
+        <section id="regions" className="py-12 md:py-16 relative overflow-hidden section-muted">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-1/4 left-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
             <div className="absolute bottom-1/4 right-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
           </div>
           
           <div className="container mx-auto px-4 relative z-10">
-            <div className="max-w-4xl mx-auto text-center mb-12">
+            <div className="max-w-4xl mx-auto text-center mb-10">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
                 <MapPin className="w-4 h-4 text-primary-green" />
                 <span className="text-sm font-medium text-text-charcoal font-inter">Regions</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                {`Foster Agency Finder by Region`}
+                {`All Regions in ${countryName}`}
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto font-inter">
                 {`Discover the best foster agencies across ${countryName} by region. Our comprehensive directory helps you find the perfect match for your fostering journey.`}
@@ -289,8 +306,8 @@ export default async function CountryPage({ params, searchParams }) {
             </div>
             
             <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                {regionsToShow.slice(0, regionsPerPage).map((region) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedRegions.map((region) => (
                   <Card key={region.slug} className="section-card rounded-modern-xl hover-lift transition-all">
                     <CardHeader>
                       <CardTitle className="text-xl font-poppins flex items-center">
@@ -315,25 +332,31 @@ export default async function CountryPage({ params, searchParams }) {
               
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex justify-center mt-8">
+                <div className="flex flex-wrap justify-center gap-2 mt-8">
                   <Pagination>
                     <PaginationContent>
                       <PaginationItem>
-                        <PaginationPrevious href="#" className="glass" />
+                        <PaginationPrevious 
+                          href={page > 1 ? `?page=${page - 1}` : '#'}
+                          className={page > 1 ? "glass" : "glass opacity-50 cursor-not-allowed"}
+                        />
                       </PaginationItem>
                       {[...Array(totalPages)].map((_, i) => (
                         <PaginationItem key={i}>
                           <PaginationLink 
-                            href="#" 
-                            isActive={i === 0}
-                            className={i === 0 ? "glass bg-primary-green text-white" : "glass"}
+                            href={`?page=${i + 1}`} 
+                            isActive={page === i + 1}
+                            className={page === i + 1 ? "glass bg-primary-green text-white" : "glass"}
                           >
                             {i + 1}
                           </PaginationLink>
                         </PaginationItem>
                       ))}
                       <PaginationItem>
-                        <PaginationNext href="#" className="glass" />
+                        <PaginationNext 
+                          href={page < totalPages ? `?page=${page + 1}` : '#'}
+                          className={page < totalPages ? "glass" : "glass opacity-50 cursor-not-allowed"}
+                        />
                       </PaginationItem>
                     </PaginationContent>
                   </Pagination>
@@ -342,6 +365,20 @@ export default async function CountryPage({ params, searchParams }) {
             </div>
           </div>
         </section>
+
+        {/* Top Agencies Section */}
+        <div className="container mx-auto px-4 py-8">
+          <SectionRenderer 
+            section={{
+              type: 'topAgencies',
+              data: {
+                title: `Top Agencies in ${countryName}`,
+                description: `Discover the highest-rated foster agencies in ${countryName} with excellent support and competitive allowances.`,
+                items: [] // Will use fallback data
+              }
+            }} 
+          />
+        </div>
       </div>
     );
   } catch (error) {

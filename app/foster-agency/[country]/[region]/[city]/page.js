@@ -1,9 +1,10 @@
 import { generateCityPaths, formatSlugToTitle } from '@/lib/locationData';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getLocationContentByCanonicalSlug } from '@/services/locationService';
+import { getLocationContentByCanonicalSlug, extractSectionsFromContent } from '@/services/locationService';
 import { Button } from '@/components/ui/button';
 import { MapPin, ChevronRight } from 'lucide-react';
+import SectionRenderer from '@/components/sections/SectionRenderer';
 
 // Make sure pages run on dynamic rendering mode
 export const dynamic = "force-dynamic";
@@ -68,14 +69,17 @@ export default async function CityPage({ params }) {
     }
     
     const content = await getLocationContentByCanonicalSlug(canonicalSlug);
+    console.log('Content loaded:', !!content);
+    console.log('Content:', JSON.stringify(content, null, 2));
 
     const cityName = formatSlugToTitle(city);
     const regionName = formatSlugToTitle(region);
     const countryName = formatSlugToTitle(country);
 
-    // Default rendering when no dynamic sections
-    console.log('Rendering default city page');
-    
+    // Extract sections from content using the utility function
+    const sections = extractSectionsFromContent(content);
+    console.log('Extracted sections:', sections.length);
+
     return (
       <div className="min-h-screen bg-background-offwhite">
         {/* Breadcrumb */}
@@ -135,6 +139,30 @@ export default async function CityPage({ params }) {
             </div>
           </div>
         </section>
+
+        {/* Render CMS sections if available */}
+        {sections.length > 0 && (
+          <div className="container mx-auto px-4 py-8">
+            {sections.map((section, index) => (
+              <SectionRenderer key={index} section={section} regionSlug={region} />
+            ))}
+          </div>
+        )}
+
+        {/* Top Agencies Section */}
+        <div className="container mx-auto px-4 py-8">
+          <SectionRenderer 
+            section={{
+              type: 'topAgencies',
+              data: {
+                title: `Top Agencies in ${cityName}`,
+                description: `Discover the highest-rated foster agencies in ${cityName} with excellent support and competitive allowances.`,
+                items: [] // Will use fallback data
+              }
+            }} 
+            regionSlug={region}
+          />
+        </div>
       </div>
     );
   } catch (error) {

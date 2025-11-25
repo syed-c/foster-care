@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import TopAgenciesSection from '@/components/sections/TopAgenciesSection';
 
 // Error boundary component to catch rendering errors
 // Error boundary component to catch rendering errors
@@ -55,6 +56,11 @@ const map = {
   faqs: dynamic(() => import('./FaqSection'), { ssr: false, loading: () => <div>Loading FAQ section...</div> }),
   topAgencies: dynamic(() => import('./TopAgenciesDynamic'), { ssr: false, loading: () => <div>Loading top agencies section...</div> }),
   agencyFinder: dynamic(() => import('./AgencyFinder'), { ssr: false, loading: () => <div>Loading agency finder section...</div> }),
+  popularLocations: dynamic(() => import('./PopularCitiesDynamic'), { ssr: false, loading: () => <div>Loading popular locations section...</div> }),
+  fosterSystem: dynamic(() => import('./BenefitsSection'), { ssr: false, loading: () => <div>Loading foster system section...</div> }),
+  whyFoster: dynamic(() => import('./BenefitsSection'), { ssr: false, loading: () => <div>Loading why foster section...</div> }),
+  regulated: dynamic(() => import('./OverviewSection'), { ssr: false, loading: () => <div>Loading regulated section...</div> }),
+  findAgencies: dynamic(() => import('./AgencyFinder'), { ssr: false, loading: () => <div>Loading find agencies section...</div> }),
   // fallback to GenericBlock
 };
 
@@ -327,72 +333,11 @@ function TopAgencies({ title, description, items }) {
   const safeItems = Array.isArray(items) ? items : [];
   
   return (
-    <section className="py-16 md:py-24 relative overflow-hidden section-highlight">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 left-1/4 w-80 h-80 bg-primary-green/5 rounded-full blur-3xl float-animation" />
-        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "2.5s" }} />
-      </div>
-      
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-            <Star className="w-4 h-4 text-primary-green" />
-            <span className="text-sm font-medium text-text-charcoal font-inter">Featured Agencies</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-            {safeTitle}
-          </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-            {safeDescription}
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {safeItems.map((agency, index) => (
-            <Card key={index} className="section-card rounded-modern-xl p-6 hover-lift transition-all h-full flex flex-col">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-xl font-bold text-text-charcoal font-poppins">{agency?.name || 'Agency'}</h3>
-                {agency?.featured && (
-                  <Badge variant="secondary" className="bg-primary-green/10 text-primary-green border-0">
-                    Featured
-                  </Badge>
-                )}
-              </div>
-              
-              <p className="text-gray-600 mb-4 flex-grow font-inter">
-                {agency?.summary || agency?.description || 'No description available'}
-              </p>
-              
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                  <span className="ml-1 text-sm font-medium">{agency?.rating || "N/A"}</span>
-                  <span className="mx-1 text-gray-400">•</span>
-                  <span className="text-sm text-gray-500">{agency?.reviewCount || 0} reviews</span>
-                </div>
-                <Badge variant="outline" className="text-xs">
-                  {agency?.type || "Agency"}
-                </Badge>
-              </div>
-              
-              <div className="flex space-x-2">
-                <Button size="sm" variant="outline" className="flex-grow font-inter" asChild>
-                  <Link href={agency?.website || agency?.link || "#"}>
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Visit Website
-                  </Link>
-                </Button>
-                <Button size="sm" className="font-inter" asChild>
-                  <Link href="/contact">
-                    Contact
-                  </Link>
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </section>
+    <TopAgenciesSection 
+      title={safeTitle}
+      description={safeDescription}
+      items={safeItems}
+    />
   );
 }
 
@@ -476,9 +421,22 @@ export default function SectionRenderer({ section, regionSlug }) {
     const Component = map[section.key];
     try {
       // Wrap in error boundary to catch runtime errors
+      // Add safety check for auth-related properties
+      const safeProps = {
+        ...section,
+        regionSlug: regionSlug
+      };
+      
+      // Ensure auth-related properties are handled safely
+      if (section.auth && typeof section.auth === 'object') {
+        safeProps.auth = section.auth;
+      } else {
+        safeProps.auth = null;
+      }
+      
       return (
         <ErrorBoundary>
-          <Component key={section.id} {...section} regionSlug={regionSlug} />
+          <Component key={section.id} {...safeProps} />
         </ErrorBoundary>
       );
     } catch (error) {

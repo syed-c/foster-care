@@ -1,13 +1,16 @@
-import { generateRegionPaths, formatSlugToTitle } from '@/lib/locationData';
+import { generateRegionPaths, formatSlugToTitle, loadAllLocations } from '@/lib/locationData';
 import { 
   getLocationContentByCanonicalSlug, 
   getAgenciesByRegion, 
-  getCitiesByRegion 
+  getCitiesByRegion,
+  extractSectionsFromContent
 } from '@/services/locationService';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { MapPin, ChevronRight } from 'lucide-react';
+import { MapPin, ChevronRight, ArrowRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import SectionRenderer from '@/components/sections/SectionRenderer';
 
 // Make sure pages run on dynamic rendering mode
 export const dynamic = "force-dynamic";
@@ -74,6 +77,7 @@ export default async function RegionPage({ params }) {
     try {
       content = await getLocationContentByCanonicalSlug(canonicalSlug);
       console.log('Content loaded:', !!content);
+      console.log('Content:', JSON.stringify(content, null, 2));
     } catch (contentError) {
       console.error('Error loading content:', contentError);
       content = {};
@@ -82,8 +86,20 @@ export default async function RegionPage({ params }) {
     const countryName = formatSlugToTitle(country);
     const regionName = formatSlugToTitle(region);
     
-    // Default rendering when no dynamic sections
-    console.log('Rendering default region page');
+    // Get cities for this region
+    let cities = [];
+    try {
+      const structure = await loadAllLocations();
+      if (structure[country] && structure[country].regions[region]) {
+        cities = Object.entries(structure[country].regions[region].cities).map(([slug, city]) => ({
+          slug,
+          name: city.name
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading cities:', error);
+      cities = [];
+    }
     
     // Get agencies for this region
     let agencies = [];
@@ -95,16 +111,10 @@ export default async function RegionPage({ params }) {
       agencies = [];
     }
     
-    // Get cities for this region
-    let cities = [];
-    try {
-      cities = await getCitiesByRegion(country, region);
-      console.log('Cities loaded:', cities.length);
-    } catch (cityError) {
-      console.error('Error loading cities:', cityError);
-      cities = [];
-    }
-    
+    // Extract sections from content using the utility function
+    const sections = extractSectionsFromContent(content);
+    console.log('Extracted sections:', sections.length);
+
     return (
       <div className="min-h-screen bg-background-offwhite">
         {/* Breadcrumb */}
@@ -162,6 +172,81 @@ export default async function RegionPage({ params }) {
             </div>
           </div>
         </section>
+
+        {/* Render CMS sections if available */}
+        {sections.length > 0 && (
+          <div className="container mx-auto px-4 py-8">
+            {sections.map((section, index) => (
+              <SectionRenderer key={index} section={section} regionSlug={region} />
+            ))}
+          </div>
+        )}
+
+        {/* Cities Grid */}
+        {cities.length > 0 && (
+          <section className="py-12 md:py-16 relative overflow-hidden section-muted">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute top-1/4 left-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
+              <div className="absolute bottom-1/4 right-10 w-72 h-72 bg-secondary-blue/5 rounded-full blur-3xl float-animation" style={{ animationDelay: "1.5s" }} />
+            </div>
+            
+            <div className="container mx-auto px-4 relative z-10">
+              <div className="max-w-4xl mx-auto text-center mb-10">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+                  <MapPin className="w-4 h-4 text-primary-green" />
+                  <span className="text-sm font-medium text-text-charcoal font-inter">Cities</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+                  {`All Cities in ${regionName}`}
+                </h2>
+                <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+                  {`Discover foster agencies across cities in ${regionName}. Find the perfect match for your fostering journey.`}
+                </p>
+              </div>
+              
+              <div className="max-w-6xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {cities.map((city) => (
+                    <Card key={city.slug} className="section-card rounded-modern-xl hover-lift transition-all">
+                      <CardHeader>
+                        <CardTitle className="text-xl font-poppins flex items-center">
+                          <MapPin className="w-5 h-5 text-primary-green mr-2" />
+                          {city.name}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <Button 
+                          variant="ghost" 
+                          className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter"
+                          asChild
+                        >
+                          <Link href={`/foster-agency/${country}/${region}/${city.slug}`}>
+                            View Agencies <ArrowRight className="ml-2 w-4 h-4" />
+                          </Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Top Agencies Section */}
+        <div className="container mx-auto px-4 py-8">
+          <SectionRenderer 
+            section={{
+              type: 'topAgencies',
+              data: {
+                title: `Top Agencies in ${regionName}`,
+                description: `Discover the highest-rated foster agencies in ${regionName} with excellent support and competitive allowances.`,
+                items: [] // Will use fallback data
+              }
+            }} 
+            regionSlug={region}
+          />
+        </div>
       </div>
     );
   } catch (error) {

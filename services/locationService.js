@@ -711,6 +711,58 @@ async function getCitiesByRegion(regionSlug, limit = 10) {
   }
 }
 
+// Utility function to extract sections from location content
+function extractSectionsFromContent(content) {
+  console.log('extractSectionsFromContent called with:', JSON.stringify(content, null, 2));
+  let sections = [];
+  
+  if (content && typeof content === 'object') {
+    // Handle content_json structure (this is the main case for our data)
+    if (content.content_json && typeof content.content_json === 'object') {
+      const contentJson = content.content_json;
+      console.log('Processing content_json:', JSON.stringify(contentJson, null, 2));
+      if (Array.isArray(contentJson.sections)) {
+        sections = contentJson.sections;
+        console.log('Found sections array in content_json:', sections.length);
+      } else if (typeof contentJson === 'object' && !Array.isArray(contentJson)) {
+        // Convert flat content structure to sections
+        sections = Object.keys(contentJson)
+          .filter(key => typeof contentJson[key] === 'object' && contentJson[key] !== null)
+          .map(key => ({
+            type: key,
+            key: key,
+            data: contentJson[key]
+          }));
+        console.log('Converted flat content to sections:', sections.length);
+      }
+    } 
+    // Handle case where content itself is the flat structure with sections
+    else if (!content.content_json && !content.sections) {
+      // Check if content has section-like properties directly
+      const contentKeys = Object.keys(content);
+      console.log('Processing direct content with keys:', contentKeys);
+      
+      // Convert flat content structure to sections
+      sections = contentKeys
+        .filter(key => typeof content[key] === 'object' && content[key] !== null && key !== 'id' && key !== 'canonical_slug' && key !== 'title' && key !== 'meta_title' && key !== 'meta_description')
+        .map(key => ({
+          type: key,
+          key: key,
+          data: content[key]
+        }));
+      console.log('Converted direct content to sections:', sections.length);
+    }
+    // Handle sections array directly in content
+    else if (Array.isArray(content.sections)) {
+      sections = content.sections;
+      console.log('Found sections array directly in content:', sections.length);
+    }
+  }
+  
+  console.log('Returning sections:', JSON.stringify(sections, null, 2));
+  return sections;
+}
+
 module.exports = {
   buildCanonicalSlug,
   updateCanonicalSlug,
@@ -719,5 +771,6 @@ module.exports = {
   getLocationContentByCanonicalSlug,
   getAgenciesByRegion,
   getAgenciesByCountry,
-  getCitiesByRegion
+  getCitiesByRegion,
+  extractSectionsFromContent
 };
