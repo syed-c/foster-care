@@ -347,10 +347,10 @@ export default async function CountryPage({ params, searchParams }) {
         notFound();
       }
       // Use regionsData if available
-      var regionsToShow = regionsData.map(r => ({ slug: r.slug, name: r.name }));
+      regionsToShow = regionsData.map(r => ({ slug: r.slug, name: r.name }));
     } else {
       // Use regions from structure
-      var regionsToShow = regions;
+      regionsToShow = regions;
     }
 
     // FAQs for each country
