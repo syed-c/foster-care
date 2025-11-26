@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request, { params }) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
     
     // Fetch agency details by slug
     const { data: agency, error } = await supabaseAdmin
