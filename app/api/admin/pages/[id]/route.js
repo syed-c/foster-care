@@ -1,26 +1,50 @@
-import { supabaseAdmin } from '@/lib/supabase';
+import { verify } from 'jsonwebtoken';
+import { sanityClient } from '@/lib/sanity';
 
 // Handle GET requests to fetch a single page
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
-    // Special case for auth@syedrayyan.com
-    const specialAccess = request.cookies.get('special_super_admin_access')?.value;
-    if (specialAccess !== 'auth@syedrayyan.com') {
-      // For now, we're allowing access without authentication for page fetching
-      // In a production environment, you might want to add proper authentication
+    // Check for admin token
+    const token = request.cookies.get("admin_token")?.value;
+    
+    if (!token) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    try {
+      // Verify the token
+      const decoded = verify(token, process.env.NEXTAUTH_SECRET);
+      
+      // Check if it's an admin
+      if (decoded.role !== "admin") {
+        return new Response(
+          JSON.stringify({ error: 'Forbidden' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    } catch (error) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid token' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Fetch page from Supabase
-    const { data: page, error } = await supabaseAdmin
-      .from('pages')
-      .select('*')
-      .eq('id', id)
-      .single();
+    // Fetch page from Sanity
+    const page = await sanityClient.fetch(
+      `*[_type == "page" && _id == $id][0]`,
+      { id }
+    );
 
-    if (error) {
-      throw new Error(error.message);
+    if (!page) {
+      return new Response(
+        JSON.stringify({ error: 'Page not found' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     return new Response(
@@ -53,34 +77,147 @@ export async function GET(request, { params }) {
   }
 }
 
+// Handle POST requests to create a new page
+export async function POST(request) {
+  try {
+    const body = await request.json();
+
+    // Check for admin token
+    const token = request.cookies.get("admin_token")?.value;
+    
+    if (!token) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    try {
+      // Verify the token
+      const decoded = verify(token, process.env.NEXTAUTH_SECRET);
+      
+      // Check if it's an admin
+      if (decoded.role !== "admin") {
+        return new Response(
+          JSON.stringify({ error: 'Forbidden' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    } catch (error) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid token' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create new page in Sanity
+    const newDocument = {
+      _type: 'page',
+      title: body.title,
+      slug: {
+        _type: 'slug',
+        current: body.slug?.current || body.slug || ''
+      },
+      seo: {
+        _type: 'seo',
+        title: body.seo?.title || '',
+        description: body.seo?.description || ''
+      }
+    };
+    
+    const result = await sanityClient.create(newDocument);
+    
+    return new Response(
+      JSON.stringify({ 
+        success: true,
+        page: result
+      }),
+      {
+        status: 201,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+  } catch (error) {
+    console.error('Error creating page:', error);
+    
+    return new Response(
+      JSON.stringify({ 
+        success: false,
+        error: error.message
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+  }
+}
+
 // Handle PUT requests to update a page
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
-    // Update page in Supabase
-    const { data: page, error } = await supabaseAdmin
-      .from('pages')
-      .update({
-        title: body.title,
-        content: body.content,
-        meta_description: body.meta_description,
-        slug: body.slug,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
+    // Check for admin token
+    const token = request.cookies.get("admin_token")?.value;
+    
+    if (!token) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
     }
+    
+    try {
+      // Verify the token
+      const decoded = verify(token, process.env.NEXTAUTH_SECRET);
+      
+      // Check if it's an admin
+      if (decoded.role !== "admin") {
+        return new Response(
+          JSON.stringify({ error: 'Forbidden' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    } catch (error) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid token' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Update page in Sanity
+    const mutations = [
+      {
+        patch: {
+          id: id,
+          set: {
+            title: body.title,
+            'slug.current': body.slug?.current || body.slug || '',
+            'seo.title': body.seo?.title || '',
+            'seo.description': body.seo?.description || ''
+          }
+        }
+      }
+    ];
+    
+    const result = await sanityClient.mutate(mutations);
+    
+    // Fetch updated page
+    const updatedPage = await sanityClient.fetch(
+      `*[_type == "page" && _id == $id][0]`,
+      { id }
+    );
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        ...page
+        page: updatedPage
       }),
       {
         status: 200,

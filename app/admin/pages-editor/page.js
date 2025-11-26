@@ -114,8 +114,6 @@ export default function PageEditor() {
     } catch (error) {
       console.error('Error fetching location content:', error);
       setLocationContent([]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -239,7 +237,6 @@ export default function PageEditor() {
 
   const fetchPages = async () => {
     try {
-      setLoading(true);
       
       // Fetch real pages from Sanity API
       const response = await fetch('/api/admin/pages');
@@ -1202,19 +1199,25 @@ export default function PageEditor() {
                     <CardDescription>Select a page to edit</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2">
-                      {pages.map((page) => (
-                        <Button
-                          key={page._id}
-                          variant={selectedPage === page._id ? "default" : "outline"}
-                          className="w-full justify-start"
-                          onClick={() => handlePageSelect(page._id)}
-                        >
-                          <FileText className="w-4 h-4 mr-2" />
-                          {page.title}
-                        </Button>
-                      ))}
-                    </div>
+                    {loading ? (
+                      <div className="flex justify-center items-center h-32">
+                        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {pages.map((page) => (
+                          <Button
+                            key={page._id}
+                            variant={selectedPage === page._id ? "default" : "outline"}
+                            className="w-full justify-start"
+                            onClick={() => handlePageSelect(page._id)}
+                          >
+                            <FileText className="w-4 h-4 mr-2" />
+                            {page.title}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
