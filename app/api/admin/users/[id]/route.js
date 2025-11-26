@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../auth/[...nextauth]/route';
+import { authOptions } from '../../../auth/[...nextauth]/authOptions';
 
 export async function DELETE(request, { params }) {
   try {

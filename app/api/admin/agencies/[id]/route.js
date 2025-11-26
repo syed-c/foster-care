@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../auth/[...nextauth]/route';
+import { authOptions } from '../../../auth/[...nextauth]/authOptions';
 
 export async function GET(request, { params }) {
   try {
