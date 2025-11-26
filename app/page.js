@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import {
   Card,
   CardContent,
@@ -12,8 +12,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
 import {
   Search,
   MapPin,
@@ -693,7 +693,7 @@ function AgencyCard({ agency }) {
 
   return (
     <Card className="section-card rounded-modern hover-lift transition-all cursor-pointer card-3d hover:scale-105">
-      <Link href={`/agency/${agency.id}`}>
+      <Link href={`/agencies/${agency.slug}`}>
         <CardHeader>
           <div className="flex items-start justify-between mb-4">
             <div className="w-16 h-16 rounded-lg glass-icon flex items-center justify-center transition-all duration-300 hover:scale-110">

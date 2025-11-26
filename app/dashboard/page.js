@@ -259,7 +259,7 @@ export default function DashboardPage() {
                     </Link>
                   </Button>
                   <Button variant="outline" className="w-full justify-start font-inter" asChild>
-                    <Link href={`/agency/${agency?.id}`} target="_blank">
+                    <Link href={`/agencies/${agency?.slug}`} target="_blank">
                       <Globe className="w-4 h-4 mr-2" />
                       View Public Profile
                     </Link>
@@ -344,7 +344,7 @@ export default function DashboardPage() {
               <CardContent>
                 <p className="text-gray-500 text-center py-8 font-inter">
                   Review management coming soon. You can view your public reviews on your{' '}
-                  <Link href={`/agency/${agency?.id}`} className="text-primary-green hover:underline">
+                  <Link href={`/agencies/${agency?.slug}`} className="text-primary-green hover:underline">
                     public profile
                   </Link>
                   .

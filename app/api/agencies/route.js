@@ -1,5 +1,5 @@
 import { getAgenciesByRegion } from '@/services/locationService';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase.js';
 import { NextResponse } from 'next/server';
 
 export async function GET(request) {

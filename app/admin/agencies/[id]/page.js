@@ -323,7 +323,7 @@ export default function AdminAgencyDetail() {
                       className="w-full font-inter"
                       asChild
                     >
-                      <Link href={`/agency/${agency.id}`} target="_blank">
+                      <Link href={`/agencies/${agency.slug}`} target="_blank">
                         <Eye className="w-4 h-4 mr-2" />
                         View Public Profile
                       </Link>

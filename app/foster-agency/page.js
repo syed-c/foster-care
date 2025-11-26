@@ -378,7 +378,7 @@ export default async function FosterAgencyMainPage() {
                     className="w-full group-hover:bg-primary-green/10 group-hover:text-primary-green font-inter"
                     asChild
                   >
-                    <Link href={`/agency/${agency.id}`}>
+                    <Link href={`/agencies/${agency.slug}`}>
                       View Profile <ArrowRight className="ml-2 w-4 h-4" />
                     </Link>
                   </Button>

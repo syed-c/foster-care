@@ -1,9 +1,9 @@
 import { Inter, Poppins } from 'next/font/google';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css";
-import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
-import AuthSessionProvider from '@/components/SessionProvider';
+import Navigation from '../components/Navigation.jsx';
+import Footer from '../components/Footer.jsx';
+import AuthSessionProvider from '../components/SessionProvider.jsx';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const poppins = Poppins({ 

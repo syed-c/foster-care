@@ -273,7 +273,7 @@ export default function AdminAgencies() {
                         {agency.status ? agency.status.charAt(0).toUpperCase() + agency.status.slice(1) : 'Pending'}
                       </Badge>
                       <Button size="sm" variant="outline" className="font-inter" asChild>
-                        <Link href={`/agency/${agency.id}`}>
+                        <Link href={`/agencies/${agency.slug}`}>
                           <Eye className="w-4 h-4 mr-1" />
                           View
                         </Link>

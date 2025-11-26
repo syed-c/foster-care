@@ -172,7 +172,7 @@ export default function AgenciesPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {agencies.map((agency) => (
               <Card key={agency.id} className="glass-card group hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer rounded-modern">
-                <Link href={`/agency/${agency.id}`}>
+                <Link href={`/agencies/${agency.slug}`}>
                   <CardHeader>
                     <div className="flex items-start justify-between mb-4">
                       <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary-green/20 to-secondary-blue/20 flex items-center justify-center">

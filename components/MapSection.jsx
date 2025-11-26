@@ -246,7 +246,7 @@ export default function MapSection({ countries = [] }) {
                     </div>
                     
                     <Link 
-                      href={`/agency/${agency.id}`}
+                      href={`/agencies/${agency.slug}`}
                       className="text-primary-green text-xs md:text-sm font-medium hover:underline"
                     >
                       View Details

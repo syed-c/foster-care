@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Textarea } from '../../../components/ui/textarea';
+import { Label } from '../../../components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Badge } from '../../../components/ui/badge';
 import { Star, MapPin, Phone, Mail, Globe, Heart, ArrowLeft, Send, CheckCircle2 } from 'lucide-react';
 
 export default function AgencyDetailPage() {
@@ -21,17 +21,21 @@ export default function AgencyDetailPage() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
-    if (params.id) {
+    if (params.slug) {
       fetchAgency();
     }
-  }, [params.id]);
+  }, [params.slug]);
 
   const fetchAgency = async () => {
     try {
-      const response = await fetch(`/api/agencies/${params.id}`);
+      // Fetch agency by slug
+      const response = await fetch(`/api/agencies/slug/${params.slug}`);
       if (response.ok) {
         const data = await response.json();
         setAgency(data.agency);
+      } else if (response.status === 404) {
+        // Agency not found
+        setAgency(null);
       }
     } catch (error) {
       console.error('Error fetching agency:', error);
@@ -49,7 +53,7 @@ export default function AgencyDetailPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          agencyId: params.id,
+          agencyId: agency.id, // Use the actual agency ID for the contact form
           ...contactForm,
         }),
       });
@@ -113,8 +117,8 @@ export default function AgencyDetailPage() {
     <div className="min-h-screen bg-background-offwhite">
       {/* Header with Cover Image */}
       <div className="relative h-64 bg-gradient-to-r from-primary-green/30 to-secondary-blue/30">
-        {agency.coverImage && (
-          <Image src={agency.coverImage} alt={agency.name} fill className="object-cover opacity-50" />
+        {agency.cover_image && (
+          <Image src={agency.cover_image} alt={agency.name} fill className="object-cover opacity-50" />
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white" />
       </div>

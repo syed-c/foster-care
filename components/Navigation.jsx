@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { Menu, X, Heart, User, LogOut, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from './ui/button.jsx';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from './ui/dropdown-menu.jsx';
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
