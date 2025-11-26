@@ -272,7 +272,7 @@ export default function AdminDashboard() {
               <CardDescription className="font-inter">Manage your directory quickly</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <Button variant="outline" className="h-auto py-4 flex flex-col items-center justify-center font-inter" asChild>
                   <Link href="/admin/agencies">
                     <Building2 className="w-6 h-6 mb-2" />
@@ -307,6 +307,12 @@ export default function AdminDashboard() {
                   <Link href="/admin/functionality-test">
                     <Settings className="w-6 h-6 mb-2" />
                     <span>Test Functionality</span>
+                  </Link>
+                </Button>
+                <Button variant="outline" className="h-auto py-4 flex flex-col items-center justify-center font-inter" asChild>
+                  <Link href="/admin/gmb-import">
+                    <Building2 className="w-6 h-6 mb-2" />
+                    <span>GMB Import</span>
                   </Link>
                 </Button>
               </div>
