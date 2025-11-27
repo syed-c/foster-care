@@ -396,7 +396,7 @@ export default function PageEditor() {
           "page_id": pageId,
           "title": "Hero Section", 
           "heading": "Find Your Perfect Fostering Agency", 
-          "content": "Connecting caring hearts with fostering opportunities across the UK. Browse verified agencies, read reviews, and start your fostering journey today.", 
+          "content": "Connecting compassionate foster carers with trusted UK agencies since [year].", 
           "headingType": "h1",
           "order": 1,
           "type": "hero",
@@ -410,11 +410,57 @@ export default function PageEditor() {
         { 
           "id": 2, 
           "page_id": pageId,
-          "title": "How It Works Section", 
-          "heading": "How It Works", 
-          "content": "Finding the right fostering agency is easy with our simple three-step process", 
+          "title": "Why Choose Our Directory", 
+          "heading": "Why Choose Our Directory", 
+          "content": "Our platform stands out as the most trusted resource for connecting foster carers with verified agencies across the UK.", 
           "headingType": "h2",
           "order": 2,
+          "type": "why_choose",
+          "subtitle": "Why Choose Us",
+          "features": JSON.stringify([
+            {
+              "title": "Verified Agencies Only",
+              "description": "Every agency in our directory is thoroughly vetted and verified for your peace of mind.",
+              "icon": "Shield"
+            },
+            {
+              "title": "Reviewed by Carers",
+              "description": "Read authentic reviews from real foster carers who've worked with these agencies.",
+              "icon": "Users"
+            },
+            {
+              "title": "Free & Easy to Use",
+              "description": "Our service is completely free for foster carers with no hidden costs or obligations.",
+              "icon": "Heart"
+            },
+            {
+              "title": "Updated Weekly",
+              "description": "We regularly review and update our listings to ensure you have the latest information.",
+              "icon": "Clock"
+            }
+          ])
+        },
+        { 
+          "id": 3, 
+          "page_id": pageId,
+          "title": "About Fostering in the UK", 
+          "heading": "About Fostering in the UK", 
+          "content": "Fostering is a vital part of the UK's child welfare system, providing temporary or permanent care for children who cannot live with their birth families. With over 70,000 children in foster care across the UK, the need for dedicated and compassionate foster carers has never been greater.", 
+          "headingType": "h2",
+          "order": 3,
+          "type": "about_fostering",
+          "subtitle": "Educational Resource",
+          "button_text": "Learn More About Fostering",
+          "button_link": "/resources"
+        },
+        { 
+          "id": 4, 
+          "page_id": pageId,
+          "title": "How It Works Section", 
+          "heading": "How It Works", 
+          "content": "Finding the right fostering agency is easy with our simple process", 
+          "headingType": "h2",
+          "order": 4,
           "type": "how_it_works",
           "subtitle": "Simple Process",
           "cards": JSON.stringify([
@@ -436,26 +482,26 @@ export default function PageEditor() {
           ])
         },
         { 
-          "id": 3, 
+          "id": 5, 
           "page_id": pageId,
           "title": "Featured Agencies Section", 
           "heading": "Featured Agencies", 
           "content": "Trusted fostering agencies across the UK", 
           "headingType": "h2",
-          "order": 3,
+          "order": 5,
           "type": "featured_agencies",
           "subtitle": "Verified Agencies",
           "button_text": "View All Agencies",
           "button_link": "/agencies"
         },
         { 
-          "id": 4, 
+          "id": 6, 
           "page_id": pageId,
           "title": "Testimonials Section", 
           "heading": "Success Stories", 
           "content": "Hear from families who found their perfect match through our directory", 
           "headingType": "h2",
-          "order": 4,
+          "order": 6,
           "type": "testimonials",
           "subtitle": "Testimonials",
           "testimonials": JSON.stringify([
@@ -480,13 +526,13 @@ export default function PageEditor() {
           ])
         },
         { 
-          "id": 5, 
+          "id": 7, 
           "page_id": pageId,
           "title": "Resources Section", 
           "heading": "Resources & Guides", 
           "content": "Everything you need to know about fostering in the UK. From legal requirements to heartwarming success stories, we've got you covered.", 
           "headingType": "h2",
-          "order": 5,
+          "order": 7,
           "type": "resources",
           "subtitle": "Knowledge Hub",
           "subheading": "Helpful Guides",
@@ -501,25 +547,175 @@ export default function PageEditor() {
               "icon": "BookOpen"
             },
             {
-              "title": "Legal Requirements",
-              "description": "Understanding the legal aspects of becoming a foster carer",
-              "icon": "FileText"
+              "title": "Training and Support",
+              "description": "Comprehensive overview of training programs and ongoing support",
+              "icon": "Users"
+            },
+            {
+              "title": "Allowance and Payments",
+              "description": "Detailed information about financial support for foster carers",
+              "icon": "Heart"
+            },
+            {
+              "title": "FAQs About Fostering",
+              "description": "Answers to common questions about the fostering process",
+              "icon": "HelpCircle"
             }
           ])
         },
         { 
-          "id": 6, 
+          "id": 8, 
+          "page_id": pageId,
+          "title": "Fostering Process Timeline", 
+          "heading": "The Fostering Process in the UK", 
+          "content": "Understanding the journey from initial inquiry to becoming an approved foster carer.", 
+          "headingType": "h2",
+          "order": 8,
+          "type": "fostering_process",
+          "subtitle": "Step-by-Step Guide",
+          "steps": JSON.stringify([
+            {
+              "step": 1,
+              "title": "Enquire",
+              "description": "Contact a fostering agency to express your interest and ask questions about the process."
+            },
+            {
+              "step": 2,
+              "title": "Assessment",
+              "description": "Complete application forms, background checks, and initial interviews with a social worker."
+            },
+            {
+              "step": 3,
+              "title": "Training",
+              "description": "Attend mandatory training sessions to prepare for the responsibilities of fostering."
+            },
+            {
+              "step": 4,
+              "title": "Approval",
+              "description": "Undergo final reviews and panel meetings to gain formal approval as a foster carer."
+            },
+            {
+              "step": 5,
+              "title": "Matching",
+              "description": "Work with your agency to find the right placement opportunity for you and the child."
+            },
+            {
+              "step": 6,
+              "title": "Placement & Support",
+              "description": "Begin fostering with ongoing support, supervision, and regular reviews."
+            }
+          ])
+        },
+        { 
+          "id": 9, 
+          "page_id": pageId,
+          "title": "Statistics & Impact", 
+          "heading": "Statistics & Impact", 
+          "content": "Understanding the scale and impact of fostering in the UK.", 
+          "headingType": "h2",
+          "order": 9,
+          "type": "statistics",
+          "subtitle": "By The Numbers",
+          "stats": JSON.stringify([
+            {
+              "number": "70,000+",
+              "label": "Children in Foster Care",
+              "description": "The number of children currently needing foster homes across the UK."
+            },
+            {
+              "number": "100+",
+              "label": "Fostering Agencies",
+              "description": "Verified agencies listed in our comprehensive directory."
+            },
+            {
+              "number": "4 Nations",
+              "label": "Serving All UK Regions",
+              "description": "Providing services across England, Wales, Scotland, and Northern Ireland."
+            }
+          ])
+        },
+        { 
+          "id": 10, 
+          "page_id": pageId,
+          "title": "Regional Quick Links", 
+          "heading": "Regional Quick Links", 
+          "content": "Find fostering opportunities in major UK regions.", 
+          "headingType": "h2",
+          "order": 10,
+          "type": "regional_links",
+          "subtitle": "Explore by Region",
+          "regions": JSON.stringify([
+            { "name": "London", "path": "/foster-agency/england/greater-london/london" },
+            { "name": "Manchester", "path": "/foster-agency/england/greater-manchester/manchester" },
+            { "name": "Birmingham", "path": "/foster-agency/england/west-midlands/birmingham" },
+            { "name": "Glasgow", "path": "/foster-agency/scotland/glasgow-city/glasgow" },
+            { "name": "Leeds", "path": "/foster-agency/england/west-yorkshire/leeds" },
+            { "name": "Liverpool", "path": "/foster-agency/england/merseyside/liverpool" },
+            { "name": "Edinburgh", "path": "/foster-agency/scotland/city-of-edinburgh/edinburgh" },
+            { "name": "Cardiff", "path": "/foster-agency/wales/cardiff/cardiff" }
+          ])
+        },
+        { 
+          "id": 11, 
+          "page_id": pageId,
+          "title": "FAQ Section", 
+          "heading": "FAQs About Fostering", 
+          "content": "Answers to common questions about becoming a foster carer.", 
+          "headingType": "h2",
+          "order": 11,
+          "type": "faq",
+          "subtitle": "Frequently Asked Questions",
+          "faqs": JSON.stringify([
+            {
+              "question": "How do I find a foster agency near me?",
+              "answer": "Use our search function to find agencies in your area, or browse our regional directories. All agencies in our directory are verified and reviewed."
+            },
+            {
+              "question": "What's the difference between local authority and independent agencies?",
+              "answer": "Local authorities are government-run organizations, while independent agencies are privately operated. Both must meet the same regulatory standards, but may offer different approaches and support systems."
+            },
+            {
+              "question": "Do foster carers get paid?",
+              "answer": "Foster carers receive a tax-free allowance to cover the costs of caring for a child, including food, clothing, and pocket money. The amount varies based on the child's age and needs."
+            },
+            {
+              "question": "Can I work while being a foster carer?",
+              "answer": "Many foster carers work, though it depends on the needs of the children placed with you. Some fostering services offer flexible arrangements for working carers."
+            },
+            {
+              "question": "How long does the fostering process take?",
+              "answer": "The assessment and approval process typically takes 4-6 months, though this can vary based on individual circumstances and the agency."
+            },
+            {
+              "question": "What support is available for foster carers?",
+              "answer": "Fostering agencies provide 24/7 emergency support, regular supervision visits, ongoing training, and access to support groups. Many also offer specialized support for children with complex needs."
+            }
+          ])
+        },
+        { 
+          "id": 12, 
           "page_id": pageId,
           "title": "CTA Section", 
           "heading": "Are You a Fostering Agency?", 
           "content": "Join our trusted directory and connect with families looking for the perfect fostering partnership. Get started with a free basic listing today.", 
           "headingType": "h2",
-          "order": 6,
+          "order": 12,
           "type": "cta",
           "primary_button_text": "Register Your Agency",
           "primary_button_link": "/auth/signup",
           "secondary_button_text": "Learn More",
           "secondary_button_link": "/contact"
+        },
+        { 
+          "id": 13, 
+          "page_id": pageId,
+          "title": "Newsletter CTA", 
+          "heading": "Stay Updated with Fostering Opportunities", 
+          "content": "Subscribe to our newsletter for the latest fostering news, resources, and opportunities.", 
+          "headingType": "h2",
+          "order": 13,
+          "type": "newsletter",
+          "subtitle": "Stay Connected"
         }
       ];
     }

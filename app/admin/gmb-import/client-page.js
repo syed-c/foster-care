@@ -291,7 +291,7 @@ export default function ClientGMBImportPage() {
           <div className="space-y-2">
             <Label htmlFor="limit">How many listings to import</Label>
             <div className="grid grid-cols-5 gap-2">
-              {[10, 50, 100, 500].map((value) => (
+              {[10, 50, 100, 500, 1000].map((value) => (
                 <Button
                   key={value}
                   variant={limit === value ? "default" : "outline"}
@@ -304,16 +304,20 @@ export default function ClientGMBImportPage() {
                 <Input
                   type="number"
                   min="1"
+                  max="5000"
                   value={limit === -1 ? customLimit : limit}
                   onChange={(e) => {
                     const value = parseInt(e.target.value) || 10;
-                    setCustomLimit(value);
+                    setCustomLimit(Math.min(value, 5000));
                     setLimit(-1);
                   }}
                   className="flex-1"
                 />
               </div>
             </div>
+            <p className="text-sm text-muted-foreground">
+              Higher limits may take longer to process. Maximum 5000 agencies per import.
+            </p>
           </div>
           
           {/* Options */}
