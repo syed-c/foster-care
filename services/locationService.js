@@ -454,162 +454,166 @@ async function getLocationContentBySlug(slug) {
 
 /**
  * Get location content by canonical slug
- * @param {string} canonicalSlug - The canonical slug of the location
- * @returns {Promise<Object|null>} The location content
+ * @param {string} canonicalSlug - The canonical slug of the page
+ * @returns {Promise<Object|null>} The location content or null if not found
  */
-async function getLocationContentByCanonicalSlug(canonicalSlug) {
+export async function getLocationContentByCanonicalSlug(canonicalSlug) {
   try {
-    console.log('=== getLocationContentByCanonicalSlug called with:', canonicalSlug);
-    
-    // Validate that we have a canonical slug
-    if (!canonicalSlug) {
-      console.warn('No canonical slug provided');
-      return null;
-    }
-    
     // Check if Supabase is configured
     if (!supabaseAdmin) {
-      console.warn('Supabase not configured. Returning mock content.');
       // Return mock content for development
-      return {
-        title: `Foster Agencies in ${canonicalSlug.split('/').pop()}`,
-        meta_title: `Foster Agencies in ${canonicalSlug.split('/').pop()} | UK Directory`,
-        meta_description: `Find accredited foster agencies in ${canonicalSlug.split('/').pop()}. Browse regions and cities to discover fostering services near you.`,
-        sections: []
-      };
+      return getMockContent(canonicalSlug);
     }
-    
-    // Ensure the canonical slug starts with /foster-agency/
-    let formattedCanonicalSlug = canonicalSlug;
-    if (!canonicalSlug.startsWith('/foster-agency/')) {
-      formattedCanonicalSlug = `/foster-agency/${canonicalSlug.replace(/^\/+/, '')}`;
-      console.log('Formatted canonical slug:', formattedCanonicalSlug);
-    }
-    
-    // First, try to query location_content directly using the canonical_slug column
-    const { data: directData, error: directError } = await supabaseAdmin
-      .from('location_content')
-      .select('content_json, canonical_slug')
-      .eq('canonical_slug', formattedCanonicalSlug)
-      .maybeSingle();
 
-    if (directData && !directError) {
-      console.log('Data fetched directly for canonical slug:', formattedCanonicalSlug, directData);
-      // Ensure we return a proper object structure
-      let content = directData?.content_json || null;
-      
-      // If we have content but it's a string, parse it
-      if (typeof content === 'string') {
-        try {
-          content = JSON.parse(content);
-        } catch (parseError) {
-          console.error('Error parsing content JSON:', parseError);
-          content = null;
-        }
-      }
-      
-      console.log('Returning content:', !!content);
-      return content;
-    }
-    
-    if (directError) {
-      console.log('Direct query error:', directError);
-    }
-    
-    console.log('No direct data found, trying join approach');
-
-    // If direct query fails or returns no data, try the join approach
-    // This is similar to how getLocationContentBySlug works
+    // Fetch content from Supabase
     const { data, error } = await supabaseAdmin
       .from('location_content')
-      .select('content_json, locations!inner(canonical_slug)')
-      .eq('locations.canonical_slug', formattedCanonicalSlug)
-      .maybeSingle();
+      .select('*')
+      .eq('canonical_slug', canonicalSlug)
+      .single();
 
     if (error) {
-      console.error('Error fetching location content by canonical slug:', error);
-      // If we get a PostgREST error about locations not being embedded, 
-      // it means we're trying to access a relationship incorrectly
-      if (error.code === 'PGRST108') {
-        console.log('PostgREST embedded resource error, trying alternative approach');
-        
-        // Try to get the location first, then get its content
-        const { data: locationData, error: locationError } = await supabaseAdmin
-          .from('locations')
-          .select('id')
-          .eq('canonical_slug', formattedCanonicalSlug)
-          .maybeSingle();
-
-        if (locationError) {
-          console.error('Error finding location by canonical slug:', locationError);
-          return null;
-        }
-
-        if (!locationData) {
-          console.log('No location found for canonical slug:', formattedCanonicalSlug);
-          return null;
-        }
-
-        // Now get the content using the location_id
-        const { data: contentData, error: contentError } = await supabaseAdmin
-          .from('location_content')
-          .select('content_json')
-          .eq('location_id', locationData.id)
-          .maybeSingle();
-
-        if (contentError) {
-          console.error('Error fetching location content by location_id:', contentError);
-          return null;
-        }
-
-        console.log('Content fetched by location_id:', contentData);
-        // Ensure we return a proper object structure
-        let content = contentData?.content_json || null;
-        
-        // If we have content but it's a string, parse it
-        if (typeof content === 'string') {
-          try {
-            content = JSON.parse(content);
-          } catch (parseError) {
-            console.error('Error parsing content JSON:', parseError);
-            content = null;
-          }
-        }
-        
-        console.log('Returning content:', !!content);
-        // Return contentData?.content_json or contentData instead of raw object
-        return contentData?.content_json || contentData || content;
-      }
-      
-      return null;
+      // If table doesn't exist or other database error, return mock content
+      console.warn('Database error fetching location content, using mock content:', error.message);
+      return getMockContent(canonicalSlug);
     }
 
-    console.log('Data fetched for canonical slug:', formattedCanonicalSlug, data);
-    // Ensure we return a proper object structure
-    let content = data?.content_json || null;
-    
-    // If we have content but it's a string, parse it
-    if (typeof content === 'string') {
-      try {
-        content = JSON.parse(content);
-      } catch (parseError) {
-        console.error('Error parsing content JSON:', parseError);
-        content = null;
-      }
-    }
-    
-    console.log('Returning content:', !!content);
-    // Return data?.content_json or data instead of raw object
-    return data?.content_json || data || content;
+    return data || getMockContent(canonicalSlug);
   } catch (error) {
-    console.error('Error getting location content by canonical slug:', error);
-    // Return mock content as fallback
+    // If any other error occurs, return mock content
+    console.warn('Error in getLocationContentByCanonicalSlug, using mock content:', error.message);
+    return getMockContent(canonicalSlug);
+  }
+}
+
+/**
+ * Get mock content for development
+ * @param {string} canonicalSlug - The canonical slug of the page
+ * @returns {Object} Mock content
+ */
+function getMockContent(canonicalSlug) {
+  const locationName = canonicalSlug.split('/').pop() || 'Location';
+  const locationType = canonicalSlug.split('/').length - 2; // 1 = country, 2 = region, 3 = city
+  
+  if (locationType === 1) {
+    // Country-level mock content
     return {
-      title: `Foster Agencies in ${canonicalSlug.split('/').pop()}`,
-      meta_title: `Foster Agencies in ${canonicalSlug.split('/').pop()} | UK Directory`,
-      meta_description: `Find accredited foster agencies in ${canonicalSlug.split('/').pop()}. Browse regions and cities to discover fostering services near you.`,
-      sections: []
+      title: `Foster Agencies in ${locationName}`,
+      meta_title: `Foster Agencies in ${locationName} | UK Directory`,
+      meta_description: `Find accredited foster agencies in ${locationName}. Browse regions and cities to discover fostering services near you.`,
+      hero: {
+        heading: `Foster Agencies in ${locationName}`,
+        subheading: `Find accredited foster agencies in ${locationName}`,
+        cta_primary: { text: "Get Foster Agency Support", link: "/contact" },
+        cta_secondary: { text: "Explore Regions", link: "#regions" }
+      },
+      overview: {
+        title: `About Fostering in ${locationName}`,
+        body: `Welcome to our directory of foster agencies in ${locationName}. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.`
+      }
     };
+  } else if (locationType === 2) {
+    // Region-level mock content
+    return {
+      title: `Foster Agencies in ${locationName}`,
+      meta_title: `Foster Agencies in ${locationName} | UK Directory`,
+      meta_description: `Find accredited foster agencies in ${locationName}. Browse cities to discover fostering services near you.`,
+      hero: {
+        heading: `Foster Agencies in ${locationName}`,
+        subheading: `Find accredited foster agencies in ${locationName}`,
+        cta_primary: { text: "Get Foster Agency Support", link: "/contact" },
+        cta_secondary: { text: "Explore Cities", link: "#cities" }
+      },
+      about: {
+        title: `About Fostering in ${locationName}`,
+        body: `Welcome to our directory of foster agencies in ${locationName}. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.`
+      }
+    };
+  } else {
+    // City-level mock content
+    return {
+      title: `Foster Agencies in ${locationName}`,
+      meta_title: `Foster Agencies in ${locationName} | UK Directory`,
+      meta_description: `Find accredited foster agencies in ${locationName}. Discover fostering services and opportunities in your local area.`,
+      hero: {
+        heading: `Foster Agencies in ${locationName}`,
+        subheading: `Find accredited foster agencies in ${locationName}`,
+        cta_primary: { text: "Talk to a Foster Advisor", link: "/contact" },
+        cta_secondary: { text: "View Agencies", link: "#agencies" }
+      },
+      about: {
+        title: `About Fostering in ${locationName}`,
+        body: `Welcome to our directory of foster agencies in ${locationName}. We've compiled a list of accredited and trusted agencies to help you start your fostering journey.`
+      }
+    };
+  }
+}
+
+/**
+ * Extract sections from content
+ * Handles both old flat structure and new sections array
+ * @param {Object} rawContent - The raw content from the database
+ * @returns {Array} Array of normalized sections
+ */
+export function extractSectionsFromContent(rawContent) {
+  try {
+    // Handle case where content is null or undefined
+    if (!rawContent) {
+      return [];
+    }
+
+    // If we have a sections array, use it directly
+    if (Array.isArray(rawContent.sections)) {
+      return rawContent.sections.map(section => ({
+        type: section.type,
+        data: section.data || {},
+        id: section.id
+      }));
+    }
+
+    // Convert flat structure to sections array
+    const sections = [];
+    
+    // Define mapping from old keys to section types
+    const keyToTypeMap = {
+      hero: 'hero',
+      overview: 'overview',
+      about: 'overview',
+      systemInfo: 'systemInfo',
+      reasons: 'reasons',
+      benefits: 'reasons',
+      featuredAreas: 'featuredAreas',
+      popularLocations: 'featuredAreas',
+      regionsGrid: 'regionsGrid',
+      faqs: 'faq',
+      trustBar: 'trustBar',
+      finalCta: 'finalCta'
+    };
+
+    // Convert each content property to a section
+    Object.entries(rawContent).forEach(([key, value]) => {
+      // Skip non-content fields
+      if (['id', 'canonical_slug', 'template_type', 'content_json', 'meta_title', 'meta_description', 'created_at', 'updated_at'].includes(key)) {
+        return;
+      }
+
+      // Map key to section type
+      const type = keyToTypeMap[key] || key;
+
+      // Only add sections with actual content
+      if (value && (typeof value === 'object' || typeof value === 'string')) {
+        sections.push({
+          type,
+          data: typeof value === 'string' ? { body: value } : value,
+          id: `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        });
+      }
+    });
+
+    return sections;
+  } catch (error) {
+    console.error('Error extracting sections from content:', error);
+    return [];
   }
 }
 
@@ -711,66 +715,12 @@ async function getCitiesByRegion(regionSlug, limit = 10) {
   }
 }
 
-// Utility function to extract sections from location content
-function extractSectionsFromContent(content) {
-  console.log('extractSectionsFromContent called with:', JSON.stringify(content, null, 2));
-  let sections = [];
-  
-  if (content && typeof content === 'object') {
-    // Handle content_json structure (this is the main case for our data)
-    if (content.content_json && typeof content.content_json === 'object') {
-      const contentJson = content.content_json;
-      console.log('Processing content_json:', JSON.stringify(contentJson, null, 2));
-      if (Array.isArray(contentJson.sections)) {
-        sections = contentJson.sections;
-        console.log('Found sections array in content_json:', sections.length);
-      } else if (typeof contentJson === 'object' && !Array.isArray(contentJson)) {
-        // Convert flat content structure to sections
-        sections = Object.keys(contentJson)
-          .filter(key => typeof contentJson[key] === 'object' && contentJson[key] !== null)
-          .map(key => ({
-            type: key,
-            key: key,
-            data: contentJson[key]
-          }));
-        console.log('Converted flat content to sections:', sections.length);
-      }
-    } 
-    // Handle case where content itself is the flat structure with sections
-    else if (!content.content_json && !content.sections) {
-      // Check if content has section-like properties directly
-      const contentKeys = Object.keys(content);
-      console.log('Processing direct content with keys:', contentKeys);
-      
-      // Convert flat content structure to sections
-      sections = contentKeys
-        .filter(key => typeof content[key] === 'object' && content[key] !== null && key !== 'id' && key !== 'canonical_slug' && key !== 'title' && key !== 'meta_title' && key !== 'meta_description')
-        .map(key => ({
-          type: key,
-          key: key,
-          data: content[key]
-        }));
-      console.log('Converted direct content to sections:', sections.length);
-    }
-    // Handle sections array directly in content
-    else if (Array.isArray(content.sections)) {
-      sections = content.sections;
-      console.log('Found sections array directly in content:', sections.length);
-    }
-  }
-  
-  console.log('Returning sections:', JSON.stringify(sections, null, 2));
-  return sections;
-}
-
-module.exports = {
+export {
   buildCanonicalSlug,
   updateCanonicalSlug,
   getLocationTree,
   getLocationContentBySlug,
-  getLocationContentByCanonicalSlug,
   getAgenciesByRegion,
   getAgenciesByCountry,
-  getCitiesByRegion,
-  extractSectionsFromContent
+  getCitiesByRegion
 };

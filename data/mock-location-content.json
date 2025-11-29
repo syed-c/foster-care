@@ -1,0 +1,423 @@
+[
+  {
+    "id": "country-england",
+    "location_id": "england",
+    "country_id": "england",
+    "template_type": "country",
+    "canonical_slug": "/foster-agency/england",
+    "content_json": {
+      "title": "Foster Agencies in England",
+      "meta_title": "Foster Agencies in England | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in England. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in England",
+        "subheading": "Find accredited foster agencies in England",
+        "cta_primary": {
+          "text": "Get Foster Agency Support",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "Explore Regions",
+          "link": "#regions"
+        }
+      },
+      "overview": {
+        "title": "About Fostering in England",
+        "body": "Welcome to our directory of foster agencies in England. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Fostering in England offers a rewarding opportunity to make a positive impact on a child's life while being part of a supportive community."
+      }
+    },
+    "hierarchy_path": "/england"
+  },
+  {
+    "id": "country-scotland",
+    "location_id": "scotland",
+    "country_id": "scotland",
+    "template_type": "country",
+    "canonical_slug": "/foster-agency/scotland",
+    "content_json": {
+      "title": "Foster Agencies in Scotland",
+      "meta_title": "Foster Agencies in Scotland | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in Scotland. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in Scotland",
+        "subheading": "Find accredited foster agencies in Scotland",
+        "cta_primary": {
+          "text": "Get Foster Agency Support",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "Explore Regions",
+          "link": "#regions"
+        }
+      },
+      "overview": {
+        "title": "About Fostering in Scotland",
+        "body": "Welcome to our directory of foster agencies in Scotland. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Fostering in Scotland offers a rewarding opportunity to make a positive impact on a child's life while being part of a supportive community."
+      }
+    },
+    "hierarchy_path": "/scotland"
+  },
+  {
+    "id": "country-wales",
+    "location_id": "wales",
+    "country_id": "wales",
+    "template_type": "country",
+    "canonical_slug": "/foster-agency/wales",
+    "content_json": {
+      "title": "Foster Agencies in Wales",
+      "meta_title": "Foster Agencies in Wales | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in Wales. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in Wales",
+        "subheading": "Find accredited foster agencies in Wales",
+        "cta_primary": {
+          "text": "Get Foster Agency Support",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "Explore Regions",
+          "link": "#regions"
+        }
+      },
+      "overview": {
+        "title": "About Fostering in Wales",
+        "body": "Welcome to our directory of foster agencies in Wales. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Fostering in Wales offers a rewarding opportunity to make a positive impact on a child's life while being part of a supportive community."
+      }
+    },
+    "hierarchy_path": "/wales"
+  },
+  {
+    "id": "country-northern-ireland",
+    "location_id": "northern-ireland",
+    "country_id": "northern-ireland",
+    "template_type": "country",
+    "canonical_slug": "/foster-agency/northern-ireland",
+    "content_json": {
+      "title": "Foster Agencies in Northern Ireland",
+      "meta_title": "Foster Agencies in Northern Ireland | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in Northern Ireland. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in Northern Ireland",
+        "subheading": "Find accredited foster agencies in Northern Ireland",
+        "cta_primary": {
+          "text": "Get Foster Agency Support",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "Explore Regions",
+          "link": "#regions"
+        }
+      },
+      "overview": {
+        "title": "About Fostering in Northern Ireland",
+        "body": "Welcome to our directory of foster agencies in Northern Ireland. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Fostering in Northern Ireland offers a rewarding opportunity to make a positive impact on a child's life while being part of a supportive community."
+      }
+    },
+    "hierarchy_path": "/northern-ireland"
+  },
+  {
+    "id": "region-greater-london",
+    "location_id": "greater-london",
+    "country_id": "england",
+    "region_id": "greater-london",
+    "template_type": "region",
+    "canonical_slug": "/foster-agency/england/greater-london",
+    "content_json": {
+      "title": "Foster Agencies in Greater London",
+      "meta_title": "Foster Agencies in Greater London | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in Greater London. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in Greater London",
+        "subheading": "Find accredited foster agencies in Greater London",
+        "cta_primary": {
+          "text": "Get Foster Agency Support",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "Explore Cities",
+          "link": "#cities"
+        }
+      },
+      "about": {
+        "title": "About Fostering in Greater London",
+        "body": "Welcome to our directory of foster agencies in Greater London. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Greater London offers diverse fostering opportunities with strong community support networks."
+      }
+    },
+    "hierarchy_path": "/england/greater-london"
+  },
+  {
+    "id": "region-west-midlands",
+    "location_id": "west-midlands",
+    "country_id": "england",
+    "region_id": "west-midlands",
+    "template_type": "region",
+    "canonical_slug": "/foster-agency/england/west-midlands",
+    "content_json": {
+      "title": "Foster Agencies in West Midlands",
+      "meta_title": "Foster Agencies in West Midlands | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in West Midlands. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in West Midlands",
+        "subheading": "Find accredited foster agencies in West Midlands",
+        "cta_primary": {
+          "text": "Get Foster Agency Support",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "Explore Cities",
+          "link": "#cities"
+        }
+      },
+      "about": {
+        "title": "About Fostering in West Midlands",
+        "body": "Welcome to our directory of foster agencies in West Midlands. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. West Midlands offers diverse fostering opportunities with strong community support networks."
+      }
+    },
+    "hierarchy_path": "/england/west-midlands"
+  },
+  {
+    "id": "region-greater-manchester",
+    "location_id": "greater-manchester",
+    "country_id": "england",
+    "region_id": "greater-manchester",
+    "template_type": "region",
+    "canonical_slug": "/foster-agency/england/greater-manchester",
+    "content_json": {
+      "title": "Foster Agencies in Greater Manchester",
+      "meta_title": "Foster Agencies in Greater Manchester | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in Greater Manchester. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in Greater Manchester",
+        "subheading": "Find accredited foster agencies in Greater Manchester",
+        "cta_primary": {
+          "text": "Get Foster Agency Support",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "Explore Cities",
+          "link": "#cities"
+        }
+      },
+      "about": {
+        "title": "About Fostering in Greater Manchester",
+        "body": "Welcome to our directory of foster agencies in Greater Manchester. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Greater Manchester offers diverse fostering opportunities with strong community support networks."
+      }
+    },
+    "hierarchy_path": "/england/greater-manchester"
+  },
+  {
+    "id": "region-glasgow-city",
+    "location_id": "glasgow-city",
+    "country_id": "scotland",
+    "region_id": "glasgow-city",
+    "template_type": "region",
+    "canonical_slug": "/foster-agency/scotland/glasgow-city",
+    "content_json": {
+      "title": "Foster Agencies in Glasgow City",
+      "meta_title": "Foster Agencies in Glasgow City | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in Glasgow City. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in Glasgow City",
+        "subheading": "Find accredited foster agencies in Glasgow City",
+        "cta_primary": {
+          "text": "Get Foster Agency Support",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "Explore Cities",
+          "link": "#cities"
+        }
+      },
+      "about": {
+        "title": "About Fostering in Glasgow City",
+        "body": "Welcome to our directory of foster agencies in Glasgow City. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Glasgow City offers diverse fostering opportunities with strong community support networks."
+      }
+    },
+    "hierarchy_path": "/scotland/glasgow-city"
+  },
+  {
+    "id": "region-cardiff",
+    "location_id": "cardiff",
+    "country_id": "wales",
+    "region_id": "cardiff",
+    "template_type": "region",
+    "canonical_slug": "/foster-agency/wales/cardiff",
+    "content_json": {
+      "title": "Foster Agencies in Cardiff",
+      "meta_title": "Foster Agencies in Cardiff | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in Cardiff. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in Cardiff",
+        "subheading": "Find accredited foster agencies in Cardiff",
+        "cta_primary": {
+          "text": "Get Foster Agency Support",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "Explore Cities",
+          "link": "#cities"
+        }
+      },
+      "about": {
+        "title": "About Fostering in Cardiff",
+        "body": "Welcome to our directory of foster agencies in Cardiff. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Cardiff offers diverse fostering opportunities with strong community support networks."
+      }
+    },
+    "hierarchy_path": "/wales/cardiff"
+  },
+  {
+    "id": "city-london",
+    "location_id": "london",
+    "country_id": "england",
+    "region_id": "greater-london",
+    "city_id": "london",
+    "template_type": "city",
+    "canonical_slug": "/foster-agency/england/greater-london/london",
+    "content_json": {
+      "title": "Foster Agencies in London",
+      "meta_title": "Foster Agencies in London | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in London. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in London",
+        "subheading": "Find accredited foster agencies in London",
+        "cta_primary": {
+          "text": "Talk to a Foster Advisor",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "View Agencies",
+          "link": "#agencies"
+        }
+      },
+      "about": {
+        "title": "About Fostering in London",
+        "body": "Welcome to our directory of foster agencies in London. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Fostering in London offers a rewarding opportunity to make a positive impact on a child's life while being part of a supportive community."
+      }
+    },
+    "hierarchy_path": "/england/greater-london/london"
+  },
+  {
+    "id": "city-birmingham",
+    "location_id": "birmingham",
+    "country_id": "england",
+    "region_id": "west-midlands",
+    "city_id": "birmingham",
+    "template_type": "city",
+    "canonical_slug": "/foster-agency/england/west-midlands/birmingham",
+    "content_json": {
+      "title": "Foster Agencies in Birmingham",
+      "meta_title": "Foster Agencies in Birmingham | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in Birmingham. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in Birmingham",
+        "subheading": "Find accredited foster agencies in Birmingham",
+        "cta_primary": {
+          "text": "Talk to a Foster Advisor",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "View Agencies",
+          "link": "#agencies"
+        }
+      },
+      "about": {
+        "title": "About Fostering in Birmingham",
+        "body": "Welcome to our directory of foster agencies in Birmingham. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Fostering in Birmingham offers a rewarding opportunity to make a positive impact on a child's life while being part of a supportive community."
+      }
+    },
+    "hierarchy_path": "/england/west-midlands/birmingham"
+  },
+  {
+    "id": "city-manchester",
+    "location_id": "manchester",
+    "country_id": "england",
+    "region_id": "greater-manchester",
+    "city_id": "manchester",
+    "template_type": "city",
+    "canonical_slug": "/foster-agency/england/greater-manchester/manchester",
+    "content_json": {
+      "title": "Foster Agencies in Manchester",
+      "meta_title": "Foster Agencies in Manchester | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in Manchester. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in Manchester",
+        "subheading": "Find accredited foster agencies in Manchester",
+        "cta_primary": {
+          "text": "Talk to a Foster Advisor",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "View Agencies",
+          "link": "#agencies"
+        }
+      },
+      "about": {
+        "title": "About Fostering in Manchester",
+        "body": "Welcome to our directory of foster agencies in Manchester. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Fostering in Manchester offers a rewarding opportunity to make a positive impact on a child's life while being part of a supportive community."
+      }
+    },
+    "hierarchy_path": "/england/greater-manchester/manchester"
+  },
+  {
+    "id": "city-glasgow",
+    "location_id": "glasgow",
+    "country_id": "scotland",
+    "region_id": "glasgow-city",
+    "city_id": "glasgow",
+    "template_type": "city",
+    "canonical_slug": "/foster-agency/scotland/glasgow-city/glasgow",
+    "content_json": {
+      "title": "Foster Agencies in Glasgow",
+      "meta_title": "Foster Agencies in Glasgow | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in Glasgow. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in Glasgow",
+        "subheading": "Find accredited foster agencies in Glasgow",
+        "cta_primary": {
+          "text": "Talk to a Foster Advisor",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "View Agencies",
+          "link": "#agencies"
+        }
+      },
+      "about": {
+        "title": "About Fostering in Glasgow",
+        "body": "Welcome to our directory of foster agencies in Glasgow. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Fostering in Glasgow offers a rewarding opportunity to make a positive impact on a child's life while being part of a supportive community."
+      }
+    },
+    "hierarchy_path": "/scotland/glasgow-city/glasgow"
+  },
+  {
+    "id": "city-cardiff-city",
+    "location_id": "cardiff-city",
+    "country_id": "wales",
+    "region_id": "cardiff",
+    "city_id": "cardiff-city",
+    "template_type": "city",
+    "canonical_slug": "/foster-agency/wales/cardiff/cardiff",
+    "content_json": {
+      "title": "Foster Agencies in Cardiff",
+      "meta_title": "Foster Agencies in Cardiff | UK Foster Care Directory",
+      "meta_description": "Find accredited foster agencies in Cardiff. Expert support and guidance for prospective foster carers.",
+      "hero": {
+        "heading": "Foster Agencies in Cardiff",
+        "subheading": "Find accredited foster agencies in Cardiff",
+        "cta_primary": {
+          "text": "Talk to a Foster Advisor",
+          "link": "/contact"
+        },
+        "cta_secondary": {
+          "text": "View Agencies",
+          "link": "#agencies"
+        }
+      },
+      "about": {
+        "title": "About Fostering in Cardiff",
+        "body": "Welcome to our directory of foster agencies in Cardiff. We've compiled a list of accredited and trusted agencies to help you start your fostering journey. Fostering in Cardiff offers a rewarding opportunity to make a positive impact on a child's life while being part of a supportive community."
+      }
+    },
+    "hierarchy_path": "/wales/cardiff/cardiff-city"
+  }
+]

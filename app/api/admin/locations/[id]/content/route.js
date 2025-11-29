@@ -63,7 +63,8 @@ async function ensureLocation(locationId, fallback = {}) {
 }
 
 export async function PUT(req, { params }) {
-  const locationId = params.id;
+  const resolvedParams = await params;
+  const locationId = resolvedParams.id;
   if (!locationId) return NextResponse.json({ success:false, error:'Missing location id' }, { status:400 });
 
   let body;
@@ -142,7 +143,8 @@ export async function PUT(req, { params }) {
 }
 
 export async function GET(req, { params }) {
-  const locationId = params.id;
+  const resolvedParams = await params;
+  const locationId = resolvedParams.id;
   if (!locationId) return NextResponse.json({ success:false, error:'Missing location id' }, { status:400 });
 
   const { data, error } = await supabaseAdmin

@@ -2,7 +2,8 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
 
     // Fetch blog post from Supabase
     const { data: blog, error } = await supabaseAdmin
@@ -62,7 +63,8 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const body = await request.json();
 
     // Update blog post in Supabase
@@ -118,7 +120,8 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
 
     // Delete blog post from Supabase
     const { error } = await supabaseAdmin

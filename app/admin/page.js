@@ -315,6 +315,12 @@ export default function AdminDashboard() {
                     <span>GMB Import</span>
                   </Link>
                 </Button>
+                <Button variant="outline" className="h-auto py-4 flex flex-col items-center justify-center font-inter" asChild>
+                  <Link href="/admin/country-editor">
+                    <FileText className="w-6 h-6 mb-2" />
+                    <span>Country Editor</span>
+                  </Link>
+                </Button>
               </div>
             </CardContent>
           </Card>

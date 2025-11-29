@@ -160,7 +160,8 @@ export async function POST(request) {
 // Handle PUT requests to update a page
 export async function PUT(request, { params }) {
   try {
-    const { id } = await params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const body = await request.json();
 
     // Check for admin token

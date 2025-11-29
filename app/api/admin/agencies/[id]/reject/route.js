@@ -1,48 +1,29 @@
 import { supabaseAdmin } from '@/lib/supabase';
-import { verify } from 'jsonwebtoken';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../../../auth/[...nextauth]/authOptions';
 
 export async function POST(request, { params }) {
   try {
-    // Special case for auth@syedrayyan.com
-    const specialAccess = request.cookies.get('special_super_admin_access')?.value;
-    if (specialAccess !== 'auth@syedrayyan.com') {
-      // Check for admin token
-      const token = request.cookies.get("admin_token")?.value;
-      
-      if (!token) {
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      try {
-        // Verify the token
-        const decoded = verify(token, process.env.NEXTAUTH_SECRET);
-        
-        // Check if it's an admin
-        if (decoded.role !== "admin") {
-          return new Response(
-            JSON.stringify({ error: 'Unauthorized' }),
-            { status: 401, headers: { 'Content-Type': 'application/json' } }
-          );
-        }
-      } catch (error) {
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+    // Get the session
+    const session = await getServerSession(authOptions);
+    
+    // Check if user is admin
+    if (!session || session.user.role !== 'admin') {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
-    const { id } = await params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     
     // Update agency status to rejected
     const { data, error } = await supabaseAdmin
       .from('agencies')
       .update({ 
-        verified: false,
-        updated_at: new Date().toISOString()
+        status: 'rejected',
+        verified: false
       })
       .eq('id', id)
       .select()
@@ -55,7 +36,7 @@ export async function POST(request, { params }) {
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
-
+    
     if (!data) {
       return new Response(
         JSON.stringify({ error: 'Agency not found' }),

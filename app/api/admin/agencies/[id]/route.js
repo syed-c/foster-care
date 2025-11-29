@@ -15,7 +15,8 @@ export async function GET(request, { params }) {
       );
     }
 
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     
     // Fetch agency details
     const { data: agency, error } = await supabaseAdmin
@@ -74,7 +75,8 @@ export async function POST(request, { params }) {
       );
     }
 
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const { action } = await request.json();
     
     let updateData = {};
