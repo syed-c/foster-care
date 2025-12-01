@@ -21,6 +21,7 @@ function slugify(text) {
  */
 async function buildCanonicalSlug(locationId, locationType) {
   try {
+    console.log('buildCanonicalSlug called with:', { locationId, locationType });
     const parts = [];
     let currentId = locationId;
     let currentType = locationType;
@@ -100,7 +101,9 @@ async function buildCanonicalSlug(locationId, locationType) {
       parts.unshift(locationId);
     }
     
-    return '/foster-agency/' + parts.join('/');
+    const result = '/foster-agency/' + parts.join('/');
+    console.log('buildCanonicalSlug result:', result);
+    return result;
   } catch (error) {
     console.error('Error building canonical slug, using fallback:', error);
     // Fallback to a basic canonical slug
@@ -472,10 +475,22 @@ async function getLocationContentByCanonicalSlug(canonicalSlug) {
       console.warn('Supabase not configured. Returning mock content.');
       // Return mock content for development
       return {
-        title: `Foster Agencies in ${canonicalSlug.split('/').pop()}`,
-        meta_title: `Foster Agencies in ${canonicalSlug.split('/').pop()} | UK Directory`,
-        meta_description: `Find accredited foster agencies in ${canonicalSlug.split('/').pop()}. Browse regions and cities to discover fostering services near you.`,
-        sections: []
+        hero: {
+          title: `Foster Agencies in ${canonicalSlug.split('/').pop()}`,
+          subtitle: `Find accredited foster agencies in ${canonicalSlug.split('/').pop()}`,
+          cta_text: "Get Foster Agency Support",
+          cta_link: "/contact",
+          search_placeholder: `Search for agencies in ${canonicalSlug.split('/').pop()}...`
+        },
+        sections: [
+          { type: "overview", content: "" },
+          { type: "system", content: "" },
+          { type: "reasons", items: [] },
+          { type: "featuredAreas", items: [] },
+          { type: "faqs", items: [] },
+          { type: "trustbar", items: [] },
+          { type: "finalcta", title: "", subtitle: "", cta_text: "", cta_link: "" }
+        ]
       };
     }
     
@@ -506,6 +521,29 @@ async function getLocationContentByCanonicalSlug(canonicalSlug) {
           console.error('Error parsing content JSON:', parseError);
           content = null;
         }
+      }
+      
+      // Ensure we have the correct structure
+      if (content && typeof content === 'object') {
+        const normalizedContent = {
+          hero: {
+            title: content.hero?.title || '',
+            subtitle: content.hero?.subtitle || '',
+            cta_text: content.hero?.cta_text || '',
+            cta_link: content.hero?.cta_link || '',
+            search_placeholder: content.hero?.search_placeholder || ''
+          },
+          sections: content.sections || [
+            { type: "overview", content: "" },
+            { type: "system", content: "" },
+            { type: "reasons", items: [] },
+            { type: "featuredAreas", items: [] },
+            { type: "faqs", items: [] },
+            { type: "trustbar", items: [] },
+            { type: "finalcta", title: "", subtitle: "", cta_text: "", cta_link: "" }
+          ]
+        };
+        return normalizedContent;
       }
       
       console.log('Returning content:', !!content);
@@ -576,8 +614,30 @@ async function getLocationContentByCanonicalSlug(canonicalSlug) {
           }
         }
         
+        // Ensure we have the correct structure
+        if (content && typeof content === 'object') {
+          const normalizedContent = {
+            hero: {
+              title: content.hero?.title || '',
+              subtitle: content.hero?.subtitle || '',
+              cta_text: content.hero?.cta_text || '',
+              cta_link: content.hero?.cta_link || '',
+              search_placeholder: content.hero?.search_placeholder || ''
+            },
+            sections: content.sections || [
+              { type: "overview", content: "" },
+              { type: "system", content: "" },
+              { type: "reasons", items: [] },
+              { type: "featuredAreas", items: [] },
+              { type: "faqs", items: [] },
+              { type: "trustbar", items: [] },
+              { type: "finalcta", title: "", subtitle: "", cta_text: "", cta_link: "" }
+            ]
+          };
+          return normalizedContent;
+        }
+        
         console.log('Returning content:', !!content);
-        // Return contentData?.content_json or contentData instead of raw object
         return contentData?.content_json || contentData || content;
       }
       
@@ -598,17 +658,51 @@ async function getLocationContentByCanonicalSlug(canonicalSlug) {
       }
     }
     
+    // Ensure we have the correct structure
+    if (content && typeof content === 'object') {
+      const normalizedContent = {
+        hero: {
+          title: content.hero?.title || '',
+          subtitle: content.hero?.subtitle || '',
+          cta_text: content.hero?.cta_text || '',
+          cta_link: content.hero?.cta_link || '',
+          search_placeholder: content.hero?.search_placeholder || ''
+        },
+        sections: content.sections || [
+          { type: "overview", content: "" },
+          { type: "system", content: "" },
+          { type: "reasons", items: [] },
+          { type: "featuredAreas", items: [] },
+          { type: "faqs", items: [] },
+          { type: "trustbar", items: [] },
+          { type: "finalcta", title: "", subtitle: "", cta_text: "", cta_link: "" }
+        ]
+      };
+      return normalizedContent;
+    }
+    
     console.log('Returning content:', !!content);
-    // Return data?.content_json or data instead of raw object
     return data?.content_json || data || content;
   } catch (error) {
     console.error('Error getting location content by canonical slug:', error);
     // Return mock content as fallback
     return {
-      title: `Foster Agencies in ${canonicalSlug.split('/').pop()}`,
-      meta_title: `Foster Agencies in ${canonicalSlug.split('/').pop()} | UK Directory`,
-      meta_description: `Find accredited foster agencies in ${canonicalSlug.split('/').pop()}. Browse regions and cities to discover fostering services near you.`,
-      sections: []
+      hero: {
+        title: `Foster Agencies in ${canonicalSlug.split('/').pop()}`,
+        subtitle: `Find accredited foster agencies in ${canonicalSlug.split('/').pop()}`,
+        cta_text: "Get Foster Agency Support",
+        cta_link: "/contact",
+        search_placeholder: `Search for agencies in ${canonicalSlug.split('/').pop()}...`
+      },
+      sections: [
+        { type: "overview", content: "" },
+        { type: "system", content: "" },
+        { type: "reasons", items: [] },
+        { type: "featuredAreas", items: [] },
+        { type: "faqs", items: [] },
+        { type: "trustbar", items: [] },
+        { type: "finalcta", title: "", subtitle: "", cta_text: "", cta_link: "" }
+      ]
     };
   }
 }
@@ -714,6 +808,13 @@ async function getCitiesByRegion(regionSlug, limit = 10) {
 // Utility function to extract sections from location content
 function extractSectionsFromContent(content) {
   console.log('extractSectionsFromContent called with:', JSON.stringify(content, null, 2));
+  
+  // Handle the new CMS structure
+  if (content && typeof content === 'object' && content.sections) {
+    return content.sections;
+  }
+  
+  // Handle legacy structure
   let sections = [];
   
   if (content && typeof content === 'object') {

@@ -36,7 +36,7 @@ async function ensureLocation(locationId, fallback = {}) {
     name: fallback.name || fallback.title || `Location ${locationId.slice(0,8)}`,
     slug: fallback.slug || (fallback.name && fallback.name.toLowerCase().replace(/\s+/g,'-')) || `auto-${locationId.slice(0,8)}`,
     canonical_slug: fallback.canonical_slug || null,
-    type: fallback.type || fallback.template_type || 'city'
+    type: fallback.type || 'city'
     // Note: Not including editable field to avoid schema cache issues
   };
 
@@ -63,7 +63,8 @@ async function ensureLocation(locationId, fallback = {}) {
 }
 
 export async function PUT(req, { params }) {
-  const locationId = params.id;
+  const resolvedParams = await params;
+  const locationId = resolvedParams.id;
   if (!locationId) return NextResponse.json({ success:false, error:'Missing location id' }, { status:400 });
 
   let body;
@@ -85,40 +86,53 @@ export async function PUT(req, { params }) {
   }
 
   // Ensure we have a proper canonical slug
-  const canonicalSlug = body.canonical_slug || 
-                       (body.slug ? (body.slug.startsWith('/foster-agency/') ? body.slug : `/foster-agency/${body.slug}`) : 
-                        null);
-
-  // Create a clean content object by removing location-specific fields
-  const { 
-    id, name, slug, type, children, editable, canonical_slug, 
-    template_type, updated_at, content_json, ...cleanContent 
-  } = body;
-
-  // Also remove any other location-specific fields that might be present
-  const locationSpecificFields = [
-    'id', 'name', 'slug', 'type', 'children', 'editable', 
-    'canonical_slug', 'template_type', 'updated_at', 'content_json'
-  ];
+  const country = body.country || 'england'; // Default to england if not provided
+  const canonicalSlug = `/foster-agency/${country}`;
   
-  const contentToSave = {};
-  Object.keys(body).forEach(key => {
-    if (!locationSpecificFields.includes(key)) {
-      contentToSave[key] = body[key];
+  // Update the location with the canonical slug
+  try {
+    const { error: updateError } = await supabaseAdmin
+      .from('locations')
+      .update({ canonical_slug: canonicalSlug })
+      .eq('id', locationId);
+    
+    if (updateError) {
+      console.error('Error updating location canonical_slug:', updateError);
     }
-  });
+  } catch (updateError) {
+    console.error('Exception updating location canonical_slug:', updateError);
+  }
 
-  const upsertObj = {
-    location_id: locationId,
-    template_type: body.template_type || type || 'city',
-    content_json: contentToSave,
-    canonical_slug: canonicalSlug,
-    updated_at: new Date().toISOString()
+  // Create the new CMS section structure exactly matching the SEO template
+  const pagesData = {
+    hero: {
+      title: body.hero?.title || `Foster Agencies in ${country.charAt(0).toUpperCase() + country.slice(1)}`,
+      subtitle: body.hero?.subtitle || `Find accredited foster agencies in ${country.charAt(0).toUpperCase() + country.slice(1)}`,
+      cta_text: body.hero?.cta_text || "Get Foster Agency Support",
+      cta_link: body.hero?.cta_link || "/contact",
+      search_placeholder: body.hero?.search_placeholder || `Search for agencies in ${country.charAt(0).toUpperCase() + country.slice(1)}...`
+    },
+    sections: body.sections || [
+      { type: "overview", content: "" },
+      { type: "system", content: "" },
+      { type: "reasons", items: [] },
+      { type: "featuredAreas", items: [] },
+      { type: "faqs", items: [] },
+      { type: "trustbar", items: [] },
+      { type: "finalcta", title: "", subtitle: "", cta_text: "", cta_link: "" }
+    ]
   };
 
+  // Perform the upsert operation with the correct canonical slug
   const { data: upserted, error: upsertErr } = await supabaseAdmin
-    .from('location_content')
-    .upsert([upsertObj], { onConflict: 'location_id' })
+    .from("location_content")
+    .upsert(
+      {
+        canonical_slug: canonicalSlug,
+        content_json: pagesData
+      },
+      { onConflict: "canonical_slug" }
+    )
     .select();
 
   if (upsertErr) {
@@ -138,17 +152,71 @@ export async function PUT(req, { params }) {
   }
 
   // Return the upserted row in standardized shape
-  return NextResponse.json({ success: true, saved: upserted?.[0] ?? upsertObj });
+  return NextResponse.json({ success: true, saved: upserted?.[0] ?? { canonical_slug: canonicalSlug, content_json: pagesData } });
 }
 
 export async function GET(req, { params }) {
-  const locationId = params.id;
+  const resolvedParams = await params;
+  const locationId = resolvedParams.id;
   if (!locationId) return NextResponse.json({ success:false, error:'Missing location id' }, { status:400 });
 
+  // First, try to get the canonical_slug for this location_id
+  let canonicalSlug = null;
+  try {
+    const { data: locationData, error: locationError } = await supabaseAdmin
+      .from('locations')
+      .select('canonical_slug')
+      .eq('id', locationId)
+      .maybeSingle();
+
+    if (locationError) {
+      console.warn('Error fetching location canonical_slug, will try alternative approaches:', locationError);
+    } else if (locationData && locationData.canonical_slug) {
+      canonicalSlug = locationData.canonical_slug;
+    }
+  } catch (error) {
+    console.warn('Error fetching location canonical_slug, will try alternative approaches:', error);
+  }
+
+  // If we couldn't get canonical_slug from location, try to infer it
+  if (!canonicalSlug) {
+    // Try to get the location data to infer the slug
+    try {
+      const { data: locationData, error: locationError } = await supabaseAdmin
+        .from('locations')
+        .select('slug, type')
+        .eq('id', locationId)
+        .maybeSingle();
+
+      if (!locationError && locationData) {
+        // For country type, use /foster-agency/{slug}
+        if (locationData.type === 'country') {
+          canonicalSlug = `/foster-agency/${locationData.slug}`;
+        }
+        // For other types, we might need more complex logic
+      }
+    } catch (error) {
+      console.warn('Error inferring canonical_slug:', error);
+    }
+  }
+
+  // If we still don't have a canonical_slug, return empty content
+  if (!canonicalSlug) {
+    console.log('No canonical_slug found for location_id:', locationId);
+    return NextResponse.json({ 
+      success: true, 
+      content: null, 
+      template_type: null, 
+      canonical_slug: null,
+      updated_at: null 
+    });
+  }
+
+  // Now fetch the content using the canonical_slug
   const { data, error } = await supabaseAdmin
     .from('location_content')
     .select('content_json, template_type, updated_at, canonical_slug')
-    .eq('location_id', locationId)
+    .eq('canonical_slug', canonicalSlug)
     .maybeSingle();
 
   if (error) {

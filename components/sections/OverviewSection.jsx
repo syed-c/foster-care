@@ -1,9 +1,17 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen } from 'lucide-react';
 
-export default function OverviewSection({ title, body }) {
+export default function OverviewSection({ content, title }) {
+  // Provide default values to prevent destructuring errors
+  const safeTitle = title || 'About Fostering in This Location';
+  const safeContent = content || '';
+  
+  if (!safeContent) {
+    return null; // Don't render if there's no content
+  }
+  
   return (
     <section className="py-16 section-alt">
       <div className="container mx-auto px-4">
@@ -14,16 +22,16 @@ export default function OverviewSection({ title, body }) {
               <span className="text-sm font-medium text-text-charcoal font-inter">About Fostering</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-              {title}
+              {safeTitle}
             </h2>
           </div>
           
           <Card className="section-card rounded-modern-xl p-6 md:p-8">
             <div className="prose max-w-none text-gray-600 font-inter">
-              {body ? (
-                <div dangerouslySetInnerHTML={{ __html: body }} />
+              {typeof safeContent === 'string' ? (
+                <div dangerouslySetInnerHTML={{ __html: safeContent }} />
               ) : (
-                <p>No content available</p>
+                <p>{JSON.stringify(safeContent)}</p>
               )}
             </div>
           </Card>

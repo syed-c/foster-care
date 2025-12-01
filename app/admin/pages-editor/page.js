@@ -75,7 +75,27 @@ export default function PageEditor() {
   const [activeTab, setActiveTab] = useState('pages');
   const [locationContent, setLocationContent] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [locationFormData, setLocationFormData] = useState({});
+  
+  // Initialize with the new CMS structure format
+  const [locationFormData, setLocationFormData] = useState({
+    hero: {
+      title: '',
+      subtitle: '',
+      cta_text: '',
+      cta_link: '',
+      search_placeholder: ''
+    },
+    sections: [
+      { type: "overview", content: "" },
+      { type: "system", content: "" },
+      { type: "reasons", items: [] },
+      { type: "featuredAreas", items: [] },
+      { type: "faqs", items: [] },
+      { type: "trustbar", items: [] },
+      { type: "finalcta", title: "", subtitle: "", cta_text: "", cta_link: "" }
+    ]
+  });
+  
   const [locationSearchQuery, setLocationSearchQuery] = useState('');
   const [formErrors, setFormErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -1017,17 +1037,77 @@ export default function PageEditor() {
     try {
       const res = await fetch(`/api/admin/locations/${locationId}/content`);
       const json = await res.json();
+      console.log('Raw API response:', JSON.stringify(json, null, 2));
       if (!json.success) {
         console.warn('loadLocationContent failed', json.error);
-        setLocationFormData({}); // or keep previous
+        // Initialize with default structure
+        setLocationFormData({
+          hero: {
+            title: '',
+            subtitle: '',
+            cta_text: '',
+            cta_link: '',
+            search_placeholder: ''
+          },
+          sections: [
+            { type: "overview", content: "" },
+            { type: "system", content: "" },
+            { type: "reasons", items: [] },
+            { type: "featuredAreas", items: [] },
+            { type: "faqs", items: [] },
+            { type: "trustbar", items: [] },
+            { type: "finalcta", title: "", subtitle: "", cta_text: "", cta_link: "" }
+          ]
+        });
         return;
       }
+      
       const content = json.content || {};
-      // If the API returns nested content_json as string for old rows, handle fallback:
-      setLocationFormData(content);
+      console.log('Content from API:', JSON.stringify(content, null, 2));
+      
+      // Ensure we have the correct structure
+      const normalizedContent = {
+        hero: {
+          title: content.hero?.title || '',
+          subtitle: content.hero?.subtitle || '',
+          cta_text: content.hero?.cta_text || '',
+          cta_link: content.hero?.cta_link || '',
+          search_placeholder: content.hero?.search_placeholder || ''
+        },
+        sections: content.sections || [
+          { type: "overview", content: "" },
+          { type: "system", content: "" },
+          { type: "reasons", items: [] },
+          { type: "featuredAreas", items: [] },
+          { type: "faqs", items: [] },
+          { type: "trustbar", items: [] },
+          { type: "finalcta", title: "", subtitle: "", cta_text: "", cta_link: "" }
+        ]
+      };
+      
+      console.log('Normalized content:', JSON.stringify(normalizedContent, null, 2));
+      setLocationFormData(normalizedContent);
     } catch (err) {
       console.error('loadLocationContent error', err);
-      setLocationFormData({});
+      // Initialize with default structure
+      setLocationFormData({
+        hero: {
+          title: '',
+          subtitle: '',
+          cta_text: '',
+          cta_link: '',
+          search_placeholder: ''
+        },
+        sections: [
+          { type: "overview", content: "" },
+          { type: "system", content: "" },
+          { type: "reasons", items: [] },
+          { type: "featuredAreas", items: [] },
+          { type: "faqs", items: [] },
+          { type: "trustbar", items: [] },
+          { type: "finalcta", title: "", subtitle: "", cta_text: "", cta_link: "" }
+        ]
+      });
     }
   };
 
@@ -1036,21 +1116,19 @@ export default function PageEditor() {
     if (!selectedLocation?.id) return;
     
     try {
+      console.log('Full locationFormData before save:', JSON.stringify(locationFormData, null, 2));
       console.log('Saving', selectedLocation.id, locationFormData);
       
       // Prepare the data to send including the canonical slug
-      // Remove location-specific fields from the content data
-      const { 
-        id, name, slug, type, children, editable, canonical_slug, 
-        template_type, updated_at, content_json, ...cleanContent 
-      } = locationFormData;
-      
       const saveData = {
-        ...cleanContent,
+        ...locationFormData,
+        country: selectedLocation.slug || selectedLocation.id,
         canonical_slug: selectedLocation.canonical_slug || `/foster-agency/${selectedLocation.slug || selectedLocation.id}`,
         id: selectedLocation.id,
-        type: selectedLocation.type || 'city'
+        type: selectedLocation.type || 'country'
       };
+      
+      console.log('Full saveData being sent:', JSON.stringify(saveData, null, 2));
       
       const res = await fetch(`/api/admin/locations/${selectedLocation.id}/content`, {
         method: 'PUT',
@@ -1074,7 +1152,24 @@ export default function PageEditor() {
         // fallback re-fetch
         const reload = await fetch(`/api/admin/locations/${selectedLocation.id}/content`);
         const reloadJson = await reload.json();
-        setLocationFormData(reloadJson.content || {});
+        setLocationFormData(reloadJson.content || {
+          hero: {
+            title: '',
+            subtitle: '',
+            cta_text: '',
+            cta_link: '',
+            search_placeholder: ''
+          },
+          sections: [
+            { type: "overview", content: "" },
+            { type: "system", content: "" },
+            { type: "reasons", items: [] },
+            { type: "featuredAreas", items: [] },
+            { type: "faqs", items: [] },
+            { type: "trustbar", items: [] },
+            { type: "finalcta", title: "", subtitle: "", cta_text: "", cta_link: "" }
+          ]
+        });
       }
       
       // Persist local autosave draft optionally to localStorage
@@ -1127,7 +1222,55 @@ export default function PageEditor() {
     }
   }, [selectedLocation?.id, isEditing]);
 
+  // Update hero section
+  const updateHeroSection = (field, value) => {
+    setLocationFormData(prev => ({
+      ...prev,
+      hero: {
+        ...prev.hero,
+        [field]: value
+      }
+    }));
+    
+    // Mark as editing when user starts typing
+    if (!isEditing) {
+      setIsEditing(true);
+    }
+  };
 
+  // Update section content
+  const updateSectionContent = (sectionType, field, value) => {
+    setLocationFormData(prev => ({
+      ...prev,
+      sections: prev.sections.map(section => 
+        section.type === sectionType 
+          ? { ...section, [field]: value }
+          : section
+      )
+    }));
+    
+    // Mark as editing when user starts typing
+    if (!isEditing) {
+      setIsEditing(true);
+    }
+  };
+
+  // Update section items
+  const updateSectionItems = (sectionType, items) => {
+    setLocationFormData(prev => ({
+      ...prev,
+      sections: prev.sections.map(section => 
+        section.type === sectionType 
+          ? { ...section, items }
+          : section
+      )
+    }));
+    
+    // Mark as editing when user starts typing
+    if (!isEditing) {
+      setIsEditing(true);
+    }
+  };
 
   // Auto-template detection based on location type
   const getTemplateSections = (locationType) => {
@@ -1419,22 +1562,44 @@ export default function PageEditor() {
                             <Label htmlFor="location-title">Page Title</Label>
                             <CMSInput
                               id="location-title"
-                              value={locationFormData.title || ''}
-                              onChange={(newValue) => updateLocationFormData('title', newValue)}
+                              value={locationFormData.hero?.title || ''}
+                              onChange={(newValue) => updateLocationFormDataNested('hero', 'title', newValue)}
                               placeholder="Enter location title"
                               required
                             />
                           </div>
                           
                           <div className="space-y-2">
+                            <Label htmlFor="location-subtitle">Page Subtitle</Label>
+                            <CMSInput
+                              id="location-subtitle"
+                              value={locationFormData.hero?.subtitle || ''}
+                              onChange={(newValue) => updateLocationFormDataNested('hero', 'subtitle', newValue)}
+                              placeholder="Enter location subtitle"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
                             <Label htmlFor="location-h1-title">H1 Title (Display)</Label>
                             <CMSInput
                               id="location-h1-title"
-                              value={locationFormData.h1_title || locationFormData.title || ''}
-                              onChange={(newValue) => updateLocationFormData('h1_title', newValue)}
+                              value={locationFormData.hero?.h1_title || ''}
+                              onChange={(newValue) => updateLocationFormDataNested('hero', 'h1_title', newValue)}
                               placeholder="Enter H1 title for display"
                             />
                             <p className="text-xs text-muted-foreground">Displayed as the main heading on the page</p>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="location-search-placeholder">Search Placeholder</Label>
+                            <CMSInput
+                              id="location-search-placeholder"
+                              value={locationFormData.hero?.search_placeholder || ''}
+                              onChange={(newValue) => updateLocationFormDataNested('hero', 'search_placeholder', newValue)}
+                              placeholder="Enter search placeholder text"
+                            />
                           </div>
                         </div>
 
@@ -1443,8 +1608,8 @@ export default function PageEditor() {
                             <Label htmlFor="location-meta-title">Meta Title (SEO)</Label>
                             <CMSInput
                               id="location-meta-title"
-                              value={locationFormData.meta_title || locationFormData.seo?.title || ''}
-                              onChange={(newValue) => updateLocationFormData('meta_title', newValue)}
+                              value={locationFormData.hero?.meta_title || locationFormData.hero?.seo?.title || locationFormData.hero?.title || ''}
+                              onChange={(newValue) => updateLocationFormDataNested('hero', 'meta_title', newValue)}
                               placeholder="Enter meta title for SEO"
                             />
                             <p className="text-xs text-muted-foreground">Used for search engine optimization (60 characters max)</p>
@@ -1468,13 +1633,35 @@ export default function PageEditor() {
                           <Label htmlFor="location-meta-description">Meta Description</Label>
                           <CMSInput
                             id="location-meta-description"
-                            value={locationFormData.meta_description || locationFormData.seo?.description || ''}
-                            onChange={(newValue) => updateLocationFormData('meta_description', newValue)}
+                            value={locationFormData.hero?.meta_description || locationFormData.hero?.seo?.description || ''}
+                            onChange={(newValue) => updateLocationFormDataNested('hero', 'meta_description', newValue)}
                             placeholder="Enter meta description for SEO"
                             type="textarea"
                             rows={3}
                           />
                           <p className="text-xs text-muted-foreground">Used for search engine optimization (160 characters max)</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="location-cta-text">Hero CTA Text</Label>
+                            <CMSInput
+                              id="location-cta-text"
+                              value={locationFormData.hero?.cta_text || ''}
+                              onChange={(newValue) => updateLocationFormDataNested('hero', 'cta_text', newValue)}
+                              placeholder="Enter CTA button text"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="location-cta-link">Hero CTA Link</Label>
+                            <CMSInput
+                              id="location-cta-link"
+                              value={locationFormData.hero?.cta_link || ''}
+                              onChange={(newValue) => updateLocationFormDataNested('hero', 'cta_link', newValue)}
+                              placeholder="Enter CTA button link"
+                            />
+                          </div>
                         </div>
 
                         {/* Dynamic Sections Editor based on location type */}

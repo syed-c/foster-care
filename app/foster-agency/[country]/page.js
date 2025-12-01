@@ -18,7 +18,7 @@ import SectionRenderer from '@/components/sections/SectionRenderer';
 
 // Make sure pages run on dynamic rendering mode
 export const dynamic = "force-dynamic";
-export const revalidate = 0; // No caching for better debugging
+export const revalidate = false; // No caching for better debugging
 
 export async function generateStaticParams() {
   try {
@@ -140,75 +140,28 @@ export default async function CountryPage({ params, searchParams }) {
     const paginatedRegions = regionsToShow.slice(startIndex, endIndex);
     const totalPages = Math.ceil(regionsToShow.length / regionsPerPage);
     
-    // Get country-specific data
-    const countryData = {
-      england: {
-        population: "56.5 million",
-        agencies: "1,200+",
-        demand: "High",
-        regulator: "Ofsted",
-        description: "England has the largest fostering system in the UK with diverse opportunities across urban and rural areas."
-      },
-      scotland: {
-        population: "5.5 million",
-        agencies: "300+",
-        demand: "Moderate",
-        regulator: "Care Inspectorate",
-        description: "Scotland offers unique fostering opportunities with a strong emphasis on community-based care."
-      },
-      wales: {
-        population: "3.1 million",
-        agencies: "200+",
-        demand: "Moderate",
-        regulator: "CSSIW",
-        description: "Wales provides bilingual fostering services and close-knit community support networks."
-      },
-      'northern-ireland': {
-        population: "1.9 million",
-        agencies: "150+",
-        demand: "Moderate",
-        regulator: "NICCY",
-        description: "Northern Ireland offers personalized fostering experiences with strong local authority support."
-      }
+    // Extract sections from the new CMS structure
+    const heroData = rawContent?.hero || {
+      title: `Foster Agencies in ${countryName}`,
+      subtitle: `Find accredited foster agencies in ${countryName}`,
+      cta_text: "Get Foster Agency Support",
+      cta_link: "/contact",
+      search_placeholder: `Search for agencies in ${countryName}...`
     };
-
-    const currentCountryData = countryData[country] || countryData.england;
-
-    // Popular regions for each country
-    const popularRegions = {
-      england: [
-        { name: "Greater London", agencies: "200+", demand: "High" },
-        { name: "West Midlands", agencies: "80+", demand: "High" },
-        { name: "Greater Manchester", agencies: "75+", demand: "High" },
-        { name: "West Yorkshire", agencies: "65+", demand: "High" },
-        { name: "South East", agencies: "150+", demand: "High" }
-      ],
-      scotland: [
-        { name: "Glasgow City", agencies: "40+", demand: "High" },
-        { name: "Edinburgh", agencies: "35+", demand: "High" },
-        { name: "Aberdeen City", agencies: "20+", demand: "Moderate" },
-        { name: "Fife", agencies: "25+", demand: "Moderate" }
-      ],
-      wales: [
-        { name: "Cardiff", agencies: "25+", demand: "High" },
-        { name: "Swansea", agencies: "20+", demand: "Moderate" },
-        { name: "Newport", agencies: "15+", demand: "Moderate" }
-      ],
-      'northern-ireland': [
-        { name: "Belfast", agencies: "20+", demand: "High" },
-        { name: "Derry", agencies: "10+", demand: "Moderate" }
-      ]
-    };
-
-    const currentPopularRegions = popularRegions[country] || popularRegions.england;
-
-    // Extract sections from content using the utility function
-    const sections = extractSectionsFromContent(rawContent);
-    console.log('Extracted sections:', sections.length);
-    console.log('Sections:', JSON.stringify(sections, null, 2));
+    
+    const sections = rawContent?.sections || [
+      { type: "overview", content: "" },
+      { type: "system", content: "" },
+      { type: "reasons", items: [] },
+      { type: "featuredAreas", items: [] },
+      { type: "faqs", items: [] },
+      { type: "trustbar", items: [] },
+      { type: "finalcta", title: "", subtitle: "", cta_text: "", cta_link: "" }
+    ];
 
     return (
       <div className="min-h-screen bg-background-offwhite">
+        
         {/* Breadcrumb */}
         <div className="bg-white/50 backdrop-blur-sm border-b border-gray-100 py-4">
           <div className="container mx-auto px-4">
@@ -222,7 +175,7 @@ export default async function CountryPage({ params, searchParams }) {
           </div>
         </div>
 
-        {/* Hero Section */}
+        {/* Hero */}
         <section className="relative py-16 md:py-24 overflow-hidden section-hero">
           <div className="absolute inset-0 gradient-mesh opacity-50" />
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -237,10 +190,10 @@ export default async function CountryPage({ params, searchParams }) {
                 <span className="text-sm font-medium text-text-charcoal font-inter">{countryName}</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold text-text-charcoal mb-6 font-poppins">
-                {rawContent?.title || `Foster Agencies in ${countryName}`}
+                {heroData.title}
               </h1>
               <p className="text-xl text-gray-600 mb-8 font-inter">
-                {rawContent?.meta_description || `Find accredited foster agencies in ${countryName}`}
+                {heroData.subtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                 <Button
@@ -248,7 +201,9 @@ export default async function CountryPage({ params, searchParams }) {
                   className="bg-gradient-to-r from-primary-green to-secondary-blue text-text-charcoal hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl btn-futuristic"
                   asChild
                 >
-                  <Link href="/contact">Get Foster Agency Support</Link>
+                  <Link href={heroData.cta_link || "/contact"}>
+                    {heroData.cta_text || "Get Foster Agency Support"}
+                  </Link>
                 </Button>
                 <Button
                   size="lg"
@@ -266,7 +221,7 @@ export default async function CountryPage({ params, searchParams }) {
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
-                    placeholder={`Search for agencies in ${countryName}...`}
+                    placeholder={heroData.search_placeholder || `Search for agencies in ${countryName}...`}
                     className="w-full pl-12 pr-4 py-4 rounded-xl glass text-text-charcoal placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-green"
                   />
                 </div>
@@ -275,16 +230,19 @@ export default async function CountryPage({ params, searchParams }) {
           </div>
         </section>
 
-        {/* Render CMS sections if available */}
-        {sections.length > 0 && (
-          <div className="container mx-auto px-4 py-8">
-            {sections.map((section, index) => (
-              <SectionRenderer key={index} section={section} />
-            ))}
-          </div>
-        )}
+        {/* Overview Section */}
+        <SectionRenderer type="overview" content={sections.find(s => s.type === "overview")} />
 
-        {/* Regions Grid */}
+        {/* Foster System */}
+        <SectionRenderer type="system" content={sections.find(s => s.type === "system")} />
+
+        {/* Reasons to Foster */}
+        <SectionRenderer type="reasons" content={sections.find(s => s.type === "reasons")} />
+
+        {/* Featured Popular Areas */}
+        <SectionRenderer type="featuredAreas" content={sections.find(s => s.type === "featuredAreas")} />
+
+        {/* Region Grid */}
         <section id="regions" className="py-12 md:py-16 relative overflow-hidden section-muted">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-1/4 left-10 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl float-animation" />
@@ -366,19 +324,14 @@ export default async function CountryPage({ params, searchParams }) {
           </div>
         </section>
 
-        {/* Top Agencies Section */}
-        <div className="container mx-auto px-4 py-8">
-          <SectionRenderer 
-            section={{
-              type: 'topAgencies',
-              data: {
-                title: `Top Agencies in ${countryName}`,
-                description: `Discover the highest-rated foster agencies in ${countryName} with excellent support and competitive allowances.`,
-                items: [] // Will use fallback data
-              }
-            }} 
-          />
-        </div>
+        {/* FAQs */}
+        <SectionRenderer type="faqs" content={sections.find(s => s.type === "faqs")} />
+
+        {/* Regulatory / Trust Bar */}
+        <SectionRenderer type="trustbar" content={sections.find(s => s.type === "trustbar")} />
+
+        {/* Final CTA */}
+        <SectionRenderer type="finalcta" content={sections.find(s => s.type === "finalcta")} />
       </div>
     );
   } catch (error) {
