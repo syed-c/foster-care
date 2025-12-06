@@ -78,7 +78,7 @@ export const FosteringPathTimeline = () => {
         }}
       />
       
-      <div className="container mx-auto px-4 sm:px-8 lg:px-16 relative z-10">
+      <div className="site-container">
         <div className="max-w-5xl mx-auto">
           <motion.div
             className="text-center mb-16"

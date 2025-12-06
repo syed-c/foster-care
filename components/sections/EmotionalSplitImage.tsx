@@ -5,8 +5,8 @@ import Image from 'next/image';
 
 export const EmotionalSplitImage = () => {
   return (
-    <section className="py-12 sm:py-16 lg:py-24 bg-brand-cream">
-      <div className="container mx-auto px-4 sm:px-8 lg:px-16">
+    <section className="py-16 sm:py-24 bg-brand-cream">
+      <div className="site-container">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}

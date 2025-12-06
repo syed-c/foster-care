@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 
 export const MissionStatement = () => {
   return (
-    <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-r from-brand-blue/5 to-brand-cream">
-      <div className="container mx-auto px-4 sm:px-8 lg:px-16">
+    <section className="py-16 sm:py-24 bg-gradient-to-r from-brand-blue/5 to-brand-cream">
+      <div className="site-container">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

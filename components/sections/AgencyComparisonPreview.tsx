@@ -41,7 +41,7 @@ export const AgencyComparisonPreview = () => {
   ];
 
   return (
-    <section className="py-12 sm:py-16 lg:py-24 relative overflow-hidden bg-brand-white">
+    <section className="py-16 sm:py-24 relative overflow-hidden bg-brand-white">
       {/* Gradient Orbs */}
       <motion.div 
         className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gradient-radial from-brand-blue/40 to-brand-white/30 blur-3xl"
@@ -69,7 +69,7 @@ export const AgencyComparisonPreview = () => {
         }}
       />
       
-      <div className="container mx-auto px-4 sm:px-8 lg:px-16 relative z-10">
+      <div className="site-container">
         <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}

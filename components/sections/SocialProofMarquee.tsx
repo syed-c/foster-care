@@ -14,7 +14,7 @@ export const SocialProofMarquee = () => {
 
   return (
     <section className="py-8 bg-brand-black">
-      <div className="container mx-auto px-4 sm:px-8 lg:px-16">
+      <div className="site-container">
         <div className="text-center mb-6">
           <p className="text-brand-cream/80 font-body text-sm uppercase tracking-wider">
             Trusted by leading organizations

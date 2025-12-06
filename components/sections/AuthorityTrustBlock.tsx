@@ -28,7 +28,7 @@ export const AuthorityTrustBlock = () => {
   ];
 
   return (
-    <section className="py-12 sm:py-16 lg:py-24 relative overflow-hidden bg-brand-blue text-white">
+    <section className="py-16 sm:py-24 relative overflow-hidden bg-brand-blue text-white">
       {/* Gradient Orbs */}
       <motion.div 
         className="absolute top-0 left-0 w-96 h-96 rounded-full bg-gradient-radial from-brand-white/40 to-brand-blue/30 blur-3xl"
@@ -56,7 +56,7 @@ export const AuthorityTrustBlock = () => {
         }}
       />
       
-      <div className="container mx-auto px-4 sm:px-8 lg:px-16 relative z-10">
+      <div className="site-container">
         <div className="max-w-5xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

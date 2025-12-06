@@ -58,7 +58,7 @@ export const PremiumHero: React.FC<PremiumHeroProps> = ({ onSearch }) => {
         }}
       />
       
-      <div className="container mx-auto px-4 sm:px-8 lg:px-16 relative z-10 py-12 sm:py-16 lg:py-24">
+      <div className="site-container relative z-10 py-16 sm:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 items-center min-h-[80vh]">
           {/* Left Column - Headline + Search */}
           <motion.div 

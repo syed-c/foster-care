@@ -35,8 +35,8 @@ export const InternalLinksBlock = () => {
   ];
 
   return (
-    <section className="py-12 sm:py-16 lg:py-24 bg-brand-cream">
-      <div className="container mx-auto px-4 sm:px-8 lg:px-16">
+    <section className="py-16 sm:py-24 bg-brand-cream">
+      <div className="site-container">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-black mb-4 font-heading">

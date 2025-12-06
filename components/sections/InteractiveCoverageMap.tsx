@@ -27,7 +27,7 @@ export const InteractiveCoverageMap = () => {
       supportCenters: 8,
       agenciesList: [
         { name: 'Northern Lights Care', rating: 4.8, reviews: 96, specialties: ['Emergency', 'Short-term'] },
-        { name: 'Manchester Family Support', rating: 4.7, reviews: 78, specialties: ['Therapeutic', 'Teenagers'] },
+        { name: 'Manchester Family Support', rating: 4.7, reviews: 89, specialties: ['Therapeutic', 'Teenagers'] },
         { name: 'Citywide Fostering', rating: 4.6, reviews: 65, specialties: ['Long-term', 'Cultural'] }
       ]
     },
@@ -93,7 +93,7 @@ export const InteractiveCoverageMap = () => {
   };
 
   return (
-    <section className="py-12 sm:py-16 lg:py-24 relative overflow-hidden bg-brand-white">
+    <section className="py-16 sm:py-24 relative overflow-hidden bg-brand-white">
       {/* Gradient Orbs */}
       <motion.div 
         className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gradient-radial from-brand-blue/40 to-brand-white/30 blur-3xl"
@@ -121,7 +121,7 @@ export const InteractiveCoverageMap = () => {
         }}
       />
       
-      <div className="container mx-auto px-4 sm:px-8 lg:px-16 relative z-10">
+      <div className="site-container">
         <div className="max-w-5xl mx-auto">
           <motion.div
             className="text-center mb-16"
