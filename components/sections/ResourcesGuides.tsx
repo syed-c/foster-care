@@ -1,95 +1,143 @@
 'use client';
 
-import Link from 'next/link';
-import { BookOpen, Lightbulb, FileText, Clipboard } from 'lucide-react';
-
-interface Resource {
-  id: number;
-  title: string;
-  excerpt: string;
-  icon: React.ReactNode;
-  href: string;
-}
+import { motion } from 'framer-motion';
+import { BookOpen, FileText, Video, Download, ExternalLink } from 'lucide-react';
 
 export const ResourcesGuides = () => {
-  const resources: Resource[] = [
+  const resources = [
     {
       id: 1,
-      title: "Understanding the Fostering Journey",
-      excerpt: "From initial inquiry to placement, we guide you through each milestone.",
-      icon: <Heart className="w-4 h-4" />,
-      href: "/resources/beginners-guide"
+      title: "Fostering Handbook",
+      description: "Comprehensive guide covering everything you need to know about becoming a foster parent",
+      type: "PDF Guide",
+      icon: <BookOpen className="w-6 h-6" />,
+      link: "#"
     },
     {
       id: 2,
-      title: "Financial Support for Foster Families",
-      excerpt: "Navigate allowances, benefits, and tax considerations.",
-      icon: <Clipboard className="w-4 h-4" />,
-      href: "/resources/financial-support"
+      title: "Financial Support Information",
+      description: "Detailed breakdown of allowances, benefits, and financial assistance available",
+      type: "Document",
+      icon: <FileText className="w-6 h-6" />,
+      link: "#"
     },
     {
       id: 3,
-      title: "Preparing Your Home for a Child",
-      excerpt: "Create a welcoming, safe environment for children.",
-      icon: <Home className="w-4 h-4" />,
-      href: "/resources/home-preparation"
+      title: "Training Videos",
+      description: "Essential training modules covering child development, trauma-informed care, and more",
+      type: "Video Series",
+      icon: <Video className="w-6 h-6" />,
+      link: "#"
     },
     {
       id: 4,
-      title: "Supporting Children with Trauma",
-      excerpt: "Essential techniques for helping children heal and build trust.",
-      icon: <Lightbulb className="w-4 h-4" />,
-      href: "/resources/trauma-support"
+      title: "Legal Framework",
+      description: "Understanding your rights and responsibilities as a foster parent",
+      type: "Guide",
+      icon: <FileText className="w-6 h-6" />,
+      link: "#"
     }
   ];
 
   return (
-    <section className="py-8 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-6">
-          <h2 className="text-xl md:text-2xl font-bold text-text-charcoal mb-2 font-heading">
-            Empowering Your Fostering Journey
-          </h2>
+    <section className="py-12 sm:py-16 lg:py-24 relative overflow-hidden bg-brand-white">
+      {/* Gradient Orbs */}
+      <motion.div 
+        className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gradient-radial from-brand-blue/40 to-brand-white/30 blur-3xl"
+        animate={{ 
+          x: [0, 30, 0, -30, 0],
+          y: [0, -30, 0, 30, 0],
+        }}
+        transition={{ 
+          duration: 20,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      <motion.div 
+        className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-gradient-radial from-brand-blue/40 to-brand-black/30 blur-3xl"
+        animate={{ 
+          x: [0, -30, 0, 30, 0],
+          y: [0, 30, 0, -30, 0],
+        }}
+        transition={{ 
+          duration: 20,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 2
+        }}
+      />
+      
+      <div className="container mx-auto px-4 sm:px-8 lg:px-16 relative z-10">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-white text-brand-blue mb-8 border border-brand-blue">
+              <Download className="w-5 h-5" />
+              <span className="text-base font-medium font-body">Helpful Resources</span>
+            </div>
+            
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-black mb-6 font-heading">
+              Essential <span className="text-brand-blue">Guides & Resources</span>
+            </h2>
+            
+            <p className="text-lg sm:text-xl text-text.medium max-w-3xl mx-auto font-body">
+              Access our library of resources designed to support you through every stage of your fostering journey
+            </p>
+          </motion.div>
           
-          <p className="text-sm text-gray-600 max-w-xl mx-auto font-body">
-            Access expert insights and practical advice to help you succeed.
-          </p>
-        </div>
-        
-        <div className="grid md:grid-cols-2 gap-3 max-w-3xl mx-auto">
-          {resources.map((resource) => (
-            <Link key={resource.id} href={resource.href} className="group block">
-              <div className="p-4 rounded-md border border-gray-100 hover:border-teal-200 transition-all duration-300 bg-gray-50">
-                <div className="flex items-start gap-2 mb-2">
-                  <div className="w-7 h-7 rounded-md bg-teal-50 flex items-center justify-center text-teal-600 flex-shrink-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {resources.map((resource, index) => (
+              <motion.div
+                key={resource.id}
+                className="bg-brand-white rounded-3xl p-6 shadow-xl border border-brand-blue hover:-translate-y-1 hover:shadow-2xl transition-all duration-300"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ y: -10 }}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-brand-blue text-white flex items-center justify-center flex-shrink-0">
                     {resource.icon}
                   </div>
-                  <h3 className="text-sm font-semibold text-text-charcoal font-heading group-hover:text-teal-600 transition-colors">
-                    {resource.title}
-                  </h3>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-xl font-bold text-brand-black font-heading">{resource.title}</h3>
+                      <ExternalLink className="w-5 h-5 text-brand-blue" />
+                    </div>
+                    <p className="text-text.medium font-body mb-3">{resource.description}</p>
+                    <div className="inline-block px-3 py-1 bg-brand-blue/10 text-brand-blue rounded-full text-sm font-body">
+                      {resource.type}
+                    </div>
+                  </div>
                 </div>
-                
-                <p className="text-gray-600 text-xs font-body">
-                  {resource.excerpt}
-                </p>
-              </div>
-            </Link>
-          ))}
+              </motion.div>
+            ))}
+          </div>
+          
+          <motion.div 
+            className="mt-12 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <a 
+              href="#" 
+              className="inline-flex items-center gap-2 px-6 py-4 bg-brand-blue text-white rounded-2xl font-bold font-heading text-lg hover:bg-brand-blue/90 transition-colors"
+            >
+              View All Resources
+              <ExternalLink className="w-5 h-5" />
+            </a>
+          </motion.div>
         </div>
       </div>
     </section>
   );
 };
-
-// Adding missing icons
-const Heart = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-  </svg>
-);
-
-const Home = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-  </svg>
-);

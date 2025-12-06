@@ -1,80 +1,95 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, Mail, Phone, MapPin } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
 
 export const SoftFooter = () => {
-  const navigation = {
-    platform: [
+  const footerLinks = {
+    directory: [
       { name: 'Find Agencies', href: '/fostering-agencies-uk' },
-      { name: 'Resources & Guides', href: '/resources' },
+      { name: 'Compare Agencies', href: '/compare-agencies' },
       { name: 'Success Stories', href: '/stories' },
-      { name: 'Agency Login', href: '/agency-login' },
+      { name: 'Resources', href: '/resources' },
     ],
-    support: [
-      { name: 'Help Center', href: '/help' },
-      { name: 'Contact Us', href: '/contact' },
-      { name: 'Safety Tips', href: '/safety' },
-      { name: 'FAQ', href: '/faq' },
-    ],
-    company: [
-      { name: 'About Us', href: '/about' },
-      { name: 'Our Mission', href: '/mission' },
+    about: [
+      { name: 'Our Mission', href: '/about' },
+      { name: 'Team', href: '/team' },
       { name: 'Careers', href: '/careers' },
-      { name: 'Press', href: '/press' },
+      { name: 'Contact', href: '/contact' },
+    ],
+    legal: [
+      { name: 'Privacy Policy', href: '/privacy' },
+      { name: 'Terms of Service', href: '/terms' },
+      { name: 'Cookie Policy', href: '/cookies' },
+      { name: 'Safeguarding', href: '/safeguarding' },
     ],
   };
 
   return (
-    <footer className="pt-16 pb-8 bg-white border-t border-gray-200">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
+    <footer className="bg-brand-black text-white pt-16 pb-8">
+      <div className="container mx-auto px-4 sm:px-8 lg:px-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+          {/* Brand Column */}
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-lg bg-teal-500 flex items-center justify-center">
-                <Heart className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-bold text-text-charcoal font-heading">FosterCare UK</span>
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold font-heading text-brand-cream mb-4">Foster Care Directory</h2>
+              <p className="text-gray-300 font-body text-base mb-6 max-w-md">
+                Connecting compassionate families with verified fostering agencies across the UK to create life-changing opportunities for children.
+              </p>
             </div>
-            <p className="text-gray-600 mb-6 font-body max-w-md">
-              Connecting children in need with loving families across the United Kingdom. 
-              Building brighter futures, one family at a time.
-            </p>
+            
+            <div className="flex space-x-4">
+              <a href="#" className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-cream hover:bg-brand-blue transition-colors">
+                <Facebook className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-cream hover:bg-brand-blue transition-colors">
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-cream hover:bg-brand-blue transition-colors">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-cream hover:bg-brand-blue transition-colors">
+                <Linkedin className="w-5 h-5" />
+              </a>
+            </div>
           </div>
           
+          {/* Directory Links */}
           <div>
-            <h3 className="text-base font-semibold text-text-charcoal mb-6 font-heading uppercase tracking-wide">Platform</h3>
-            <ul className="space-y-4">
-              {navigation.platform.map((item) => (
-                <li key={item.name}>
-                  <Link href={item.href} className="text-gray-600 hover:text-teal-600 transition-colors font-body text-sm">
-                    {item.name}
+            <h3 className="text-lg font-bold font-heading text-brand-cream mb-4">Directory</h3>
+            <ul className="space-y-3">
+              {footerLinks.directory.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-gray-300 hover:text-brand-cream font-body text-base transition-colors">
+                    {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
           
+          {/* About Links */}
           <div>
-            <h3 className="text-base font-semibold text-text-charcoal mb-6 font-heading uppercase tracking-wide">Support</h3>
-            <ul className="space-y-4">
-              {navigation.support.map((item) => (
-                <li key={item.name}>
-                  <Link href={item.href} className="text-gray-600 hover:text-teal-600 transition-colors font-body text-sm">
-                    {item.name}
+            <h3 className="text-lg font-bold font-heading text-brand-cream mb-4">About</h3>
+            <ul className="space-y-3">
+              {footerLinks.about.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-gray-300 hover:text-brand-cream font-body text-base transition-colors">
+                    {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
           
+          {/* Legal Links */}
           <div>
-            <h3 className="text-base font-semibold text-text-charcoal mb-6 font-heading uppercase tracking-wide">Company</h3>
-            <ul className="space-y-4">
-              {navigation.company.map((item) => (
-                <li key={item.name}>
-                  <Link href={item.href} className="text-gray-600 hover:text-teal-600 transition-colors font-body text-sm">
-                    {item.name}
+            <h3 className="text-lg font-bold font-heading text-brand-cream mb-4">Legal</h3>
+            <ul className="space-y-3">
+              {footerLinks.legal.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-gray-300 hover:text-brand-cream font-body text-base transition-colors">
+                    {link.name}
                   </Link>
                 </li>
               ))}
@@ -82,63 +97,46 @@ export const SoftFooter = () => {
           </div>
         </div>
         
-        <div className="border-t border-gray-200 pt-10">
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold text-text-charcoal mb-4 font-heading">Contact Our Support Team</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-600 font-body">0800 123 4567</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-600 font-body">support@fostercare.co.uk</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MapPin className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-600 font-body">London, United Kingdom</span>
-                </div>
+        {/* Contact Info */}
+        <div className="border-t border-gray-800 pt-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-cream">
+                <MapPin className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-gray-300 font-body text-sm">123 Care Street</p>
+                <p className="text-gray-300 font-body text-sm">London, SW1A 1AA</p>
               </div>
             </div>
             
-            <div>
-              <h3 className="text-lg font-semibold text-text-charcoal mb-4 font-heading">Subscribe to Our Newsletter</h3>
-              <p className="text-gray-600 mb-4 font-body text-sm">
-                Get inspiring stories, expert advice, and updates on fostering opportunities.
-              </p>
-              <form className="flex gap-2">
-                <input 
-                  type="email" 
-                  placeholder="Your email address" 
-                  className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm font-body"
-                />
-                <button 
-                  type="submit"
-                  className="bg-teal-500 text-white px-5 py-3 rounded-lg hover:bg-teal-600 transition-colors font-body text-sm"
-                >
-                  Subscribe
-                </button>
-              </form>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-cream">
+                <Phone className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-gray-300 font-body text-sm">Helpline: 0800 123 4567</p>
+                <p className="text-gray-300 font-body text-sm">Mon-Sun: 8am-8pm</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-cream">
+                <Mail className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-gray-300 font-body text-sm">support@fostercare.co.uk</p>
+                <p className="text-gray-300 font-body text-sm">help@fostercare.co.uk</p>
+              </div>
             </div>
           </div>
-          
-          <div className="mt-12 pt-8 border-t border-gray-200 text-center">
-            <p className="text-gray-500 font-body text-sm">
-              © 2023 FosterCare UK. All rights reserved. Made with ❤️ for families across the United Kingdom.
-            </p>
-            <div className="flex flex-wrap justify-center gap-6 mt-4">
-              <Link href="/privacy" className="text-gray-500 hover:text-gray-700 font-body text-sm">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-gray-500 hover:text-gray-700 font-body text-sm">
-                Terms of Service
-              </Link>
-              <Link href="/cookies" className="text-gray-500 hover:text-gray-700 font-body text-sm">
-                Cookie Policy
-              </Link>
-            </div>
-          </div>
+        </div>
+        
+        {/* Copyright */}
+        <div className="text-center pt-8 border-t border-gray-800">
+          <p className="text-gray-400 font-body text-sm">
+            © {new Date().getFullYear()} Foster Care Directory UK. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

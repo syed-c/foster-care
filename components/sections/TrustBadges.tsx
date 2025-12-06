@@ -1,79 +1,57 @@
 'use client';
 
-import { Shield, Award, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Shield, Award, Users, FileText } from 'lucide-react';
 
 export const TrustBadges = () => {
   const badges = [
     {
-      icon: <Shield className="w-5 h-5" />,
-      title: "Ofsted Registered",
-      description: "Fully compliant with UK fostering standards"
+      id: 1,
+      title: "OFSTED Rated Good/Outstanding",
+      description: "All featured agencies meet high regulatory standards",
+      icon: <Shield className="w-8 h-8" />
     },
     {
-      icon: <Award className="w-5 h-5" />,
-      title: "Quality Mark Certified",
-      description: "Recognized for excellence in child welfare"
+      id: 2,
+      title: "HCPC Registered",
+      description: "Professionals adhere to strict ethical guidelines",
+      icon: <Award className="w-8 h-8" />
     },
     {
-      icon: <CheckCircle className="w-5 h-5" />,
-      title: "Safeguarding Assured",
-      description: "Rigorous vetting processes for all agencies"
+      id: 3,
+      title: "Community Trusted",
+      description: "Over 10,000 families have found their match",
+      icon: <Users className="w-8 h-8" />
+    },
+    {
+      id: 4,
+      title: "Transparent Process",
+      description: "Clear steps, no hidden fees, full support",
+      icon: <FileText className="w-8 h-8" />
     }
   ];
 
   return (
-    <section className="py-12 bg-white border-y border-gray-200">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-text-charcoal mb-3 font-heading">
-            Trusted by Families and Regulated by Authorities
-          </h2>
-          
-          <p className="text-base text-gray-600 max-w-2xl mx-auto font-body">
-            Our platform meets the highest standards for child protection and family support.
-          </p>
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+    <section className="py-8 sm:py-12 bg-brand-white">
+      <div className="container mx-auto px-4 sm:px-8 lg:px-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {badges.map((badge, index) => (
-            <div key={index} className="text-center p-5 bg-offwhite-50 rounded-lg border border-gray-100">
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-teal-50 text-teal-600 mb-3">
+            <motion.div
+              key={badge.id}
+              className="flex flex-col items-center text-center p-4 rounded-2xl bg-brand-white border border-brand-blue hover:bg-brand-blue/5 transition-colors"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+              whileHover={{ y: -5 }}
+            >
+              <div className="w-12 h-12 rounded-xl bg-brand-blue text-white flex items-center justify-center mb-3">
                 {badge.icon}
               </div>
-              <h3 className="text-base font-semibold text-text-charcoal mb-1 font-heading">{badge.title}</h3>
-              <p className="text-gray-600 text-sm font-body">{badge.description}</p>
-            </div>
+              <h3 className="font-bold text-brand-black text-base mb-1 font-heading">{badge.title}</h3>
+              <p className="text-text.medium text-xs font-body">{badge.description}</p>
+            </motion.div>
           ))}
-        </div>
-        
-        <div className="max-w-3xl mx-auto mt-8 p-6 bg-gray-50 rounded-lg">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-text-charcoal mb-3 font-heading">Official Recognition</h3>
-            <p className="text-gray-700 font-body text-sm mb-4">
-              We work in partnership with local authorities, Ofsted, and national fostering organizations 
-              to ensure the highest standards of care for every child in our network.
-            </p>
-            <div className="flex flex-wrap justify-center gap-6 opacity-70">
-              {['Ofsted', 'National Fostering Association', 'Fostering Network'].map((org, index) => (
-                <div key={index} className="text-gray-500 font-heading font-medium text-sm">
-                  {org}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        
-        {/* Micro-secondary CTA */}
-        <div className="mt-8 text-center">
-          <a 
-            href="/safeguarding" 
-            className="inline-flex items-center gap-2 text-teal-600 hover:text-teal-700 font-body text-sm"
-          >
-            Learn about our safeguarding policies
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </a>
         </div>
       </div>
     </section>
