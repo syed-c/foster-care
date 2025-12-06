@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { 
   Search, 
   MapPin, 
@@ -119,7 +120,7 @@ const sortOptions = [
   { value: 'name', label: 'A-Z' }
 ];
 
-export default function BrowseAgenciesPage() {
+function BrowseAgenciesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -207,7 +208,7 @@ export default function BrowseAgenciesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary-ivory to-white">
+    <>
       {/* Header */}
       <div className="bg-gradient-to-r from-primary-ivory to-primary-sky/20 py-12 md:py-16">
         <div className="container mx-auto px-4">
@@ -349,6 +350,16 @@ export default function BrowseAgenciesPage() {
           </div>
         </AnimatedSection>
       </div>
+    </>
+  );
+}
+
+export default function BrowseAgenciesPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-primary-ivory to-white">
+      <Suspense fallback={<div>Loading...</div>}>
+        <BrowseAgenciesContent />
+      </Suspense>
     </div>
   );
 }

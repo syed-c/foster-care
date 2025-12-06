@@ -173,7 +173,7 @@ export default function LocationFAQPage() {
                   <GradientButton
                     key={loc.id}
                     onClick={() => setSelectedLocation(loc.location)}
-                    variant={selectedLocation === loc.location ? 'primary' : 'outline'}
+                    variant={selectedLocation === loc.location ? 'default' : 'outline'}
                     className="px-6 py-2"
                   >
                     {loc.location}

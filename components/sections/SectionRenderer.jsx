@@ -52,6 +52,7 @@ const map = {
   overview: dynamic(() => import('./OverviewSection'), { ssr: false, loading: () => <div>Loading overview section...</div> }),
   system: dynamic(() => import('./BenefitsSection'), { ssr: false, loading: () => <div>Loading foster system section...</div> }),
   reasons: dynamic(() => import('./BenefitsSection'), { ssr: false, loading: () => <div>Loading reasons section...</div> }),
+  benefitsSupport: dynamic(() => import('./BenefitsSection'), { ssr: false, loading: () => <div>Loading benefits & support section...</div> }),
   featuredAreas: dynamic(() => import('./PopularCitiesSection'), { ssr: false, loading: () => <div>Loading featured areas section...</div> }),
   faqs: dynamic(() => import('./FaqSection'), { ssr: false, loading: () => <div>Loading FAQ section...</div> }),
   trustbar: dynamic(() => import('./TrustBarSection'), { ssr: false, loading: () => <div>Loading trust bar section...</div> }),
