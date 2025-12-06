@@ -19,6 +19,7 @@ const sectionComponents = {
   hero: RegionHeroSection,
   about: RegionAboutSection,
   benefits: RegionBenefitsSection,
+  benefitsSupport: RegionBenefitsSection,
   popularCities: RegionPopularCitiesSection,
   allowances: RegionAllowancesSection,
   testimonials: RegionTestimonialsSection,
