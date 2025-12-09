@@ -142,7 +142,8 @@ export const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div className="text-center text-white/70 font-body text-sm pt-8 border-t border-white/10">
+                  
+        <div className="text-center text-white/70 font-body text-sm pt-8 border-t border-white/10 mt-8">
           <p>© {currentYear} Foster Care Directory UK. All rights reserved.</p>
         </div>
       </div>
