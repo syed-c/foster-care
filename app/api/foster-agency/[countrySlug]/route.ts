@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Use Node.js runtime instead of Edge Runtime for environment variable access and Supabase client
+export const runtime = 'nodejs';
+
 // Create Supabase client directly in the route
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

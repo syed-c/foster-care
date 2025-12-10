@@ -24,7 +24,8 @@ import {
   HandHeart,
   Scale,
   CheckCircle2,
-  PoundSterling
+  PoundSterling,
+  Clock
 } from 'lucide-react';
 import MapSection from '@/components/MapSection';
 

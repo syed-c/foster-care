@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+// Use Node.js runtime instead of Edge Runtime for environment variable access
+export const runtime = 'nodejs';
+
 export async function GET() {
   return NextResponse.json({
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
