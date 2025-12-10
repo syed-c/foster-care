@@ -6,16 +6,56 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: {
-        // Brand color system - Hard locked to specified brand colors
-        'brand': {
-          'blue': '#2B4593',   // Brand Blue
-          'white': '#FFFFFF',   // Brand White
-          'black': '#020202',   // Brand Black
+      container: {
+        center: true,
+        padding: {
+          DEFAULT: '1rem',
+          sm: '2rem',
+          lg: '4rem',
+          xl: '5rem',
+          '2xl': '6rem',
         },
-        // Ensure no other main colors are used
+      },
+      colors: {
+        // New design token palette
+        brand: {
+          dark: "#06141F",      // header / dark sections
+          main: "#0E2A47",      // primary dark blue
+          accent: "#16A34A",    // green accent
+          accentSoft: "#C3F3D3",// light green bg
+          light: "#F3F4F6",     // page background
+        },
+        neutral: {
+          50: "#F9FAFB",
+          100: "#F3F4F6",
+          200: "#E5E7EB",
+          700: "#374151",
+          900: "#111827",
+        },
+        white: "#FFFFFF",
+        
+        // Previous brand color system (deprecated but kept for backward compatibility)
+        'brand-blue': '#2B4593',
+        'brand-white': '#FFFFFF',
+        'brand-black': '#020202',
+        'primary': {
+          'start': '#2B4593',
+          'end': '#1A2A5E',
+        },
+        'background': {
+          'default': '#FFFFFF',
+          'soft': '#F8FAFC',
+        },
+        'text': {
+          'dark': '#020202',
+          'medium': '#64748B',
+          'light': '#94A3B8',
+        },
+        'card': {
+          'base': '#FFFFFF',
+        },
         // Neutral tints derived from brand colors
-        'neutral': {
+        'neutral-old': {
           50: '#f9f8f8',
           100: '#f0f0f0',
           200: '#e0e0e0',
@@ -33,7 +73,7 @@ module.exports = {
         '5xl': '48px',
       },
       fontFamily: {
-        heading: ['Playfair Display', 'serif'],
+        heading: ['Inter', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
       },
       animation: {

@@ -3,121 +3,120 @@ import { Heart, Mail, Phone, MapPin, Facebook, Twitter, Instagram } from 'lucide
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-br from-background-offwhite to-secondary-blue/10 border-t border-gray-100 relative overflow-hidden">
-      {/* Floating particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="particle particle-1"></div>
-        <div className="particle particle-2"></div>
-        <div className="particle particle-3"></div>
-      </div>
-      
-      <div className="container mx-auto px-4 py-12 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-brand-main w-full">
+      <div className="max-w-[1200px] mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           {/* Brand */}
-          <div className="col-span-1">
+          <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-green to-secondary-blue flex items-center justify-center glow-primary transition-all duration-300 hover:scale-110 card-3d">
-                <Heart className="w-6 h-6 text-text-charcoal" fill="currentColor" />
+              <div className="w-10 h-10 rounded-full bg-brand-accent flex items-center justify-center">
+                <Heart className="w-6 h-6 text-white" fill="currentColor" />
               </div>
-              <span className="text-lg font-bold bg-gradient-to-r from-primary-green to-secondary-blue bg-clip-text text-transparent transition-all duration-300 hover:scale-105">
+              <span className="text-lg font-bold text-white">
                 Foster Care UK
               </span>
             </div>
-            <p className="text-sm text-gray-600 mb-4 font-inter">
+            <p className="text-sm text-white/80 mb-4">
               Connecting caring hearts with fostering opportunities across the UK.
             </p>
             <div className="flex space-x-3">
-              <a href="#" className="w-8 h-8 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green/20 transition-all duration-300 hover:scale-110 glow-primary card-3d">
-                <Facebook className="w-4 h-4 text-primary-green" />
+              <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all duration-300">
+                <Facebook className="w-4 h-4 text-white" />
               </a>
-              <a href="#" className="w-8 h-8 rounded-full bg-secondary-blue/10 flex items-center justify-center hover:bg-secondary-blue/20 transition-all duration-300 hover:scale-110 glow-secondary card-3d">
-                <Twitter className="w-4 h-4 text-secondary-blue" />
+              <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all duration-300">
+                <Twitter className="w-4 h-4 text-white" />
               </a>
-              <a href="#" className="w-8 h-8 rounded-full bg-accent-peach/10 flex items-center justify-center hover:bg-accent-peach/20 transition-all duration-300 hover:scale-110 glow-accent card-3d">
-                <Instagram className="w-4 h-4 text-accent-peach" />
+              <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all duration-300">
+                <Instagram className="w-4 h-4 text-white" />
               </a>
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Company */}
           <div>
-            <h3 className="font-semibold text-text-charcoal mb-4 font-poppins">Quick Links</h3>
+            <h3 className="font-semibold text-white mb-4">Company</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/agencies" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
-                  Browse Agencies
-                </Link>
-              </li>
-              <li>
-                <Link href="/resources" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
-                  Resources
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
+                <Link href="/about" className="text-sm text-white/80 hover:text-white transition-all duration-300">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
+                <Link href="/contact" className="text-sm text-white/80 hover:text-white transition-all duration-300">
                   Contact
                 </Link>
               </li>
+              <li>
+                <Link href="/privacy" className="text-sm text-white/80 hover:text-white transition-all duration-300">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="text-sm text-white/80 hover:text-white transition-all duration-300">
+                  Terms of Service
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* For Agencies */}
+          {/* Services */}
           <div>
-            <h3 className="font-semibold text-text-charcoal mb-4 font-poppins">For Agencies</h3>
+            <h3 className="font-semibold text-white mb-4">Services</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/auth/signup" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
-                  Register Your Agency
+                <Link href="/agencies" className="text-sm text-white/80 hover:text-white transition-all duration-300">
+                  Browse Agencies
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
-                  Pricing Plans
+                <Link href="/foster-agency" className="text-sm text-white/80 hover:text-white transition-all duration-300">
+                  Locations
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard" className="text-sm text-gray-600 hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
-                  Agency Dashboard
+                <Link href="/resources" className="text-sm text-white/80 hover:text-white transition-all duration-300">
+                  Resources
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing" className="text-sm text-white/80 hover:text-white transition-all duration-300">
+                  Pricing
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Resources */}
           <div>
-            <h3 className="font-semibold text-text-charcoal mb-4 font-poppins">Contact Us</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start space-x-2 text-sm text-gray-600 font-inter hover:text-primary-green transition-all duration-300 cursor-pointer card-3d">
-                <Mail className="w-4 h-4 mt-0.5 text-primary-green transition-all duration-300 hover:scale-110" />
-                <span>info@foster-care.co.uk</span>
+            <h3 className="font-semibold text-white mb-4">Resources</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/resources" className="text-sm text-white/80 hover:text-white transition-all duration-300">
+                  Blog
+                </Link>
               </li>
-              <li className="flex items-start space-x-2 text-sm text-gray-600 font-inter hover:text-secondary-blue transition-all duration-300 cursor-pointer card-3d">
-                <Phone className="w-4 h-4 mt-0.5 text-secondary-blue transition-all duration-300 hover:scale-110" />
-                <span>0800 123 4567</span>
+              <li>
+                <Link href="/resources/faqs" className="text-sm text-white/80 hover:text-white transition-all duration-300">
+                  FAQs
+                </Link>
               </li>
-              <li className="flex items-start space-x-2 text-sm text-gray-600 font-inter hover:text-primary-green transition-all duration-300 cursor-pointer card-3d">
-                <MapPin className="w-4 h-4 mt-0.5 text-primary-green transition-all duration-300 hover:scale-110" />
-                <span>London, United Kingdom</span>
+              <li>
+                <Link href="/resources/guides" className="text-sm text-white/80 hover:text-white transition-all duration-300">
+                  Guides
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-sm text-white/80 hover:text-white transition-all duration-300">
+                  Support
+                </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-200 mt-8 pt-8 text-center">
-          <p className="text-sm text-gray-600 font-inter">
-            © {new Date().getFullYear()} Foster Care Directory UK. All rights reserved. |{' '}
-            <Link href="/privacy" className="hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
-              Privacy Policy
-            </Link>
-            {' | '}
-            <Link href="/terms" className="hover:text-primary-green transition-all duration-300 hover:scale-105 font-inter card-3d">
-              Terms of Service
-            </Link>
+        <div className="border-t border-white/10 mt-8 pt-8 text-center">
+          <p className="text-sm text-white/80">
+            © {new Date().getFullYear()} Foster Care Directory UK. All rights reserved.
           </p>
         </div>
       </div>

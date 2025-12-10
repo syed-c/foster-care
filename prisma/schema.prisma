@@ -1,0 +1,83 @@
+// Foster Care Directory UK - Prisma Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Country model for the new single-page country system
+model Country {
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  title           String
+  metaTitle       String?
+  metaDescription String?
+  introHtml       String?
+  heroImage       String?
+  regions         Region[]
+  counties        County[]
+  blocks          CountryPageBlock[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+// Region model (subdivisions of countries like England's regions)
+model Region {
+  id        String   @id @default(cuid())
+  countryId String
+  slug      String
+  title     String
+  summary   String?
+  longHtml  String?
+  heroImage String?
+  order     Int?
+  counties  County[]
+  Country   Country  @relation(fields: [countryId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([countryId, slug])
+}
+
+// County model (administrative divisions within regions)
+model County {
+  id         String   @id @default(cuid())
+  regionId   String
+  slug       String
+  title      String
+  summary    String?
+  longHtml   String?
+  heroImage  String?
+  statsJson  Json?
+  faqJson    Json?
+  order      Int?
+  Region     Region   @relation(fields: [regionId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([regionId, slug])
+}
+
+// CMS blocks for country pages
+model CountryPageBlock {
+  id         String   @id @default(cuid())
+  countryId  String
+  type       String   // e.g., "hero", "intro", "whyFosteringMatters", "typesOfFostering", "supportInfo", "faq", "cta"
+  contentJson Json    // Flexible JSON structure for different block types
+  order      Int?
+  Country    Country  @relation(fields: [countryId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Admin user model for CMS access
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      String   // "admin", "editor", etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

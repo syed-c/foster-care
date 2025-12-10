@@ -4,40 +4,51 @@
 
 @layer base {
   :root {
+    /* New design token palette */
+    --brand-dark: #06141F;
+    --brand-main: #0E2A47;
+    --brand-accent: #16A34A;
+    --brand-accentSoft: #C3F3D3;
+    --brand-light: #F3F4F6;
+    
+    --neutral-50: #F9FAFB;
+    --neutral-100: #F3F4F6;
+    --neutral-200: #E5E7EB;
+    --neutral-700: #374151;
+    --neutral-900: #111827;
+    
+    --white: #FFFFFF;
+    
+    /* Previous brand color system (deprecated but kept for backward compatibility) */
     --brand-blue: #2B4593;
     --brand-white: #FFFFFF;
     --brand-black: #020202;
-    --card-base: #FFFFFF;
+    
+    --primary-start: #2B4593;
+    --primary-end: #1A2A5E;
+    --background-default: #FFFFFF;
+    --background-soft: #F8FAFC;
     --text-dark: #020202;
     --text-medium: #64748B;
     --text-light: #94A3B8;
+    
+    --card-base: #FFFFFF;
+    
+    /* Neutral tints derived from brand colors */
+    --neutral-old-50: #f9f8f8;
+    --neutral-old-100: #f0f0f0;
+    --neutral-old-200: #e0e0e0;
+    --neutral-old-300: #d0d0d0;
+    --neutral-old-400: #b0b0b0;
+    --neutral-old-500: #909090;
+    --neutral-old-600: #707070;
+    --neutral-old-700: #505050;
+    --neutral-old-800: #303030;
+    --neutral-old-900: #101010;
   }
 }
 
 @layer components {
-  .glass {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-  }
-  
-  .glass-card {
-    background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 10px 30px -15px rgba(43, 69, 147, 0.1);
-  }
-  
-  .glass-strong {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 20px 50px -20px rgba(43, 69, 147, 0.2);
-  }
-  
   .rounded-4xl {
     border-radius: 32px;
   }
@@ -49,33 +60,6 @@
   .rounded-t-5xl {
     border-top-left-radius: 48px;
     border-top-right-radius: 48px;
-  }
-  
-  .gradient-text {
-    background: linear-gradient(90deg, var(--brand-blue) 0%, var(--brand-white) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  .gradient-bg {
-    background: linear-gradient(90deg, var(--brand-blue) 0%, var(--brand-white) 100%);
-  }
-  
-  .gradient-bg-secondary {
-    background: linear-gradient(90deg, var(--brand-white) 0%, var(--brand-blue) 100%);
-  }
-  
-  .gradient-border {
-    border-image: linear-gradient(90deg, var(--brand-blue) 0%, var(--brand-white) 100%) 1;
-  }
-  
-  .accent-bg {
-    background-color: var(--brand-blue);
-  }
-  
-  .accent-text {
-    color: var(--brand-blue);
   }
 }
 
@@ -112,27 +96,5 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
-  }
-  
-  .animate-underline {
-    position: relative;
-  }
-  
-  .animate-underline::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, var(--brand-blue) 0%, var(--brand-white) 100%);
-    transform: scaleX(0);
-    transform-origin: bottom right;
-    transition: transform 0.3s ease-out;
-  }
-  
-  .animate-underline:hover::after {
-    transform: scaleX(1);
-    transform-origin: bottom left;
   }
 }

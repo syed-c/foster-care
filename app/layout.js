@@ -1,8 +1,7 @@
 import { Inter, Poppins } from 'next/font/google';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css";
-import Navigation from '../components/Navigation.jsx';
-import Footer from '../components/Footer.jsx';
+import SiteShell from '../components/SiteShell.jsx';
 import AuthSessionProvider from '../components/SessionProvider.jsx';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -21,13 +20,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${poppins.variable} font-sans antialiased bg-background`}>
+      <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
         <AuthSessionProvider>
-          <Navigation />
-          <main>
+          <SiteShell>
             {children}
-          </main>
-          {/* <Footer /> */}
+          </SiteShell>
           <SpeedInsights/>
         </AuthSessionProvider>
       </body>
