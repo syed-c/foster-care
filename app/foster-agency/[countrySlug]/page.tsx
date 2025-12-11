@@ -20,6 +20,64 @@ const supabaseAdmin = createClient(
   }
 );
 
+// Helper function to fetch region content
+async function fetchRegionContent(countrySlug: string, regions: any[]) {
+  try {
+    // Create a mapping of region slug to content
+    const regionContent: Record<string, any> = {};
+    
+    // For each region, try to fetch its content
+    for (const region of regions) {
+      // Try different approaches to fetch content
+      // Approach 1: Try with canonical slug
+      const canonicalSlug = `/foster-agency/${countrySlug}/${region.slug}`;
+      
+      let contentData = null;
+      
+      // Try fetching from location_content table with canonical_slug
+      const { data: contentByCanonical, error: canonicalError } = await supabaseAdmin
+        .from('location_content')
+        .select('content_json')
+        .eq('canonical_slug', canonicalSlug)
+        .maybeSingle();
+      
+      if (contentByCanonical && contentByCanonical.content_json) {
+        contentData = contentByCanonical.content_json;
+      } else {
+        // Approach 2: Try fetching from location_content table with location_id
+        // First check if there's a corresponding location entry
+        const { data: locationEntry, error: locationError } = await supabaseAdmin
+          .from('locations')
+          .select('id')
+          .eq('name', region.title)
+          .eq('type', 'region')
+          .maybeSingle();
+        
+        if (locationEntry) {
+          const { data: contentByLocation, error: locationContentError } = await supabaseAdmin
+            .from('location_content')
+            .select('content_json')
+            .eq('location_id', locationEntry.id)
+            .maybeSingle();
+          
+          if (contentByLocation && contentByLocation.content_json) {
+            contentData = contentByLocation.content_json;
+          }
+        }
+      }
+      
+      if (contentData) {
+        regionContent[region.slug] = contentData;
+      }
+    }
+    
+    return regionContent;
+  } catch (error) {
+    console.error('Error fetching region content:', error);
+    return {};
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ countrySlug: string }> }) {
   const resolvedParams = await params;
   
@@ -79,12 +137,16 @@ export default async function CountryPage({ params }: { params: Promise<{ countr
     blocks = [];
   }
 
+  // Fetch region content
+  const regionContent = await fetchRegionContent(resolvedParams.countrySlug, regions || []);
+
   // Combine all data
   const countryData = {
     ...country,
     regions: regions || [],
     counties: counties || [],
-    blocks: blocks || []
+    blocks: blocks || [],
+    regionContent: regionContent || {}
   };
 
   return <CountryPageClient countryData={countryData} />;
