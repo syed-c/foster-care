@@ -11,26 +11,36 @@ import { fetchLocationContent } from '@/lib/cmsFetcher';
 import RegionSectionRenderer from '@/components/sections/RegionSectionRenderer';
 import CountryView from '@/components/CountryPage/CountryView.jsx';
 
-interface CountryPageClientProps {
-  country: any;
+interface CountryData {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
   regions: any[];
   counties: any[];
-  cities: any[];
+  blocks: any[];
   regionContent: Record<string, any>;
-  viewMode?: 'map' | 'list' | 'grid';
-  initialView?: string;
+}
+
+interface CountryPageClientProps {
+  countryData: CountryData;
 }
 
 export default function CountryPageClient({
-  country,
-  regions,
-  counties,
-  cities,
-  regionContent,
-  viewMode = 'map',
-  initialView = 'map'
+  countryData
 }: CountryPageClientProps) {
-  const [currentView, setCurrentView] = useState(viewMode);
+  const {
+    id,
+    slug,
+    title,
+    description,
+    regions,
+    counties,
+    blocks,
+    regionContent
+  } = countryData;
+  
+  const [currentView, setCurrentView] = useState<'map' | 'list' | 'grid'>('map');
   const [selectedRegion, setSelectedRegion] = useState<any>(null);
   const [selectedRegionContent, setSelectedRegionContent] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -41,7 +51,7 @@ export default function CountryPageClient({
   useEffect(() => {
     const viewParam = searchParams.get('view');
     if (viewParam && ['map', 'list', 'grid'].includes(viewParam)) {
-      setCurrentView(viewParam as any);
+      setCurrentView(viewParam as 'map' | 'list' | 'grid');
     }
     
     // Handle hash navigation for regions
@@ -59,7 +69,7 @@ export default function CountryPageClient({
     setLoading(true);
     try {
       // Try to fetch content from CMS first
-      const cmsContent = await fetchLocationContent(`/foster-agency/${country.slug}/${region.slug}`);
+      const cmsContent = await fetchLocationContent(`/foster-agency/${slug}/${region.slug}`);
       
       if (cmsContent && cmsContent.sections) {
         setSelectedRegionContent(cmsContent);
@@ -116,7 +126,7 @@ export default function CountryPageClient({
               onClick={handleBackToCountry}
               className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 gap-2"
             >
-              ← Back to {country.title}
+              ← Back to {title}
             </button>
           </div>
         </div>
@@ -160,7 +170,7 @@ export default function CountryPageClient({
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold">{country.title}</h1>
+              <h1 className="text-2xl font-bold">{title}</h1>
               <p className="text-muted-foreground">Explore fostering opportunities</p>
             </div>
             
@@ -215,10 +225,7 @@ export default function CountryPageClient({
           >
             <CountryView 
               countryData={{
-                ...country,
-                regions,
-                counties,
-                cities
+                ...countryData
               }}
             />
           </motion.div>
