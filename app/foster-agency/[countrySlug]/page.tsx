@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import CountryPageClient from './CountryPageClient.tsx';
+import { normalizeLocation } from '@/lib/normalizeLocation';
 
 // Use Node.js runtime instead of Edge Runtime for environment variable access and Supabase client
 export const runtime = 'nodejs';
@@ -66,8 +67,10 @@ async function fetchRegionContent(countrySlug: string, regions: any[]) {
         }
       }
       
+      // Normalize the content data using the normalizeLocation function
       if (contentData) {
-        regionContent[region.slug] = contentData;
+        const normalizedContent = normalizeLocation(contentData);
+        regionContent[region.slug] = normalizedContent;
       }
     }
     

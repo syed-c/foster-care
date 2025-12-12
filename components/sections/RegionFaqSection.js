@@ -1,95 +1,115 @@
 'use client';
 
 // RegionFaqSection.js
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Users } from 'lucide-react';
-import Head from 'next/head';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { ChevronDown, HelpCircle } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 export default function RegionFaqSection({ data, regionSlug }) {
+  const [openIndex, setState] = useState(null);
+
+  const toggleFAQ = (index) => {
+    setState(openIndex === index ? null : index);
+  };
+
   // Default values if no data provided
-  const title = data?.title || `Frequently Asked Questions`;
-  const description = data?.description || `Get answers to common questions about becoming a foster carer`;
-  const enableFaqSchema = data?.enableFaqSchema || true;
+  const title = data?.title || `Frequently Asked Questions About Fostering`;
+  const description = data?.description || `Everything you need to know about becoming a foster carer in this region`;
   const faqs = data?.faqs || [
-    {
-      question: "How many foster families are needed in this region?",
-      answer: "This region has a continuous need for foster families to provide care for children and young people. The exact number varies based on local demand, but there is always a need for dedicated carers who can provide stable, loving homes."
-    },
-    {
-      question: "Who can foster a child in this region?",
-      answer: "To foster in this region, you must be over 21, have a spare room, pass background checks, and complete training. You can be single, married, in a relationship, working, or retired. The relevant regulatory body sets the standards for approval."
-    },
-    {
-      question: "Can single people foster in this region?",
-      answer: "Yes, single people can foster in this region. What matters most is your ability to provide a stable, loving home for a child in need. All applicants go through the same assessment and approval process regardless of marital status."
-    },
-    {
-      question: "What support is available for foster carers in this region?",
-      answer: "Foster carers in this region receive ongoing support including 24/7 helplines, regular supervision, training opportunities, and access to support groups. Agencies also provide financial allowances and respite care."
-    }
+    { question: "How long does the approval process take?", answer: "The process typically takes 4-6 months, including application, training, assessments, and panel review." },
+    { question: "Do I need previous childcare experience?", answer: "No formal experience is required, but you must be committed to providing a safe, nurturing environment for children." }
   ];
 
-  // Generate FAQ schema markup if enabled
-  const faqSchema = enableFaqSchema ? {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": faqs.map(faq => ({
-      "@type": "Question",
-      "name": faq.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.answer
-      }
-    }))
-  } : null;
-
   return (
-    <>
-      {faqSchema && (
-        <Head>
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify(faqSchema)
-            }}
-          />
-        </Head>
-      )}
-      <section className="py-16 md:py-24 section-alt">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-                <Users className="w-4 h-4 text-primary-green" />
-                <span className="text-sm font-medium text-text-charcoal font-inter">FAQs</span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
-                {title}
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto font-inter">
-                {description}
-              </p>
-            </div>
+    <section className="py-16 md:py-24 bg-brand-light">
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Enhanced header */}
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-strong mb-6 border border-brand-white/30 shadow-sm mx-auto"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <HelpCircle className="w-5 h-5 text-brand-blue" />
+              <span className="text-sm font-medium text-brand-black font-heading">Regional Guidance</span>
+            </motion.div>
             
-            <Accordion type="single" collapsible className="space-y-4">
-              {faqs.map((faq, index) => (
-                <AccordionItem 
-                  key={index} 
-                  value={`item-${index}`} 
-                  className="section-card rounded-modern-lg border border-gray-200"
+            <motion.h2 
+              className="text-3xl md:text-4xl lg:text-5xl font-bold text-brand-black mb-6 font-heading"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+            >
+              {title}
+            </motion.h2>
+            
+            <motion.p 
+              className="text-xl text-text.medium max-w-3xl mx-auto font-body leading-relaxed"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: 0.3 }}
+            >
+              {description}
+            </motion.p>
+          </motion.div>
+          
+          {/* Enhanced FAQ accordion */}
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <Card 
+                  className="rounded-2xl overflow-hidden border border-brand-white/50 bg-white shadow-lg"
                 >
-                  <AccordionTrigger className="px-6 py-4 text-left font-poppins text-lg font-medium text-text-charcoal hover:bg-gray-50 rounded-t-modern-lg">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 py-4 text-gray-600 font-inter bg-white rounded-b-modern-lg">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+                  <button
+                    className="w-full text-left p-6 flex justify-between items-center hover:bg-brand-blue/5 transition-colors duration-200"
+                    onClick={() => toggleFAQ(index)}
+                  >
+                    <h3 className="text-lg font-bold text-brand-black font-heading pr-4">{faq.question}</h3>
+                    <motion.div
+                      animate={{ rotate: openIndex === index ? 180 : 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ChevronDown className="w-5 h-5 text-brand-blue flex-shrink-0" />
+                    </motion.div>
+                  </button>
+                  
+                  {openIndex === index && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-6 pb-6 text-text.medium font-body border-t border-brand-white/50 pt-4">
+                        {faq.answer}
+                      </div>
+                    </motion.div>
+                  )}
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

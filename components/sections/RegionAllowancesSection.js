@@ -1,55 +1,90 @@
 'use client';
 
 // RegionAllowancesSection.js
+import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
-import { Wallet, Heart } from 'lucide-react';
+import { Wallet, GraduationCap, Heart, Users } from 'lucide-react';
 
 export default function RegionAllowancesSection({ data, regionSlug }) {
   // Default values if no data provided
-  const title = data?.title || `Foster Allowances & Support`;
-  const description = data?.description || `Comprehensive support system for foster carers in this region`;
+  const title = data?.title || `Support for Foster Carers in This Region`;
+  const description = data?.description || `Comprehensive support ensures you're never alone in your fostering journey`;
   const allowances = data?.allowances || [
-    {
-      title: "Weekly Fostering Allowances",
-      description: "Receive weekly fostering allowances to cover the costs of caring for a child."
-    },
-    {
-      title: "Additional Payments",
-      description: "Additional payments for special circumstances and needs."
-    },
-    {
-      title: "Holiday Pay",
-      description: "Extra allowance for holiday periods and special occasions."
-    }
+    { title: "Financial Support", description: "Receive tax-free fostering allowances to cover the costs of caring for a child" },
+    { title: "Training Programs", description: "Access initial training courses and ongoing professional development workshops" },
+    { title: "Emotional Support", description: "24/7 helpline for emergencies, regular supervising visits, and peer support groups" }
   ];
 
+  // Icons for allowances
+  const icons = [Wallet, GraduationCap, Heart, Users];
+
   return (
-    <section className="py-16 section-alt">
+    <section className="py-16 md:py-24 bg-brand-light">
       <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
-              <Wallet className="w-4 h-4 text-primary-green" />
-              <span className="text-sm font-medium text-text-charcoal font-inter">Allowances & Support</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-text-charcoal mb-4 font-poppins">
+        <div className="max-w-5xl mx-auto">
+          {/* Enhanced header */}
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-strong mb-6 border border-brand-white/30 shadow-sm mx-auto"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <Wallet className="w-5 h-5 text-brand-blue" />
+              <span className="text-sm font-medium text-brand-black font-heading">Comprehensive Support</span>
+            </motion.div>
+            
+            <motion.h2 
+              className="text-3xl md:text-4xl lg:text-5xl font-bold text-brand-black mb-6 font-heading"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+            >
               {title}
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto font-inter">
+            </motion.h2>
+            
+            <motion.p 
+              className="text-xl text-text.medium max-w-3xl mx-auto font-body leading-relaxed"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: 0.3 }}
+            >
               {description}
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {allowances.map((allowance, index) => (
-              <Card key={index} className="section-card rounded-modern-xl p-6 text-center">
-                <div className="w-12 h-12 bg-primary-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-6 h-6 text-primary-green" />
-                </div>
-                <h3 className="text-lg font-bold text-text-charcoal mb-2">{allowance.title}</h3>
-                <p className="text-gray-600 text-sm">{allowance.description}</p>
-              </Card>
-            ))}
+          {/* Enhanced allowances grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {allowances.map((allowance, index) => {
+              const Icon = icons[index % icons.length];
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                  <Card className="rounded-2xl p-8 shadow-lg border border-brand-white/50 bg-white h-full hover:shadow-xl transition-shadow duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center mb-6">
+                      <Icon className="w-6 h-6 text-brand-blue" />
+                    </div>
+                    
+                    <h3 className="text-xl font-bold text-brand-black mb-4 font-heading">{allowance.title}</h3>
+                    <p className="text-text.medium font-body leading-relaxed">{allowance.description}</p>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </div>
